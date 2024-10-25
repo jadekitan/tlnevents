@@ -56,6 +56,7 @@ const Experiences = () => {
                   <Image
                     w="100%"
                     h={["30vh", "50vh", "50vh", "75vh"]}
+                    bg="gray.500"
                     rounded={["6px", "8px"]}
                     src={image}
                     alt={`Slide ${index}`}

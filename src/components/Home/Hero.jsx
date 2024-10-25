@@ -27,6 +27,13 @@ const fadeAndScale = keyframes`
 `;
 
 const Hero = () => {
+  const eventData = {
+    url: "lpe",
+    image: HeroImg,
+    name: "Lemonade Playground Experience",
+    date: "22 December",
+    venue: "Muri Okuola Park, Vicotria Island, Lagos",
+  };
   return (
     <Box
       w="100%"
@@ -68,8 +75,8 @@ const Hero = () => {
       >
         {/* Hero Image */}
         <Image
-          src={HeroImg}
-          alt="LPE Logo"
+          src={eventData.image}
+          alt={`${eventData.name} Logo`}
           sx={{
             width: ["350px", "380px", "420px", "440px"],
             height: "auto",
@@ -81,13 +88,31 @@ const Hero = () => {
 
         {/* Get Tickets Button */}
         <Flex align="center" gap="40px">
-          <Link to="" _hover={{ textDecoration: "none" }}>
-            <Button size="lg" bg="primary.500" color="dark">
+          <Link
+            to={`/${eventData.url}/checkout`}
+            _hover={{ textDecoration: "none" }}
+            target="_blank"
+          >
+            <Button
+              size="lg"
+              bg="primary.500"
+              _hover={{ bg: "primary.400" }}
+              color="dark"
+            >
               Get Tickets
             </Button>
           </Link>
-          <Link to="" _hover={{ textDecoration: "none" }}>
-            <Button size="lg" bg="secondary.500" color="dark">
+          <Link
+            to={`/${eventData.url}`}
+            _hover={{ textDecoration: "none" }}
+            target="_blank"
+          >
+            <Button
+              size="lg"
+              bg="secondary.500"
+              _hover={{ bg: "primary.400" }}
+              color="dark"
+            >
               View Event
             </Button>
           </Link>
@@ -98,14 +123,14 @@ const Hero = () => {
             fontSize={["24px", "26px", "30px", "32px"]}
             textTransform="uppercase"
           >
-            22 December
+            {eventData.date}
           </Heading>
           <Text
             color="white"
             fontSize={["16px", "18px", "22px", "24px"]}
             textTransform="uppercase"
           >
-            Muri Okuola Park, Vicotria Island, Lagos
+            {eventData.venue}
           </Text>
         </VStack>
       </VStack>

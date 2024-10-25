@@ -36,13 +36,19 @@ const Footer = () => {
                 </Text>
               </Link>
             </Box>
-            <Link>
+            <Link
+              to="https://instagram.com/thelemonadenetwork.ng"
+              target="_blank"
+            >
               <FaInstagram />
             </Link>
-            <Link>
+            <Link to="https://twitter.com/tln_community" target="_blank">
               <FaXTwitter />
             </Link>
-            <Link>
+            <Link
+              to="https://www.tiktok.com/@thelemonadenetwork.ng"
+              target="_blank"
+            >
               <FaTiktok />
             </Link>
           </Flex>

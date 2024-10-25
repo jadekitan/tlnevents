@@ -72,7 +72,7 @@ const Testimonials = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       handleNext();
-    }, 5000); // Change slide every 5 seconds
+    }, 10000); // Change slide every 10 seconds
     return () => clearInterval(interval); // Cleanup on unmount
   }, [currentIndex]);
 
@@ -152,13 +152,7 @@ const Testimonials = () => {
               w={["100%", "100%", "100%", "40%"]}
               h={["40vh", "50vh", "50vh", "75vh"]}
             >
-              <Image
-                w="100%"
-                h="100%"
-                rounded="8px"
-                objectFit={["cover", "fill"]}
-                src={image}
-              />
+              <Image w="100%" h="100%" rounded="8px" src={image} />
             </Box>
             <VStack
               w={["100%", "100%", "100%", "50%"]}

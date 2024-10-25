@@ -28,6 +28,9 @@ const Header = () => {
       element.scrollIntoView({ behavior: "smooth" });
     }
   }
+  const eventData = {
+    url: "lpe",
+  };
   return (
     <Box
       w="100%"
@@ -57,7 +60,7 @@ const Header = () => {
           align="center"
           gap={["20px", "20px", "20px", "40px"]}
         >
-          <Link to="/lpe/checkout">
+          <Link to={`/${eventData.url}/checkout`} target="_blank">
             <Text
               color={isScrolled ? "dark" : "white"}
               fontSize={
@@ -69,7 +72,7 @@ const Header = () => {
               Tickets
             </Text>
           </Link>
-          <Link to="/lpe">
+          <Link to={`/${eventData.url}`} target="_blank">
             <Text
               color={isScrolled ? "dark" : "white"}
               fontSize={
