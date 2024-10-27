@@ -140,6 +140,8 @@ const EventBooking = () => {
               if (jsonData.success) {
                 // Redirect on successful payment verification
                 window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}`;
+                setIsDisable(false);
+                setIsSubmitting(false);
               } else {
                 console.log("Payment verification failed", jsonData.message);
               }

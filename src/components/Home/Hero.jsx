@@ -9,9 +9,6 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
-import HeroVid from "../../assets/hero.mp4";
-import HeroImg from "../../assets/lpe.webp";
-import FallBack from "../../assets/gallery/IMG_2374.webp";
 import { Link } from "react-router-dom";
 
 // Define the keyframes for the animation
@@ -29,7 +26,7 @@ const fadeAndScale = keyframes`
 const Hero = () => {
   const eventData = {
     url: "lpe",
-    image: HeroImg,
+    image: "https://tlnevents.com/assets/lpe.webp",
     name: "Lemonade Playground Experience",
     date: "22 December",
     venue: "Muri Okuola Park, Vicotria Island, Lagos",
@@ -42,7 +39,7 @@ const Hero = () => {
       position="relative"
       height="100dvh"
       overflow="hidden"
-      bg={"rgba(0, 0, 0, 0.3)"}
+      bg="rgba(0, 0, 0, 0.3)"
     >
       <Box
         as="video"
@@ -51,7 +48,7 @@ const Hero = () => {
         autoPlay
         playsInline
         preload="auto"
-        poster={FallBack}
+        poster="https://tlnevents.com/assets/gallery/Fk shot it-244.jpg"
         width="100%"
         height="100%"
         objectFit="cover"
@@ -60,7 +57,10 @@ const Hero = () => {
         left="0"
         zIndex="-1"
       >
-        <source src={HeroVid} type="video/mp4" />
+        <source
+          src="https://tlnevents.com/assets/lpe-hero.mp4"
+          type="video/mp4"
+        />
         Your browser does not support the video tag.
       </Box>
       <VStack

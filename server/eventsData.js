@@ -2,7 +2,7 @@ export const eventsData = {
   lpe: {
     id: "lpe",
     url: "lpe",
-    image: "../../src/assets/event-banners/lpe.png",
+    image: "https://tlnevents.com/assets/event-banners/lpe.png",
     name: "Lemonade Playground Experience",
     venue: {
       name: "Muri Okuola Park",
@@ -14,10 +14,15 @@ export const eventsData = {
       latitude: "37.7749",
       longitude: "-122.4194",
     },
-    date: "2024-12-22T12:00:00Z/2024-12-23T16:00:00Z",
-    startDate: "20241222T120000Z",
-    endDate: "20241223T060000Z",
-    iso: "20241222T120000Z/20241223T060000Z",
+    date: {
+      iso: "20241222T120000Z/20241223T060000Z",
+      startDate: "20241222T120000Z",
+      endDate: "20241223T060000Z",
+      outlookStartDate: "2024-12-22T12:00:00Z",
+      outlookEndDate: "2024-12-23T06:00:00Z",
+      timeZone: "WAT",
+    },
+
     categories: "Party",
     price: 5000,
     tickets: [

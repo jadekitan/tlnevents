@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { eventsData } from "../../../server/eventsData";
 import { Icon } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
+import { debounce } from "lodash";
 
 export const multiBookingContext = React.createContext();
 const BookingContext = ({ children }) => {
@@ -60,7 +61,14 @@ const BookingContext = ({ children }) => {
 
   const [assignMultiple, setAssignMultiple] = useState(false);
 
-  // Initialize contactData from localStorage or set default values
+  // Debounce the localStorage update function
+  const saveToLocalStorage = useCallback(
+    debounce((data) => {
+      localStorage.setItem("contactData", JSON.stringify(data));
+    }, 500), // Adjust debounce timing as needed
+    []
+  );
+
   const [contactData, setContactData] = useState(() => {
     const storedContactData = localStorage.getItem("contactData");
     return storedContactData
@@ -70,9 +78,9 @@ const BookingContext = ({ children }) => {
           lastName: "",
           email: "",
           phone: "",
-          countryCode: "+234", // Set your default country code here
+          countryCode: "+234",
           attendeeAddresses: ticketType.reduce((acc, ticket) => {
-            const count = ticketCounts[ticket.id] || 0; // Get the count of tickets or default to 0
+            const count = ticketCounts[ticket.id] || 0;
             acc[ticket.id] = Array.from({ length: count }).map(() => ({
               firstName: "",
               lastName: "",
@@ -83,18 +91,21 @@ const BookingContext = ({ children }) => {
         };
   });
 
-  // Save contactData to localStorage whenever it updates
-  useEffect(() => {
-    localStorage.setItem("contactData", JSON.stringify(contactData));
-  }, [contactData]);
-
-  // Example function to update contactData
-  const handleContactDataChange = (newData) => {
-    setContactData((prevData) => ({
-      ...prevData,
-      ...newData,
-    }));
+  // Save to localStorage on blur instead of every keystroke
+  const handleBlur = () => {
+    saveToLocalStorage(contactData);
   };
+
+  const handleContactDataChange = (newData) => {
+    setContactData((prevData) => ({ ...prevData, ...newData }));
+  };
+
+  useEffect(() => {
+    return () => {
+      // Cancel debounced save on unmount to avoid memory leaks
+      saveToLocalStorage.cancel();
+    };
+  }, []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDisable, setIsDisable] = useState(false);
@@ -115,7 +126,7 @@ const BookingContext = ({ children }) => {
           countryCode,
           setCountryCode,
           contactData,
-          setContactData: handleContactDataChange,
+          setContactData,
           assignMultiple,
           setAssignMultiple,
           isSubmitting,

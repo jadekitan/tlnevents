@@ -20,7 +20,6 @@ import {
 } from "@chakra-ui/react";
 import { eventsData } from "../../server/eventsData";
 import { format, parseISO } from "date-fns";
-import LPE from "../assets/event-banners/lpe.png";
 import { BsGlobe2 } from "react-icons/bs";
 import { FaInstagram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -28,8 +27,10 @@ import { FaFacebookF } from "react-icons/fa6";
 import { FaTiktok } from "react-icons/fa6";
 import { IoLogoLinkedin } from "react-icons/io5";
 import { ChevronDownIcon } from "@chakra-ui/icons";
-
-import { Link, useParams, useLocation } from "react-router-dom";
+import { FcGoogle } from "react-icons/fc";
+import Outlook from "../../src/assets/icons/outlook.svg";
+import Download from "../../src/assets/icons/download.svg";
+import { Link, useParams } from "react-router-dom";
 
 const EventDetails = () => {
   const { eventId } = useParams(); // Get the event ID from the URL
@@ -39,126 +40,49 @@ const EventDetails = () => {
     document.title = `${event?.name} | The Lemonade Network`;
   }, []);
 
-  const toast = useToast();
-  const urlLocation = useLocation(); // to access query parameters
+  // Corrected ISO string
+  const isoString = event.date.iso;
 
-  // Function to get query parameters
-  const getQueryParams = () => {
-    const params = new URLSearchParams(urlLocation.search);
-    return params;
-  };
-
-  useEffect(() => {
-    const params = getQueryParams();
-    const msg = params.get("msg");
-
-    if (msg === "paysuccess") {
-      toast({
-        title: "Payment Successful",
-        description: "Check Your Email",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
-    } else if (msg === "payfail") {
-      toast({
-        title: "Payment Not Successful",
-        description: "If You Were Debited, Please Contact Us",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  }, [urlLocation, toast]);
-
-  // Sample ISO 8601 string for a time range
-  const isoString = event.date;
+  // Add hyphens and colons to match ISO 8601 format
+  const formattedIsoString = isoString.replace(
+    /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/g,
+    "$1-$2-$3T$4:$5:$6Z"
+  );
 
   // Split the ISO string into start and end times
-  const [startIso, endIso] = isoString ? isoString.split("/") : [null, null];
+  const [startIso, endIso] = formattedIsoString
+    ? formattedIsoString.split("/")
+    : [null, null];
 
-  // Parse the start and end times into Date objects
-  const startDate = new Date(startIso);
-  const endDate = new Date(endIso);
+  // Parse the start and end times into Date objects using parseISO
+  const startDate = parseISO(startIso);
+  const endDate = parseISO(endIso);
 
-  // 1. Format start and end times with meridiem (12-hour format)
-  const startTimeWithMeridiem = format(startDate, "h:mm a"); // 12-hour format with meridiem
-  const endTimeWithMeridiem = format(endDate, "h:mm a"); // 12-hour format with meridiem
+  // Manually format times using UTC hours and minutes to avoid timezone shifts
+  const startTimeWithMeridiem = `${String(
+    startDate.getUTCHours() % 12 || 12
+  ).padStart(2, "0")}:${String(startDate.getUTCMinutes()).padStart(2, "0")} ${
+    startDate.getUTCHours() >= 12 ? "PM" : "AM"
+  }`;
+  const endTimeWithMeridiem = `${String(
+    endDate.getUTCHours() % 12 || 12
+  ).padStart(2, "0")}:${String(endDate.getUTCMinutes()).padStart(2, "0")} ${
+    endDate.getUTCHours() >= 12 ? "PM" : "AM"
+  }`;
 
-  const timeZoneMap = {
-    "+00:00": "GMT", // Greenwich Mean Time
-    "+01:00": "WAT", // West Africa Time
-    "+02:00": "CAT", // Central Africa Time
-    "+03:00": "EAT", // East Africa Time
-    "+04:00": "GST", // Gulf Standard Time
-    "+05:00": "PKT", // Pakistan Standard Time
-    "+06:00": "BST", // Bangladesh Standard Time
-    "+07:00": "WIB", // Western Indonesia Time
-    "+08:00": "CST", // China Standard Time
-    "+09:00": "JST", // Japan Standard Time
-    "+10:00": "AEST", // Australian Eastern Standard Time
-    "+11:00": "SBT", // Solomon Islands Time
-    "+12:00": "NZST", // New Zealand Standard Time
-    "-01:00": "AZOT", // Azores Time
-    "-02:00": "BRST", // Brasilia Summer Time
-    "-03:00": "BRT", // Brasilia Time
-    "-04:00": "AST", // Atlantic Standard Time
-    "-05:00": "EST", // Eastern Standard Time
-    "-06:00": "CST", // Central Standard Time
-    "-07:00": "MST", // Mountain Standard Time
-    "-08:00": "PST", // Pacific Standard Time
-    "-09:00": "AKST", // Alaska Standard Time
-    "-10:00": "HST", // Hawaii-Aleutian Standard Time
-    // Add more time zones as needed
-  };
+  // 3. Format in (Wed, August 21st 7:00 PM) with meridiem, UTC-based
+  const startFormattedDate = `${format(startDate, "EEE")}, ${format(
+    startDate,
+    "MMMM do"
+  )} ${startTimeWithMeridiem}`;
+  const endFormattedDate = `${format(endDate, "EEE")}, ${format(
+    endDate,
+    "MMMM do"
+  )} ${endTimeWithMeridiem}`;
 
-  const getTimeZoneAbbreviation = () => {
-    const now = new Date();
-    const offsetMinutes = now.getTimezoneOffset();
-    const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
-    const offsetMinutesRemaining = Math.abs(offsetMinutes) % 60;
-    const offsetSign = offsetMinutes > 0 ? "-" : "+";
-    const formattedOffset = `${offsetSign}${String(offsetHours).padStart(
-      2,
-      "0"
-    )}:${String(offsetMinutesRemaining).padStart(2, "0")}`;
-
-    return timeZoneMap[formattedOffset] || "Unknown Time Zone";
-  };
-
-  // 2. Extract Time Zone (Assuming same for both times)
-  const timezoneOffset = -startDate.getTimezoneOffset() / 60;
-  const timezoneOffsetFormatted = `GMT${
-    timezoneOffset >= 0 ? "+" : ""
-  }${timezoneOffset}`;
-
-  // 3. Format in (Wed, August 21st 7:00 PM) with meridiem
-  const startDayOfWeek = format(startDate, "EEE");
-  const startMonth = format(startDate, "MMMM");
-  const startDay = format(startDate, "do");
-  const startTime = format(startDate, "h:mm a"); // 12-hour format with meridiem
-
-  const endDayOfWeek = format(endDate, "EEE");
-  const endMonth = format(endDate, "MMMM");
-  const endDay = format(endDate, "do");
-  const endTime = format(endDate, "h:mm a");
-
-  const startFormattedDate = `${startDayOfWeek}, ${startMonth} ${startDay} ${startTime}`;
-  const endFormattedDate = `${endDayOfWeek}, ${endMonth} ${endDay} ${endTime}`;
-
-  // 4. Format in (Wednesday, 21st August, 2024)
-  const startFullDayOfWeek = format(startDate, "EEEE");
-  const startFullDayOfMonth = format(startDate, "do");
-  const startFullMonth = format(startDate, "MMMM");
-  const startFullYear = format(startDate, "yyyy");
-
-  const endFullDayOfWeek = format(endDate, "EEEE");
-  const endFullDayOfMonth = format(endDate, "do");
-  const endFullMonth = format(endDate, "MMMM");
-  const endFullYear = format(endDate, "yyyy");
-
-  const startFullFormattedDate = `${startFullDayOfWeek}, ${startFullDayOfMonth} ${startFullMonth}, ${startFullYear}`;
-  const endFullFormattedDate = `${endFullDayOfWeek}, ${endFullDayOfMonth} ${endFullMonth}, ${endFullYear}`;
+  // 4. Format in (Wednesday, 21st August, 2024), UTC-based
+  const startFullFormattedDate = format(startDate, "EEEE, do MMMM, yyyy");
+  const endFullFormattedDate = format(endDate, "EEEE, do MMMM, yyyy");
 
   const addToGoogleCalendar = (title, date, description, location) => {
     const baseUrl = "https://calendar.google.com/calendar/render";
@@ -175,7 +99,7 @@ const EventDetails = () => {
 
   // Usage
   const title = event.name;
-  const date = event.iso; // ISO format: YYYYMMDDTHHMMSSZ
+  const date = event.date.iso; // ISO format: YYYYMMDDTHHMMSSZ
   const description = event.about.description;
   const location = `${event.venue.name}, ${event.venue.city}, ${event.venue.state}`;
 
@@ -196,48 +120,49 @@ const EventDetails = () => {
     const baseUrl = "https://outlook.live.com/calendar/0/deeplink/compose";
     const url = new URL(baseUrl);
 
-    url.searchParams.append(event.name, title);
-    url.searchParams.append(event.startDate, startDate);
-    url.searchParams.append(event.endDate, endDate);
-    url.searchParams.append(event.about.description, description);
-    url.searchParams.append(
-      `${event.venue.name}, ${event.venue.city}, ${event.venue.state}`,
-      location
-    );
+    // Use correct query parameter names expected by Outlook Calendar
+    url.searchParams.append("path", "/calendar/action/compose");
+    url.searchParams.append("rru", "addevent"); // Required for adding an event
+    url.searchParams.append("startdt", startDate); // Start date in ISO format
+    url.searchParams.append("enddt", endDate); // End date in ISO format
+    url.searchParams.append("subject", title); // Event title
+    url.searchParams.append("body", description); // Event description
+    url.searchParams.append("location", location); // Event location
 
     return url.toString();
   };
 
   // Usage
   const outlookCalendarUrl = addToOutlookCalendar(
-    title,
-    startDate,
-    endDate,
-    description,
-    location
+    event.name,
+    event.date.outlookStartDate, // Example ISO date format for start date
+    event.date.outlookEndDate, // Example ISO date format for end date
+    event.about.description,
+    `${event.venue.name}, ${event.venue.city}, ${event.venue.state}`
   );
 
   const generateICS = (title, startDate, endDate, description, location) => {
+    // Helper function to convert dates to proper ICS format (UTC time)
+    const formatDateToICS = (date) => {
+      const formattedDate =
+        new Date(date).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+      return formattedDate; // YYYYMMDDTHHMMSSZ
+    };
+
     const icsContent = `
-  BEGIN:VCALENDAR
-  VERSION:2.0
-  PRODID:-//The Lemonade Network Events//NONSGML v1.0//EN
-  BEGIN:VEVENT
-  UID:${new Date().getTime()}@tlnevents.com
-  DTSTAMP:${event.startDate
-    .replace(/-/g, "")
-    .replace(/T/, "")
-    .replace(/:/g, "")}
-  DTSTART:${event.startDate
-    .replace(/-/g, "")
-    .replace(/T/, "")
-    .replace(/:/g, "")}
-  DTEND:${event.endDate.replace(/-/g, "").replace(/T/, "").replace(/:/g, "")}
-  SUMMARY:${event.name}
-  DESCRIPTION:${event.about.description}
-  LOCATION:${`${event.venue.name}, ${event.venue.city}, ${event.venue.state}`}
-  END:VEVENT
-  END:VCALENDAR
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//The Lemonade Network Events//NONSGML v1.0//EN
+BEGIN:VEVENT
+UID:${new Date().getTime()}@tlnevents.com
+DTSTAMP:${formatDateToICS(new Date().toISOString())}
+DTSTART:${formatDateToICS(startDate)}
+DTEND:${formatDateToICS(endDate)}
+SUMMARY:${title}
+DESCRIPTION:${description}
+LOCATION:${location}
+END:VEVENT
+END:VCALENDAR
     `.trim();
 
     const blob = new Blob([icsContent], { type: "text/calendar" });
@@ -246,8 +171,14 @@ const EventDetails = () => {
     return url;
   };
 
-  // Usage
-  const icsUrl = generateICS(title, startDate, endDate, description, location);
+  // Usage Example
+  const icsUrl = generateICS(
+    event.name,
+    event.date.outlookStartDate, // Start date in ISO format
+    event.date.outlookEndDate, // End date in ISO format
+    event.about.description,
+    `${event.venue.name}, ${event.venue.city}, ${event.venue.state}`
+  );
 
   return (
     <VStack
@@ -320,11 +251,9 @@ const EventDetails = () => {
               </Box>
               <Flex w="100%" justify="space-between" align="center">
                 <VStack w="100%" align="flex-start" gap="10px">
-                  <Link to={event.organizers.url}>
-                    <Heading color="dark" fontSize={["22px"]} lineHeight="28px">
-                      Organized By
-                    </Heading>
-                  </Link>
+                  <Heading color="dark" fontSize={["22px"]} lineHeight="28px">
+                    Organized By
+                  </Heading>
 
                   <Flex w="100%" justify="space-between" align="center">
                     <Text color="primary.500" fontSize="16px" lineHeight="24px">
@@ -443,7 +372,7 @@ const EventDetails = () => {
                   </Text>
                   <Text color="neutral.500" fontSize="16px">
                     {startTimeWithMeridiem} - {endTimeWithMeridiem}{" "}
-                    {getTimeZoneAbbreviation()}
+                    {event.date.timeZone}
                   </Text>
                   <Menu>
                     <MenuButton
@@ -452,6 +381,8 @@ const EventDetails = () => {
                       size="md"
                       bg="primary.500"
                       _hover={{ bg: "primary.400", color: "dark" }}
+                      _active={{ bg: "primary.400", color: "dark" }}
+                      _focus={{ bg: "primary.400", color: "dark" }}
                       color="white"
                     >
                       Add To Calendar
@@ -463,18 +394,40 @@ const EventDetails = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <MenuItem> Add to Google Calendar</MenuItem>
+                        <MenuItem icon={<FcGoogle />}>Google Calendar</MenuItem>
                       </a>
                       <a
                         href={outlookCalendarUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <MenuItem>Outlook</MenuItem>
+                        <MenuItem
+                          icon={
+                            <Image
+                              w="20px"
+                              h="20px"
+                              src={Outlook}
+                              alt="Outlook"
+                            />
+                          }
+                        >
+                          Outlook
+                        </MenuItem>
                       </a>
 
                       <a href={icsUrl} download={`${event.id}.ics`}>
-                        <MenuItem>Download ICS</MenuItem>
+                        <MenuItem
+                          icon={
+                            <Image
+                              w="20px"
+                              h="20px"
+                              src={Download}
+                              alt="Download"
+                            />
+                          }
+                        >
+                          Event ICS
+                        </MenuItem>
                       </a>
                     </MenuList>
                   </Menu>

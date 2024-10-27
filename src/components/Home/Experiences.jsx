@@ -1,14 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Box, VStack, Skeleton, Image, Heading, Text } from "@chakra-ui/react";
 import Glide from "@glidejs/glide";
 import "@glidejs/glide/dist/css/glide.core.min.css";
 import "@glidejs/glide/dist/css/glide.theme.min.css";
 
 const imageList = [
-  "../../src/assets/gallery/Fk shot it-244.jpg",
-  "../../src/assets/gallery/Fk shot it-252.jpg",
-  "../../src/assets/gallery/IMG_2438.JPG",
-  // Add all your image paths here
+  "https://tlnevents.com/assets/gallery/Fk shot it-244.jpg",
+  "https://tlnevents.com/assets/gallery/Fk shot it-252.jpg",
+  "https://tlnevents.com/assets/gallery/IMG_2438.jpg",
+  "https://tlnevents.com/assets/gallery/IMG_2413.jpg",
+  "https://tlnevents.com/assets/gallery/IMG_2374.jpg",
+  "https://tlnevents.com/assets/gallery/IMG_2334.jpg",
+  "https://tlnevents.com/assets/gallery/IMG_2320.jpg",
+  "https://tlnevents.com/assets/gallery/DSC_1318_web.jpg",
+  "https://tlnevents.com/assets/gallery/DSC_1336_web.jpg",
+  "https://tlnevents.com/assets/gallery/DSC_1348_web copy.jpg",
+  "https://tlnevents.com/assets/gallery/DSC_1355_web.jpg",
+  "https://tlnevents.com/assets/gallery/DSC_1358_web copy.jpg",
+  "https://tlnevents.com/assets/gallery/DSC_1440_web.jpg",
+  "https://tlnevents.com/assets/gallery/Fk shot it-266.jpg",
+  "https://tlnevents.com/assets/gallery/DSC_1444_web.jpg",
+  "https://tlnevents.com/assets/gallery/DSC_1561_web.jpg",
+  "https://tlnevents.com/assets/gallery/DSC_1641_web.jpg",
+  "https://tlnevents.com/assets/gallery/DSC_1727_web.jpg",
+  "https://tlnevents.com/assets/gallery/DSC_1753_web.jpg",
 ];
 
 const Experiences = () => {
@@ -59,7 +74,7 @@ const Experiences = () => {
                     bg="gray.500"
                     rounded={["6px", "8px"]}
                     src={image}
-                    alt={`Slide ${index}`}
+                    alt={`Slide ${index - 1}`}
                     style={{ width: "100%" }}
                   />
                 </Skeleton>
@@ -79,16 +94,6 @@ const Experiences = () => {
             ></button>
           ))}
         </div>
-
-        {/* Previous and Next Arrows */}
-        {/* <div data-glide-el="controls">
-          <button data-glide-dir="<" aria-label="Previous Slide">
-            Prev
-          </button>
-          <button data-glide-dir=">" aria-label="Next Slide">
-            Next
-          </button>
-        </div> */}
       </Box>
     </VStack>
   );

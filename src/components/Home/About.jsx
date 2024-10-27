@@ -1,10 +1,5 @@
 import React from "react";
 import { VStack, Heading, Text, Stack, Image } from "@chakra-ui/react";
-import Crew from "../../assets/crew.webp";
-import Vision from "../../assets/gallery/Fk shot it-244.jpg";
-import Mission from "../../assets/gallery/DSC_1318_web.jpg";
-import Goal from "../../assets/gallery/DSC_9238.JPG";
-
 const About = () => {
   return (
     <VStack
@@ -32,7 +27,7 @@ const About = () => {
         <Image
           w={["100%", "100%", "100%", "45%"]}
           rounded="8px"
-          src={Crew}
+          src="https://tlnevents.com/assets/crew.webp"
           alt="The Lemonade Network Crew"
         />
         <VStack
@@ -80,7 +75,8 @@ const About = () => {
               objectFit="cover"
               rounded={["6px", "6px", "8px", "full"]}
               shadow="md"
-              src={Vision}
+              src="https://tlnevents.com/assets/gallery/Fk shot it-244.jpg"
+              alt="vision"
             />
             <VStack
               align={["flex-start", "flex-start", "flex-start", "center"]}
@@ -110,7 +106,8 @@ const About = () => {
               objectFit="cover"
               rounded={["6px", "6px", "8px", "full"]}
               shadow="md"
-              src={Mission}
+              src="https://tlnevents.com/assets/gallery/DSC_1318_web.jpg"
+              alt="mission"
             />
             <VStack
               align={["flex-start", "flex-start", "flex-start", "center"]}
@@ -142,7 +139,8 @@ const About = () => {
               objectFit="cover"
               rounded={["6px", "6px", "8px", "full"]}
               shadow="md"
-              src={Goal}
+              src="https://tlnevents.com/assets/gallery/DSC_9238.JPG"
+              alt="goal"
             />
             <VStack
               align={["flex-start", "flex-start", "flex-start", "center"]}

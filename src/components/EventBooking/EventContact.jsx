@@ -70,63 +70,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
 
   const initialValues = { ...contactData };
 
-  // Handle Checkbox Change Function
-  const handleCheckboxChange = (e, ticketId, i) => {
-    const isChecked = e.target.checked;
-
-    // Logic to copy values from the previous attendee (if any)
-    if (isChecked) {
-      // Get the previous attendee values (i - 1)
-      const ticketQuantity = ticketCounts[ticketId];
-      const prevAttendeeValues =
-        formik.values.attendeeAddresses[ticketQuantity - 1]?.[i - 1];
-      console.log(ticketCounts);
-      console.log(i);
-
-      // Check if previous attendee values exist and are valid
-      if (
-        prevAttendeeValues &&
-        prevAttendeeValues.firstName &&
-        prevAttendeeValues.lastName &&
-        prevAttendeeValues.email
-      ) {
-        // Copy the values if they exist
-        formik.setFieldValue(
-          `attendeeAddresses[${ticketId - 1}][${i}].firstName`,
-          prevAttendeeValues.firstName
-        );
-        formik.setFieldValue(
-          `attendeeAddresses[${ticketId - 1}][${i}].lastName`,
-          prevAttendeeValues.lastName
-        );
-        formik.setFieldValue(
-          `attendeeAddresses[${ticketId - 1}][${i}].email`,
-          prevAttendeeValues.email
-        );
-
-        // Display success toast
-        toast({
-          title: "Values copied.",
-          description:
-            "Attendee information has been copied from the previous attendee.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-      } else {
-        // Display error toast if the previous form is empty
-        toast({
-          title: "Error.",
-          description:
-            "No values found in the previous attendee's form to copy.",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    }
-  };
-
   const formik = useFormik({
     initialValues: initialValues,
     enableReinitialize: true, // To update countryCode automatically when fetched
@@ -185,10 +128,21 @@ const EventContact = ({ handleNextStep, formRef }) => {
             }
 
             if (!attendee.email) {
+              errors.attendeeAddresses = errors.attendeeAddresses || {};
+              errors.attendeeAddresses[ticketId] =
+                errors.attendeeAddresses[ticketId] || [];
               errors.attendeeAddresses[ticketId][index] =
                 errors.attendeeAddresses[ticketId][index] || {};
               errors.attendeeAddresses[ticketId][index].email =
                 "Email is required";
+            } else if (!/\S+@\S+\.\S+/.test(attendee.email)) {
+              errors.attendeeAddresses = errors.attendeeAddresses || {};
+              errors.attendeeAddresses[ticketId] =
+                errors.attendeeAddresses[ticketId] || [];
+              errors.attendeeAddresses[ticketId][index] =
+                errors.attendeeAddresses[ticketId][index] || {};
+              errors.attendeeAddresses[ticketId][index].email =
+                "Invalid email format";
             }
           });
         });
@@ -197,20 +151,31 @@ const EventContact = ({ handleNextStep, formRef }) => {
       return errors;
     },
     onSubmit: async (values, { setSubmitting, resetForm }) => {
-      const response = await fetch(
-        "https://tlnevents.com/server/contacts.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
+      try {
+        const response = await fetch(
+          "https://tlnevents.com/server/contacts.php",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(values),
+          }
+        );
+        const result = await response.json();
+        if (result.success) {
+          console.log("Contact and attendees saved successfully!");
+        } else {
+          console.error("Error:", result.message);
         }
-      );
+      } catch (error) {
+        console.error("Unexpected error:", error);
+      } finally {
+        setSubmitting(false);
+      }
+
       setIsSubmitting(true);
       setIsDisable(true);
-      setContactData(values);
       handleNextStep(); // Advance to the next step if everything is valid
+      setSubmitting(false);
     },
   });
 
@@ -228,6 +193,63 @@ const EventContact = ({ handleNextStep, formRef }) => {
 
   // Inside your component:
   const toast = useToast();
+
+  // Handle Checkbox Change Function
+  const handleCheckboxChange = (e, ticketId, i) => {
+    const isChecked = e.target.checked;
+
+    // Logic to copy values from the previous attendee (if any)
+    if (isChecked) {
+      // Get the previous attendee values (i - 1)
+      const ticketQuantity = ticketCounts[ticketId];
+      const prevAttendeeValues =
+        formik.values.attendeeAddresses[ticketQuantity - 1]?.[i - 1];
+      console.log(ticketCounts);
+      console.log(i);
+
+      // Check if previous attendee values exist and are valid
+      if (
+        prevAttendeeValues &&
+        prevAttendeeValues.firstName &&
+        prevAttendeeValues.lastName &&
+        prevAttendeeValues.email
+      ) {
+        // Copy the values if they exist
+        formik.setFieldValue(
+          `attendeeAddresses[${ticketId - 1}][${i}].firstName`,
+          prevAttendeeValues.firstName
+        );
+        formik.setFieldValue(
+          `attendeeAddresses[${ticketId - 1}][${i}].lastName`,
+          prevAttendeeValues.lastName
+        );
+        formik.setFieldValue(
+          `attendeeAddresses[${ticketId - 1}][${i}].email`,
+          prevAttendeeValues.email
+        );
+
+        // Display success toast
+        toast({
+          title: "Values copied.",
+          description:
+            "Attendee information has been copied from the previous attendee.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        // Display error toast if the previous form is empty
+        toast({
+          title: "Error.",
+          description:
+            "No values found in the previous attendee's form to copy.",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    }
+  };
 
   return (
     <VStack
@@ -350,7 +372,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
             <Select
               variant="filled"
               h={["40px", "50px"]}
-              bg="rgba(210, 190, 249, 0.10)"
               color="dark"
               textAlign="center"
               fontSize="16px"
@@ -545,7 +566,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
                   </FormControl>
 
                   {/* Checkbox */}
-                  {ticketQuantity !== 1 && (
+                  {i + 1 > 1 && (
                     <Checkbox
                       colorScheme="green"
                       onChange={(e) => handleCheckboxChange(e, ticketId, i)}
