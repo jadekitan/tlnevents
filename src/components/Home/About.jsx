@@ -1,5 +1,5 @@
 import React from "react";
-import { VStack, Heading, Text, Stack, Image } from "@chakra-ui/react";
+import { VStack, Heading, Text, Stack, Box, Image } from "@chakra-ui/react";
 const About = () => {
   return (
     <VStack
@@ -24,12 +24,14 @@ const About = () => {
         align="center"
         spacing={{ base: "40px" }}
       >
-        <Image
-          w={["100%", "100%", "100%", "45%"]}
-          rounded="8px"
-          src="https://tlnevents.com/assets/crew.webp"
-          alt="The Lemonade Network Crew"
-        />
+        <Box w={["100%", "100%", "100%", "45%"]} bg="gray.200">
+          <Image
+            w="100%"
+            rounded="8px"
+            src="https://tlnevents.com/assets/crew.webp"
+            alt="The Lemonade Network Crew"
+          />
+        </Box>
         <VStack
           w={["100%", "100%", "100%", "50%"]}
           align={["center", "center", "center", "flex-start"]}

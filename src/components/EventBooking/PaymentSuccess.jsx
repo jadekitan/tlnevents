@@ -7,11 +7,9 @@ import {
   Heading,
   Text,
   Button,
-  Spinner,
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
-import Order from "../../assets/confirmed.svg";
 import { useLocation, Link, useParams } from "react-router-dom";
 import axios from "axios";
 
@@ -64,7 +62,11 @@ const PaymentSuccess = () => {
               ></Image>
             </Link>
           </Flex>
-          <Image w={["100px", "150px"]} src={Order} alt="confirmed Image" />
+          <Image
+            w={["100px", "150px"]}
+            src="https://tlnevents.com/assets/confirmed.svg"
+            alt="confirmed Image"
+          />
           <VStack spacing="20px">
             <Heading color="dark" fontSize="32px">
               Payment Succesful !

@@ -84,16 +84,18 @@ const Experiences = () => {
         </div>
 
         {/* Navigation Dots */}
-        <div className="glide__bullets" data-glide-el="controls[nav]">
-          {imageList.map((_, index) => (
-            <button
-              key={index}
-              className="glide__bullet"
-              data-glide-dir={`=${index}`}
-              aria-label={`Go to slide ${index + 1}`}
-            ></button>
-          ))}
-        </div>
+        <Box display={["none", "block"]}>
+          <div className="glide__bullets" data-glide-el="controls[nav]">
+            {imageList.map((_, index) => (
+              <button
+                key={index}
+                className="glide__bullet"
+                data-glide-dir={`=${index}`}
+                aria-label={`Go to slide ${index + 1}`}
+              ></button>
+            ))}
+          </div>
+        </Box>
       </Box>
     </VStack>
   );
