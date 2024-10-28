@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from "react-helmet-async";
 import {
   VStack,
   Flex,
@@ -184,7 +184,7 @@ END:VCALENDAR
   return (
     <>
       <Helmet>
-        <title>{`${event?.name} | The Lemonade Network`}</title>
+        <title>{event.name}</title>
         <meta
           name="description"
           content={
@@ -192,10 +192,7 @@ END:VCALENDAR
             `Connect &bull; Collaborate &bull; Create`
           }
         />
-        <meta
-          property="og:title"
-          content={`${event?.name} | The Lemonade Network`}
-        />
+        <meta property="og:title" content={event.name} />
         <meta
           property="og:description"
           content={
@@ -203,6 +200,7 @@ END:VCALENDAR
             `Connect &bull; Collaborate &bull; Create`
           }
         />
+        <meta property="og:image" content={event.image} />
       </Helmet>
       <VStack
         w="100%"
