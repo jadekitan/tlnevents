@@ -59,7 +59,13 @@ const BookingContext = ({ children }) => {
 
   const [countryCode, setCountryCode] = useState("+234"); // Default country code (Nigeria)
 
-  const [assignMultiple, setAssignMultiple] = useState(false);
+  const [assignMultiple, setAssignMultiple] = useState(
+    () => JSON.parse(localStorage.getItem("assignMultiple")) || false
+  );
+
+  useEffect(() => {
+    localStorage.setItem("assignMultiple", JSON.stringify(assignMultiple));
+  }, [assignMultiple]);
 
   // Debounce the localStorage update function
   const saveToLocalStorage = useCallback(

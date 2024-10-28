@@ -260,7 +260,7 @@ const EventBooking = () => {
         h="100%"
         align="flex-start"
         spacing={["50px", "25px", "80px"]}
-        px={["20px", "25px", "100px"]}
+        px={["20px", "25px", "50px", "75px", "100px"]}
         pt={["30px", "24px", "40px", "54px"]}
         pb={["30px", "24px", "40px", "54px"]}
       >
@@ -367,7 +367,10 @@ const EventBooking = () => {
           justify={["flex-start", "space-between"]}
           align="flex-start"
         >
-          <Box w={["100%", "544px"]} pb={["100px", 0]}>
+          <Box
+            w={["100%", "100%", "100%", "544px"]}
+            pb={["100px", "100px", "100px", 0]}
+          >
             {showStep(currentStep)}
           </Box>
           <VStack
@@ -517,7 +520,7 @@ const EventBooking = () => {
             </Box>
           </VStack>
           <Box
-            display={["block", "none"]}
+            display={["block", "block", "block", "none"]}
             w="100%"
             h="93px"
             position="fixed"

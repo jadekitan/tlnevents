@@ -61,7 +61,7 @@ const Experiences = () => {
         </Text>
       </VStack>
 
-      <Box w={["100%", "100%", "100%", "80%"]} className="glide">
+      <Box w={["100%", "100%", "100%", "70%"]} className="glide">
         {/* The Carousel */}
         <div className="glide__track" data-glide-el="track">
           <ul className="glide__slides">
