@@ -5,9 +5,9 @@ import { extendTheme } from "@chakra-ui/react";
 import "@fontsource/urbanist";
 import "@glidejs/glide/dist/css/glide.core.min.css";
 import "@glidejs/glide/dist/css/glide.theme.min.css";
-
 import * as ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 
 import App from "./App.jsx";
 import "./index.css";
@@ -39,7 +39,9 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ChakraProvider theme={theme}>
       <BrowserRouter>
-        <App />
+        <HelmetProvider>
+          <App />
+        </HelmetProvider>
       </BrowserRouter>
     </ChakraProvider>
   </StrictMode>
