@@ -193,6 +193,8 @@ END:VCALENDAR
           }
         />
         <meta property="og:title" content={event.name} />
+
+        <meta property="og:image" content={event.image} />
         <meta
           property="og:description"
           content={
@@ -200,7 +202,7 @@ END:VCALENDAR
             `Connect &bull; Collaborate &bull; Create`
           }
         />
-        <meta property="og:image" content={event.image} />
+        <meta property="og:url" content={`https://tlnevents.com/${event.id}`} />
       </Helmet>
       <VStack
         w="100%"

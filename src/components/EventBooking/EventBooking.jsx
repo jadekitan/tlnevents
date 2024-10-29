@@ -20,6 +20,7 @@ import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
 import EventTickets from "./EventTickets";
 import EventContact from "./EventContact";
+import PaymentTable from "./PaymentTable";
 import { IoClose } from "react-icons/io5";
 import { Link, useParams } from "react-router-dom";
 
@@ -71,33 +72,6 @@ const EventBooking = () => {
     }
   }
 
-  // Function to get the selected tickets with fees and subtotal
-  const getSelectedTickets = () => {
-    return ticketType
-      .filter((ticket) => ticketCounts[ticket.id] > 0) // Only tickets with count > 0
-      .map((ticket) => {
-        const subtotal = (ticket.price * ticketCounts[ticket.id]) / ticket.step; // Calculate subtotal per ticket
-        const fees =
-          ticketCounts[ticket.id] *
-          (ticket.price * (feePercentage / 100) + 100 / ticket.step); // Assuming fees are 10% of the ticket price
-        const total = subtotal + fees; // Calculate the total including fees
-        return {
-          ticketId: ticket.id,
-          name: ticket.name,
-          price: ticket.price,
-          quantity: ticketCounts[ticket.id], // Ticket quantity based on the user's input
-          subtotal: subtotal, // Add subtotal
-          fees: fees, // Add fees
-          total: total, // Add total (subtotal + fees)
-        };
-      });
-  };
-
-  // Getting the selected tickets with updated data
-  const selectedTickets = getSelectedTickets();
-
-  // console.log("Selected Tickets with Fees and Subtotal:", selectedTickets); // Log the tickets to verify
-
   // Handle Paystack Payment with the updated selected tickets
   const handlePaystackPayment = (
     firstName,
@@ -105,8 +79,7 @@ const EventBooking = () => {
     email,
     countryCode,
     phone,
-    total,
-    selectedTickets // Updated array of selected tickets containing ticketId, ticketType, price, quantity, fees, subtotal, and total
+    total
   ) => {
     const handler = window.PaystackPop.setup({
       key: "pk_test_2ee3c2c176bb56a26e8213b0ce1546e3088647d6",
@@ -122,72 +95,19 @@ const EventBooking = () => {
         setIsSubmitting(false);
       },
       callback: (response) => {
-        // On successful payment, send the ticket details and payment reference to the backend
-        fetch("https://tlnevents.com/server/verify-payment.php", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: `${contactData.firstName} ${contactData.lastName}`,
-            reference: response.reference, // Pass the payment reference here
-            tickets: selectedTickets, // Include updated ticket details with fees and subtotal
-          }),
-        })
-          .then((res) => res.text()) // Get raw response
-          .then((data) => {
-            try {
-              const jsonData = JSON.parse(data); // Parse JSON
-              if (jsonData.success) {
-                // Redirect on successful payment verification
-                window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}`;
-                setIsDisable(false);
-                setIsSubmitting(false);
-              } else {
-                console.log("Payment verification failed", jsonData.message);
-              }
-            } catch (error) {
-              console.error("Error parsing JSON response:", error, data); // Show raw response
-            }
-          })
-          .catch((error) => console.error("Error with fetch:", error));
+        setStep(currentStep + 1);
+        // Redirect on successful payment verification
+        // window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}`;
+        console.log(selectedTickets);
+        setIsDisable(false);
+        setIsSubmitting(false);
       },
     });
 
     handler.openIframe();
   };
 
-  // Function to verify payment on your backend
-  const verifyPayment = async (reference, email, ticketDetails) => {
-    try {
-      const response = await fetch("https://tlnevents.com/verify-payment.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          reference,
-          email,
-          ticket_details: ticketDetails,
-        }), // Send reference and ticket details
-      });
-
-      const result = await response.json();
-      if (result.status === "success") {
-        // Handle successful order processing
-        window.location.href = `/payment-success`; // Redirect to a success page
-      } else {
-        // Handle errors returned by the backend
-        alert("Payment verification failed: " + result.message);
-      }
-    } catch (error) {
-      console.error("An error occurred during payment verification:", error);
-      alert("An error occurred. Please try again.");
-    }
-  };
-
   const handleNextStep = () => {
-    // setStep((prevStep) => prevStep + 1); // Advance to the next step
     handlePaystackPayment(
       contactData.firstName,
       contactData.lastName,
@@ -210,6 +130,10 @@ const EventBooking = () => {
       case 2:
         return (
           <EventContact handleNextStep={handleNextStep} formRef={formRef} /> // Pass formRef and handleNextStep
+        );
+      case 3:
+        return (
+          <PaymentTable /> // Pass formRef and handleNextStep
         );
       default:
         return <EventTickets />;
@@ -266,7 +190,7 @@ const EventBooking = () => {
       >
         {/* <Header /> */}
         <VStack w="100%" align="flex-start" spacing="40px">
-          <Box w="100%">
+          <Box w="100%" display={currentStep === 3 ? "none" : "block"}>
             <Flex w="100%" align="center" gap="40px">
               {/* <Image src="/logo.svg" /> */}
               <Flex w="100%" justify="space-between" align="center">
@@ -295,7 +219,12 @@ const EventBooking = () => {
               align="flex-start"
               spacing="20px"
             >
-              <Box id="stepper" position="relative" width={["100%", "85%"]}>
+              <Box
+                id="stepper"
+                position="relative"
+                width={["100%", "85%"]}
+                display={currentStep === 3 ? "none" : "block"}
+              >
                 <Stepper index={currentStep} size="sm" gap="0">
                   {steps.map((step, index) => (
                     <Step key={index} gap="10px">
@@ -368,13 +297,15 @@ const EventBooking = () => {
           align="flex-start"
         >
           <Box
-            w={["100%", "100%", "100%", "544px"]}
+            w={currentStep === 3 ? "100%" : ["100%", "100%", "100%", "544px"]}
             pb={["100px", "100px", "100px", 0]}
           >
             {showStep(currentStep)}
           </Box>
           <VStack
-            display={["none", "none", "none", "flex"]}
+            display={
+              currentStep === 3 ? "none" : ["none", "none", "none", "flex"]
+            }
             position="sticky"
             top="20px"
             w="450px"

@@ -67,13 +67,13 @@ const PaymentSuccess = () => {
             src="https://tlnevents.com/assets/confirmed.svg"
             alt="confirmed Image"
           />
-          <VStack spacing="20px">
+          <VStack w="100%" spacing="20px">
             <Heading color="dark" fontSize="32px">
               Payment Succesful !
             </Heading>
-            <VStack textAlign="center" spacing="10px">
+            <VStack w="100%" textAlign="center" spacing="10px">
               <Text color="dark" fontSize="16px">
-                your order was successful. We've also sent a copy to your email
+                Your order was successful. We've also sent a copy to your email
                 address{" "}
                 <Text as="span" color="primary.500">
                   {contactData.email}
