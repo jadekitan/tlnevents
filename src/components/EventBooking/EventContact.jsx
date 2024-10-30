@@ -26,6 +26,8 @@ const EventContact = ({ handleNextStep, formRef }) => {
     setStep,
     contactData,
     setContactData,
+    handleContactDataChange,
+    handleBlur,
     setCountryCode,
     setIsDisable,
     setIsSubmitting,
@@ -184,33 +186,38 @@ const EventContact = ({ handleNextStep, formRef }) => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const val = type === "checkbox" ? checked : value;
-    setContactData({
+    handleContactDataChange({
       ...contactData,
       [name]: val,
     });
     formik.handleChange(e);
   };
 
-  const handleAttendeeChange = (e, ticketId, attendeeIndex, fieldName) => {
-    const { value } = e.target;
-    setContactData((prevData) => {
-      // Ensure attendeeAddresses and attendeeAddresses[ticketId] are initialized
-      const updatedAttendees = {
-        ...prevData.attendeeAddresses,
-        [ticketId]: prevData.attendeeAddresses[ticketId]
-          ? prevData.attendeeAddresses[ticketId].map((attendee, i) =>
-              i === attendeeIndex
-                ? { ...attendee, [fieldName]: value }
-                : attendee
-            )
-          : Array.from({ length: ticketCounts[ticketId] || 1 }).map(() => ({
-              firstName: "",
-              lastName: "",
-              email: "",
-            })),
-      };
+  const handleAttendeeChange = (ticketId, index, field, value) => {
+    console.log(
+      `Updating ${field} for ticketId ${ticketId}, index ${index} with value: ${value}`
+    );
 
-      return { ...prevData, attendeeAddresses: updatedAttendees };
+    // Update Formik field value
+    formik.setFieldValue(
+      `attendeeAddresses[${ticketId}][${index}].${field}`,
+      value
+    );
+
+    // Update local contactData for tracking and saving purposes
+    setContactData((prevData) => {
+      const updatedAddresses = { ...prevData.attendeeAddresses };
+      if (!updatedAddresses[ticketId]) updatedAddresses[ticketId] = [];
+      if (!updatedAddresses[ticketId][index]) {
+        updatedAddresses[ticketId][index] = {
+          firstName: "",
+          lastName: "",
+          email: "",
+        };
+      }
+      updatedAddresses[ticketId][index][field] = value;
+
+      return { ...prevData, attendeeAddresses: updatedAddresses };
     });
   };
 
@@ -325,7 +332,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
             placeholder="First Name"
             value={formik.values.firstName}
             onChange={handleChange}
-            onBlur={formik.handleBlur}
+            onBlur={handleBlur}
           />
           <FormErrorMessage fontSize={["14px", "16px"]}>
             {formik.errors.firstName}
@@ -350,7 +357,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
             placeholder="Last Name"
             value={formik.values.lastName}
             onChange={handleChange}
-            onBlur={formik.handleBlur}
+            onBlur={handleBlur}
           />
           <FormErrorMessage fontSize={["14px", "16px"]}>
             {formik.errors.lastName}
@@ -376,7 +383,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
             placeholder="Email Address"
             value={formik.values.email}
             onChange={handleChange}
-            onBlur={formik.handleBlur}
+            onBlur={handleBlur}
           />
           <FormErrorMessage fontSize={["14px", "16px"]}>
             {formik.errors.email}
@@ -480,13 +487,11 @@ const EventContact = ({ handleNextStep, formRef }) => {
         <VStack w="100%" align="flex-start" spacing="40px">
           {Object.keys(ticketCounts).map((ticketId) => {
             const ticketQuantity = ticketCounts[ticketId];
-            console.log(ticketType[ticketId - 1]?.name);
 
-            // Ensure the ticket quantity is valid
             if (!ticketQuantity || ticketQuantity <= 0) return null;
 
             return Array.from({ length: ticketQuantity }).map((_, i) => (
-              <Box w="100%" key={`${ticketType.id}-${i}`}>
+              <Box w="100%" key={`${ticketId}-${i}`}>
                 <VStack w="100%" align="flex-start" spacing="20px">
                   <FormLabel htmlFor={`attendee-${ticketId}-${i}`}>
                     <Text color="dark" fontSize="16px">
@@ -495,7 +500,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
                     </Text>
                   </FormLabel>
 
-                  {/* Form Inputs */}
+                  {/* First Name */}
                   <FormControl
                     isInvalid={
                       formik.errors.attendeeAddresses?.[ticketId]?.[i]
@@ -511,12 +516,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
                       p={["20px", "24px"]}
                       type="text"
                       id={`attendee-firstname-${ticketId}-${i}`}
-                      name={`attendeeAddresses[${
-                        ticketId - 1
-                      }][${i}].firstName`}
-                      onChange={(e) =>
-                        handleAttendeeChange(e, ticketId, i, "firstName")
-                      }
+                      name={`attendeeAddresses[${ticketId}][${i}].firstName`}
                       placeholder={`First Name (${
                         ticketType[ticketId - 1]?.name || "Unknown"
                       })`}
@@ -524,6 +524,15 @@ const EventContact = ({ handleNextStep, formRef }) => {
                         formik.values.attendeeAddresses?.[ticketId]?.[i]
                           ?.firstName || ""
                       }
+                      onChange={(e) =>
+                        handleAttendeeChange(
+                          ticketId,
+                          i,
+                          "firstName",
+                          e.target.value
+                        )
+                      }
+                      onBlur={formik.handleBlur}
                     />
                     <FormErrorMessage fontSize={["14px", "16px"]}>
                       {
@@ -533,6 +542,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
                     </FormErrorMessage>
                   </FormControl>
 
+                  {/* Last Name */}
                   <FormControl>
                     <Input
                       variant="filled"
@@ -544,9 +554,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
                       type="text"
                       id={`attendee-lastname-${ticketId}-${i}`}
                       name={`attendeeAddresses[${ticketId}][${i}].lastName`}
-                      onChange={(e) =>
-                        handleAttendeeChange(e, ticketId, i, "lastName")
-                      }
                       placeholder={`Last Name (${
                         ticketType[ticketId - 1]?.name || "Unknown"
                       })`}
@@ -554,9 +561,19 @@ const EventContact = ({ handleNextStep, formRef }) => {
                         formik.values.attendeeAddresses?.[ticketId]?.[i]
                           ?.lastName || ""
                       }
+                      onChange={(e) =>
+                        handleAttendeeChange(
+                          ticketId,
+                          i,
+                          "lastName",
+                          e.target.value
+                        )
+                      }
+                      onBlur={formik.handleBlur}
                     />
                   </FormControl>
 
+                  {/* Email */}
                   <FormControl
                     isInvalid={
                       formik.errors.attendeeAddresses?.[ticketId]?.[i]?.email
@@ -572,9 +589,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
                       type="email"
                       id={`attendee-email-${ticketId}-${i}`}
                       name={`attendeeAddresses[${ticketId}][${i}].email`}
-                      onChange={(e) =>
-                        handleAttendeeChange(e, ticketId, i, "email")
-                      }
                       placeholder={`Email Address (${
                         ticketType[ticketId - 1]?.name || "Unknown"
                       })`}
@@ -582,17 +596,23 @@ const EventContact = ({ handleNextStep, formRef }) => {
                         formik.values.attendeeAddresses?.[ticketId]?.[i]
                           ?.email || ""
                       }
+                      onChange={(e) =>
+                        handleAttendeeChange(
+                          ticketId,
+                          i,
+                          "email",
+                          e.target.value
+                        )
+                      }
+                      onBlur={formik.handleBlur}
                     />
                     <FormErrorMessage fontSize={["14px", "16px"]}>
-                      {
-                        formik.errors.attendeeAddresses?.[ticketId - 1]?.[i]
-                          ?.email
-                      }
+                      {formik.errors.attendeeAddresses?.[ticketId]?.[i]?.email}
                     </FormErrorMessage>
                   </FormControl>
 
-                  {/* Checkbox */}
-                  {i + 1 > 1 && (
+                  {/* Copy from previous checkbox */}
+                  {i > 0 && (
                     <Checkbox
                       colorScheme="green"
                       onChange={(e) => handleCheckboxChange(e, ticketId, i)}

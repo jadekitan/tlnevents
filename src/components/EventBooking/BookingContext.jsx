@@ -67,6 +67,14 @@ const BookingContext = ({ children }) => {
     localStorage.setItem("assignMultiple", JSON.stringify(assignMultiple));
   }, [assignMultiple]);
 
+  // Debounce the localStorage update function
+  const saveToLocalStorage = useCallback(
+    debounce((data) => {
+      localStorage.setItem("contactData", JSON.stringify(data));
+    }, 10000), // Adjust debounce timing as needed
+    []
+  );
+
   const [contactData, setContactData] = useState(() => {
     const storedContactData = localStorage.getItem("contactData");
     return storedContactData
@@ -89,9 +97,21 @@ const BookingContext = ({ children }) => {
         };
   });
 
+  // Save to localStorage on blur instead of every keystroke
+  const handleBlur = () => {
+    saveToLocalStorage(contactData);
+  };
+
+  const handleContactDataChange = (newData) => {
+    setContactData((prevData) => ({ ...prevData, ...newData }));
+  };
+
   useEffect(() => {
-    localStorage.setItem("contactData", JSON.stringify(contactData));
-  }, [contactData]);
+    return () => {
+      // Cancel debounced save on unmount to avoid memory leaks
+      saveToLocalStorage.cancel();
+    };
+  }, []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDisable, setIsDisable] = useState(false);
@@ -113,6 +133,8 @@ const BookingContext = ({ children }) => {
           setCountryCode,
           contactData,
           setContactData,
+          handleBlur,
+          handleContactDataChange,
           assignMultiple,
           setAssignMultiple,
           isSubmitting,

@@ -98,7 +98,7 @@ const EventBooking = () => {
         setStep(currentStep + 1);
         // Redirect on successful payment verification
         // window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}`;
-        console.log(selectedTickets);
+
         setIsDisable(false);
         setIsSubmitting(false);
       },
@@ -116,8 +116,7 @@ const EventBooking = () => {
       contactData.phone,
       total,
       subtotal,
-      fees,
-      selectedTickets
+      fees
     );
   };
 
