@@ -22,7 +22,7 @@ const Sponsors = () => {
       <Flex overflow="hidden">
         <Flex
           flexShrink="0"
-          gap="70px"
+          gap={["40px", "70px"]}
           animation={
             brands >= 5 ? [`${scrollAnimation} 30s linear infinite`] : ""
           }
@@ -35,7 +35,12 @@ const Sponsors = () => {
           }}
         >
           {brands.map((image, i) => (
-            <Box key={i} maxH="80px" maxW="150px" flexShrink="0">
+            <Box
+              key={i}
+              maxH={["70px", "70px", "80px"]}
+              maxW={["100px", "100px", "150px", "150px"]}
+              flexShrink="0"
+            >
               <Image w="100%" h="100%" objectFit="contain" src={image} />
             </Box>
           ))}
