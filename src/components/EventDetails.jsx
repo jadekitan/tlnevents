@@ -38,36 +38,39 @@ const EventDetails = () => {
   const event = eventsData[eventId]; // Lookup event from local data
 
   useEffect(() => {
-    document.title = `${event?.name} | The Lemonade Network`;
-    // Set or update description meta tag
-    let descriptionMeta = document.querySelector('meta[name="description"]');
-    if (!descriptionMeta) {
-      descriptionMeta = document.createElement("meta");
-      descriptionMeta.name = "description";
-      document.head.appendChild(descriptionMeta);
-    }
-    descriptionMeta.content = event.about?.description || "Default description";
-
-    // Set or update Open Graph meta tags
-    const ogTags = [
-      { property: "og:title", content: event.name },
-      {
-        property: "og:description",
-        content: event.about?.description || "Default description",
-      },
-      { property: "og:image", content: event.image },
-      { property: "og:url", content: `https://tlnevents.com/${event.id}` },
-    ];
-
-    ogTags.forEach(({ property, content }) => {
-      let metaTag = document.querySelector(`meta[property="${property}"]`);
-      if (!metaTag) {
-        metaTag = document.createElement("meta");
-        metaTag.setAttribute("property", property);
-        document.head.appendChild(metaTag);
+    setTimeout(() => {
+      document.title = `${event?.name} | The Lemonade Network`;
+      // Set or update description meta tag
+      let descriptionMeta = document.querySelector('meta[name="description"]');
+      if (!descriptionMeta) {
+        descriptionMeta = document.createElement("meta");
+        descriptionMeta.name = "description";
+        document.head.appendChild(descriptionMeta);
       }
-      metaTag.content = content;
-    });
+      descriptionMeta.content =
+        event.about?.description || "Default description";
+
+      // Set or update Open Graph meta tags
+      const ogTags = [
+        { property: "og:title", content: event.name },
+        {
+          property: "og:description",
+          content: event.about?.description || "Default description",
+        },
+        { property: "og:image", content: event.image },
+        { property: "og:url", content: `https://tlnevents.com/${event.id}` },
+      ];
+
+      ogTags.forEach(({ property, content }) => {
+        let metaTag = document.querySelector(`meta[property="${property}"]`);
+        if (!metaTag) {
+          metaTag = document.createElement("meta");
+          metaTag.setAttribute("property", property);
+          document.head.appendChild(metaTag);
+        }
+        metaTag.content = content;
+      });
+    }, 100);
   }, []);
 
   // Corrected ISO string

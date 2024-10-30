@@ -3,7 +3,7 @@ import { VStack, Flex, Box, Image } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 
 const Sponsors = () => {
-  const brands = ["../../../src/assets/sponsors/morenag-energy.png"];
+  const brands = ["https://tlnevents.com/assets/sponsors/morenag-energy.png"];
 
   // Define keyframes for scrolling animation
   const scrollAnimation = keyframes`
