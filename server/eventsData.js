@@ -84,10 +84,10 @@ export const eventsData = {
 
       socials: {
         url: "",
-        instagram: "https://instagram.com/thelemonadenetwork.ng",
+        instagram: "https://instagram.com/lemonade.africa ",
         facebook: "",
-        x: "https://twitter.com/tln_community",
-        tiktok: "https://tiktok.com/@thelemonadenetwork.ng",
+        x: "https://twitter.com/lemonade_africa",
+        tiktok: "https://tiktok.com/@lemonade.africa",
         linkedin: "",
       },
     },

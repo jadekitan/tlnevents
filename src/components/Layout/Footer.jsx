@@ -30,25 +30,19 @@ const Footer = () => {
               </Link>
             </Box>
             <Box display={["none", "none", "none", "block"]}>
-              <Link to="mailto:info@thelemonadenetwork.ng">
+              <Link to="mailto: info@lemonade.africa">
                 <Text color="dark" fontSize="16px" lineHeight="24px">
                   info@thelemonadenetwork.ng
                 </Text>
               </Link>
             </Box>
-            <Link
-              to="https://instagram.com/thelemonadenetwork.ng"
-              target="_blank"
-            >
+            <Link to="https://instagram.com/lemonade.africa " target="_blank">
               <FaInstagram />
             </Link>
-            <Link to="https://twitter.com/tln_community" target="_blank">
+            <Link to="https://twitter.com/lemonade_africa" target="_blank">
               <FaXTwitter />
             </Link>
-            <Link
-              to="https://www.tiktok.com/@thelemonadenetwork.ng"
-              target="_blank"
-            >
+            <Link to="https://www.tiktok.com/@lemonade.africa" target="_blank">
               <FaTiktok />
             </Link>
           </Flex>
