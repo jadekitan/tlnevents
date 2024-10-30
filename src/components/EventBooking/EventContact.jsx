@@ -88,70 +88,54 @@ const EventContact = ({ handleNextStep, formRef }) => {
 
       // Validate email
       if (!values.email) {
-        if (!values.email) {
-          errors.email = "Email is required";
-        } else if (
-          !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-        ) {
-          errors.email = "Invalid email address";
-        }
+        errors.email = "Email is required";
+      } else if (
+        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
+      ) {
+        errors.email = "Invalid email address";
       }
 
-      // Validate phone number based on the selected country code
-      const country = countryCodes.find((c) => c.code === values.countryCode);
+      // Validate phone number
       if (!values.phone) {
         errors.phone = "Phone number is required";
-      } else if (!country) {
-        errors.phone = "Invalid country code";
-      } else {
-        const phoneLength = values.phone.replace(/\D/g, "").length; // Remove non-numeric characters
-        if (
-          phoneLength < country.minLength ||
-          phoneLength > country.maxLength
-        ) {
-          errors.phone = `Phone number must be between ${country.minLength} and ${country.maxLength} digits`;
-        }
       }
 
+      // Validate attendee addresses if assignMultiple is true
       if (assignMultiple) {
-        // Validate attendee form for each ticket type
+        errors.attendeeAddresses = {};
         Object.keys(values.attendeeAddresses).forEach((ticketId) => {
-          const attendees = values.attendeeAddresses[ticketId] || [];
-
+          const attendees = values.attendeeAddresses[ticketId];
           attendees.forEach((attendee, index) => {
+            const attendeeErrors = {};
             if (!attendee.firstName) {
-              errors.attendeeAddresses = errors.attendeeAddresses || {};
-              errors.attendeeAddresses[ticketId] =
-                errors.attendeeAddresses[ticketId] || [];
-              errors.attendeeAddresses[ticketId][index] =
-                errors.attendeeAddresses[ticketId][index] || {};
-              errors.attendeeAddresses[ticketId][index].firstName =
-                "First Name is required";
+              attendeeErrors.firstName = "First Name is required";
             }
-
             if (!attendee.email) {
-              errors.attendeeAddresses = errors.attendeeAddresses || {};
+              attendeeErrors.email = "Email is required";
+            } // else if (
+            //   !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(attendee.email)
+            // ) {
+            //   attendeeErrors.email = "Invalid email format";
+            // }
+
+            // Only add errors if they exist
+            if (Object.keys(attendeeErrors).length > 0) {
               errors.attendeeAddresses[ticketId] =
                 errors.attendeeAddresses[ticketId] || [];
-              errors.attendeeAddresses[ticketId][index] =
-                errors.attendeeAddresses[ticketId][index] || {};
-              errors.attendeeAddresses[ticketId][index].email =
-                "Email is required";
-            } else if (!/\S+@\S+\.\S+/.test(attendee.email)) {
-              errors.attendeeAddresses = errors.attendeeAddresses || {};
-              errors.attendeeAddresses[ticketId] =
-                errors.attendeeAddresses[ticketId] || [];
-              errors.attendeeAddresses[ticketId][index] =
-                errors.attendeeAddresses[ticketId][index] || {};
-              errors.attendeeAddresses[ticketId][index].email =
-                "Invalid email format";
+              errors.attendeeAddresses[ticketId][index] = attendeeErrors;
             }
           });
         });
       }
 
+      if (Object.keys(formik.errors).length > 0) {
+        console.log("Validation Errors:", formik.errors);
+        return; // Prevent submission
+      }
+
       return errors;
     },
+
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       setIsSubmitting(true);
       setIsDisable(true);
