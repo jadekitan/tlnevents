@@ -95,9 +95,10 @@ const EventBooking = () => {
         setIsSubmitting(false);
       },
       callback: (response) => {
-        setStep(currentStep + 1);
+        // setStep(currentStep + 1);
         // Redirect on successful payment verification
-        // window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}`;
+
+        window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}`;
 
         setIsDisable(false);
         setIsSubmitting(false);

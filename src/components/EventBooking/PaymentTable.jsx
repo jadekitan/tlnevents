@@ -24,7 +24,6 @@ const PaymentSuccess = () => {
     LeftArrow,
     currentStep,
     setStep,
-    ticketType,
     ticketCounts,
     feePercentage,
     contactData,
@@ -36,6 +35,11 @@ const PaymentSuccess = () => {
   // Extract the reference from the URL query params
   const query = new URLSearchParams(location.search);
   const reference = query.get("reference");
+
+  const { eventId } = useParams(); // Get the event ID from the URL
+  const event = eventsData[eventId]; // Lookup event from local data
+
+  const [ticketType, setTicketType] = useState(event ? event.tickets : []);
 
   useEffect(() => {
     if (reference) {

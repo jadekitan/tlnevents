@@ -4,6 +4,7 @@ import EventDetails from "./components/EventDetails.jsx";
 import BookingContext from "./components/EventBooking/BookingContext.jsx";
 import EventBooking from "./components/EventBooking/EventBooking.jsx";
 import PaymentSuccess from "./components/EventBooking/PaymentSuccess.jsx";
+import PaymentTable from "./components/EventBooking/PaymentTable.jsx";
 
 function App() {
   return (
