@@ -49,6 +49,26 @@ export const eventsData = {
           "SAVE UP TO N8,000 ON TWO TICKETS! If you want to attend Moonshot with your favourite buddy, Then this ticket is for you 😀😀 Note: Buying 1 Moonshot buddy ticket gives you access to two Regular tickets.",
       },
     ],
+    merch: {
+      1: {
+        id: 1,
+        name: "Festival T-Shirt",
+        price: 25.0,
+        description: "Official festival t-shirt with artwork",
+        sizes: ["S", "M", "L", "XL"],
+        colors: ["dark", "white", "grey"],
+        image: "https://tlnevents.com/assets/event-banners/lpe.webp",
+      },
+      2: {
+        id: 2,
+        name: "Festival Hoodie",
+        price: 45.0,
+        description: "Comfortable hoodie with festival logo",
+        sizes: ["S", "M", "L", "XL"],
+        colors: ["Black", "Gray"],
+        image: "https://tlnevents.com/assets/event-banners/lpe.webp",
+      },
+    },
     about: {
       description:
         "Get ready to unleash your inner party animal at Detty Beach Rave! Picture this: dancing barefoot in the sand, surrounded by electrifying beats and colorful lights that make you glow like a star. With top DJs, beach games, and inflatable fun, this isn't just a party – it's a wild beach bash! Sip on cocktails from beachside bars, show off your coolest outfits that light up the night, and dive into a sea of music and excitement. Detty Beach Rave isn't just an event; it's a pulsating, neon-drenched adventure that you won't forget. Join us and let's rave by the waves 🌊🎉🔥 #DettyBeachRave 🏖️🎶",

@@ -220,7 +220,6 @@ END:VCALENDAR
       justify="center"
       align="center"
       spacing={["50px", "60px", "70px", "75px", "30px"]}
-      // pb={["70px", "0"]}
     >
       <VStack
         w="100%"
@@ -251,7 +250,7 @@ END:VCALENDAR
             <BreadcrumbItem isCurrentPage>
               <BreadcrumbLink href="/discover">
                 <Text color="dark" fontSize={["14px", "16px"]}>
-                  Lemonade Playground Experience
+                  {event.name}
                 </Text>
               </BreadcrumbLink>
             </BreadcrumbItem>
