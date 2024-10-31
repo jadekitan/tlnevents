@@ -1,9 +1,14 @@
 CREATE TABLE orders (
-    order_id VARCHAR(5) PRIMARY KEY,  -- Unique order ID
-    email VARCHAR(255) NOT NULL,       -- Email of the user
-    name VARCHAR(255) NOT NULL,        -- Full name of the user
-    amount DECIMAL(10, 2) NOT NULL,    -- Total amount for the order
-    ticket_type VARCHAR(255) NOT NULL, -- Ticket type (e.g., VIP, Regular)
-    quantity INT NOT NULL,             -- Quantity of tickets
-    date_created DATETIME NOT NULL     -- Order creation timestamp
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    order_id VARCHAR(10) NOT NULL UNIQUE,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    ticket_type VARCHAR(100) NOT NULL,
+    quantity INT(11) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    fees DECIMAL(10,2) NOT NULL,
+    total DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
