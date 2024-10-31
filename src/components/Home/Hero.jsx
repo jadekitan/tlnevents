@@ -103,7 +103,7 @@ const Hero = () => {
             </Button>
           </Link>
           <Link
-            to={`/${eventData.url}`}
+            to={`/${eventData.url}/merch`}
             _hover={{ textDecoration: "none" }}
             target="_blank"
           >
@@ -113,7 +113,7 @@ const Hero = () => {
               _hover={{ bg: "primary.400" }}
               color="dark"
             >
-              View Event
+              Buy Merch
             </Button>
           </Link>
         </Flex>
