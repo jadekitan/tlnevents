@@ -28,36 +28,36 @@ export const eventsData = {
     tickets: [
       {
         id: 1,
-        name: "Playground Children Pass",
+        name: "Playground Children Early Bird Pass",
         price: 5000,
         quantity: 100,
         maxQuantity: 5,
         step: 1,
 
-        descrpition:
-          "Join founders, investors & innovators at Moonshot by TechCabal!Africa's boldest tech conference returns on October 9-10, 2024.Network, collaborate, & celebrate the future of African tech",
+        description:
+          "Give your little ones an unforgettable experience filled with excitement and joy! With the Playground Children Early Bird Pass, they'll enjoy access to exclusive goodies and activities tailored just for them.",
       },
       {
         id: 2,
-        name: "Playground Early Bird Adult Pass",
+        name: "Playground Adult Early Bird Pass",
         price: 5000,
         quantity: 100,
         maxQuantity: 5,
         step: 1,
 
-        descrpition:
-          "SAVE UP TO N8,000 ON TWO TICKETS! If you want to attend Moonshot with your favourite buddy, Then this ticket is for you 😀😀 Note: Buying 1 Moonshot buddy ticket gives you access to two Regular tickets.",
+        description:
+          "This Entry Ticket grants you full access to the entire experience, designed to keep you entertained, engaged, and immersed in the lively atmosphere!",
       },
     ],
     merch: {
-      1: {
-        id: 1,
-        name: "Festival T-Shirt",
-        price: 25.0,
+      r8eufiasfjef9qeriqegivjadjqef4: {
+        id: "r8eufiasfjef9qeriqegivjadjqef4",
+        name: "Lemonade X MoRhodes Tees",
+        price: 20000,
         description: "Official festival t-shirt with artwork",
         sizes: ["S", "M", "L", "XL"],
         colors: ["dark", "white", "grey"],
-        image: "https://tlnevents.com/assets/event-banners/lpe.webp",
+        image: "https://tlnevents.com/assets/merch/lemonade X morhodes.jpg",
       },
       2: {
         id: 2,
@@ -71,7 +71,7 @@ export const eventsData = {
     },
     about: {
       description:
-        "Get ready to unleash your inner party animal at Detty Beach Rave! Picture this: dancing barefoot in the sand, surrounded by electrifying beats and colorful lights that make you glow like a star. With top DJs, beach games, and inflatable fun, this isn't just a party – it's a wild beach bash! Sip on cocktails from beachside bars, show off your coolest outfits that light up the night, and dive into a sea of music and excitement. Detty Beach Rave isn't just an event; it's a pulsating, neon-drenched adventure that you won't forget. Join us and let's rave by the waves 🌊🎉🔥 #DettyBeachRave 🏖️🎶",
+        "Step into Lemonade Playground Experience – Play all day, Party all night! By day, kids dive into a world of playful adventures, laughter, and joy. As the night rolls in, adults take the spotlight with electrifying vibes, music, and memories waiting to be made. It’s not just a party; it’s a day-to-night celebration like no other. Sip on the sweetness of fun by day and dance through the night. The Lemonade Playground Experience – party all day, groove all night!",
       rating: 18,
       policy:
         "You can get a refund if:It’s within 24 hours of buying ticket This event is rescheduled or cancelled",

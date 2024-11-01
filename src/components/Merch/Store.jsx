@@ -12,6 +12,7 @@ import {
 import { useParams, Link } from "react-router-dom";
 import { eventsData } from "../../../server/eventsData";
 import { CartContext } from "./CartProvider";
+import { FaShoppingCart } from "react-icons/fa";
 
 const Store = () => {
   // Sample product data
@@ -39,8 +40,10 @@ const Store = () => {
             alt="The Lemonade Logo"
           ></Image>
         </Link>
-        <Button colorScheme="blue" onClick={onOpen} position="relative">
-          Cart
+        <Box as="button" onClick={onOpen} position="relative">
+          <Box>
+            <FaShoppingCart className=" w-6 h-6" />
+          </Box>
           {cart.length > 0 && (
             <Box
               position="absolute"
@@ -59,7 +62,7 @@ const Store = () => {
               {cart.length}
             </Box>
           )}
-        </Button>
+        </Box>
       </Flex>
       <VStack w="100%" align="flex-start" spacing="50px">
         <Heading color="dark" fontSize={["28px", "32px"]}>

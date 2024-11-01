@@ -27,6 +27,7 @@ import { useParams, Link } from "react-router-dom";
 import { eventsData } from "../../../server/eventsData";
 import { CartContext } from "./CartProvider";
 import { AddIcon, MinusIcon, DeleteIcon } from "@chakra-ui/icons";
+import { FaShoppingCart } from "react-icons/fa";
 import { create } from "lodash";
 
 const ProductDetails = () => {
@@ -84,27 +85,29 @@ const ProductDetails = () => {
               alt="The Lemonade Logo"
             ></Image>
           </Link>
-          <Button colorScheme="blue" onClick={onOpen} position="relative">
-            Cart
+          <Box as="button" onClick={onOpen} position="relative">
+            <Box>
+              <FaShoppingCart className=" w-8 h-8" />
+            </Box>
             {cart.length > 0 && (
               <Box
                 position="absolute"
                 top="-2"
                 right="-2"
-                bg="red.500"
+                bg="primary.500"
                 color="white"
                 borderRadius="full"
-                w={5}
-                h={5}
+                w={4}
+                h={4}
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
                 fontSize="xs"
               >
-                {cart.length}
+                <Text>{cart.length}</Text>
               </Box>
             )}
-          </Button>
+          </Box>
         </Flex>
         <VStack w="100%" h="100%" align="flex-start" spacing="20px">
           <Breadcrumb fontWeight="500" color="Dark">
@@ -176,7 +179,7 @@ const ProductDetails = () => {
                   {product.name}
                 </Heading>
                 <Text color="primary.500" fontSize={["14px", "16px"]}>
-                  ${product.price.toFixed(2)}
+                  &#8358;{product.price.toLocaleString()}
                 </Text>
               </VStack>
 

@@ -72,73 +72,87 @@ const EventContact = ({ handleNextStep, formRef }) => {
 
   const initialValues = { ...contactData };
 
+  // const validationSchema = Yup.object().shape({
+  //   firstName: Yup.string().required("First name is required"),
+  //   lastName: Yup.string().required("Last name is required"),
+  //   email: Yup.string()
+  //     .email("Invalid email address")
+  //     .required("Email is required"),
+  //   phone: Yup.string()
+  //     .required("Phone number is required")
+  //     .test("is-valid-phone", "Invalid phone number", (value, context) => {
+  //       const countryCode = context.parent.countryCode;
+  //       return validatePhoneNumber(value, countryCode);
+  //     }),
+  //   attendeeAddresses: Yup.lazy((attendees) =>
+  //     assignMultiple
+  //       ? Yup.object().shape(
+  //           Object.keys(attendees).reduce((schema, ticketId) => {
+  //             schema[ticketId] = Yup.array().of(
+  //               Yup.object().shape({
+  //                 firstName: Yup.string().required("First Name is required"),
+  //                 email: Yup.string()
+  //                   .email("Invalid email format")
+  //                   .required("Email is required"),
+  //               })
+  //             );
+  //             return schema;
+  //           }, {})
+  //         )
+  //       : Yup.object()
+  //   ),
+  // });
+
+  const validate = (values) => {
+    const errors = {};
+
+    if (!values.firstName) {
+      errors.firstName = "First name is required";
+    }
+    if (!values.lastName) {
+      errors.lastName = "Last name is required";
+    }
+    if (!values.email) {
+      errors.email = "Email is required";
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+      errors.email = "Invalid email address";
+    }
+    if (!values.phone) {
+      errors.phone = "Phone number is required";
+    } else if (!validatePhoneNumber(values.phone, values.countryCode)) {
+      errors.phone = "Invalid phone number";
+    }
+
+    if (assignMultiple && values.attendeeAddresses) {
+      Object.keys(values.attendeeAddresses).forEach((ticketId) => {
+        errors.attendeeAddresses = errors.attendeeAddresses || {};
+        errors.attendeeAddresses[ticketId] = values.attendeeAddresses[
+          ticketId
+        ].map((attendee) => {
+          const attendeeErrors = {};
+          if (!attendee.firstName)
+            attendeeErrors.firstName = "First name required";
+          if (!attendee.email) attendeeErrors.email = "Email required";
+          return attendeeErrors;
+        });
+      });
+    }
+
+    return errors;
+  };
+
   const formik = useFormik({
     initialValues: initialValues,
     enableReinitialize: true, // To update countryCode automatically when fetched
-    validate: (values) => {
-      const errors = {};
-
-      // Validate name
-      if (!values.firstName) {
-        errors.firstName = "First name is required";
-      }
-      if (!values.lastName) {
-        errors.lastName = "Last name is required";
-      }
-
-      // Validate email
-      if (!values.email) {
-        errors.email = "Email is required";
-      } else if (
-        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-      ) {
-        errors.email = "Invalid email address";
-      }
-
-      // Validate phone number
-      if (!values.phone) {
-        errors.phone = "Phone number is required";
-      }
-
-      // Validate attendee addresses if assignMultiple is true
-      if (assignMultiple) {
-        errors.attendeeAddresses = {};
-        Object.keys(values.attendeeAddresses).forEach((ticketId) => {
-          const attendees = values.attendeeAddresses[ticketId];
-          attendees.forEach((attendee, index) => {
-            const attendeeErrors = {};
-            if (!attendee.firstName) {
-              attendeeErrors.firstName = "First Name is required";
-            }
-            if (!attendee.email) {
-              attendeeErrors.email = "Email is required";
-            } // else if (
-            //   !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(attendee.email)
-            // ) {
-            //   attendeeErrors.email = "Invalid email format";
-            // }
-
-            // Only add errors if they exist
-            if (Object.keys(attendeeErrors).length > 0) {
-              errors.attendeeAddresses[ticketId] =
-                errors.attendeeAddresses[ticketId] || [];
-              errors.attendeeAddresses[ticketId][index] = attendeeErrors;
-            }
-          });
-        });
-      }
-
-      if (Object.keys(formik.errors).length > 0) {
-        console.log("Validation Errors:", formik.errors);
-        return; // Prevent submission
-      }
-
-      return errors;
-    },
-
+    validate,
+    // validationSchema,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       setIsSubmitting(true);
       setIsDisable(true);
+      if (Object.keys(formik.errors).length > 0) {
+        handleFocusOnError();
+        return; // Prevent submission if there are errors
+      }
       try {
         const response = await fetch(
           "https://tlnevents.com/server/contacts.php",
@@ -150,8 +164,8 @@ const EventContact = ({ handleNextStep, formRef }) => {
         );
         const result = await response.json();
         if (result.success) {
-          console.log("Contact and attendees saved successfully!");
-          console.log(values);
+          // console.log("Contact and attendees saved successfully!");
+          // console.log(values);
         } else {
           console.error("Error:", result.message);
         }
@@ -160,6 +174,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
       } finally {
         setSubmitting(false);
       }
+
       handleNextStep(); // Advance to the next step if everything is valid
       setSubmitting(false);
     },
@@ -178,10 +193,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
   };
 
   const handleAttendeeChange = (ticketId, index, field, value) => {
-    console.log(
-      `Updating ${field} for ticketId ${ticketId}, index ${index} with value: ${value}`
-    );
-
     // Update Formik field value
     formik.setFieldValue(
       `attendeeAddresses[${ticketId}][${index}].${field}`,
@@ -423,7 +434,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
           </FormControl>
         </Flex>
       </VStack>
-      {Object.values(ticketCounts).reduce((total, count) => total + count, 0) >
+      {/* {Object.values(ticketCounts).reduce((total, count) => total + count, 0) >
         1 && (
         <VStack
           justify="flex-start"
@@ -464,10 +475,9 @@ const EventContact = ({ handleNextStep, formRef }) => {
             </Text>
           </Flex>
         </VStack>
-      )}
-      {/* Additional Address Form */}
-      // Your existing JSX structure
-      {assignMultiple && (
+      )} */}
+
+      {/* {assignMultiple && (
         <VStack w="100%" align="flex-start" spacing="40px">
           {Object.keys(ticketCounts).map((ticketId) => {
             const ticketQuantity = ticketCounts[ticketId];
@@ -484,7 +494,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
                     </Text>
                   </FormLabel>
 
-                  {/* First Name */}
+                  
                   <FormControl
                     isInvalid={
                       formik.errors.attendeeAddresses?.[ticketId]?.[i]
@@ -526,7 +536,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
                     </FormErrorMessage>
                   </FormControl>
 
-                  {/* Last Name */}
+                 
                   <FormControl>
                     <Input
                       variant="filled"
@@ -557,7 +567,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
                     />
                   </FormControl>
 
-                  {/* Email */}
+                  
                   <FormControl
                     isInvalid={
                       formik.errors.attendeeAddresses?.[ticketId]?.[i]?.email
@@ -595,7 +605,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
                     </FormErrorMessage>
                   </FormControl>
 
-                  {/* Copy from previous checkbox */}
+                  
                   {i > 0 && (
                     <Checkbox
                       colorScheme="green"
@@ -609,7 +619,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
             ));
           })}
         </VStack>
-      )}
+      )} */}
       {/* Hidden submit button to trigger form submit */}
       <Button type="submit" style={{ display: "none" }}>
         Submit

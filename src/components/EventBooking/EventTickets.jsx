@@ -159,7 +159,7 @@ const EventTickets = () => {
           border="1px"
           borderColor="primary.500"
         >
-          <VStack w="100%">
+          <VStack w="100%" spacing={["10px", "20px"]}>
             <VStack w="100%" align="flex-start">
               {ticket.step > 1 ? (
                 <Badge bg="primary.500">
@@ -210,30 +210,46 @@ const EventTickets = () => {
             <Flex w="100%" justify="space-between" align="flex-start">
               <VStack w="70%" align="flex-start">
                 <Box>
-                  <Collapse startingHeight={60} in={showDescription[ticket.id]}>
+                  {ticket.description.length > 200 ? (
+                    <>
+                      <Collapse
+                        startingHeight={60}
+                        in={showDescription[ticket.id]}
+                      >
+                        <Text
+                          title={ticket.description}
+                          color="dark"
+                          fontSize={["12px", "14px"]}
+                          lineHeight="20px"
+                        >
+                          {ticket.description}
+                        </Text>
+                      </Collapse>
+                      <Text
+                        as="button"
+                        color="primary.500"
+                        fontSize="14px"
+                        lineHeight="20px"
+                        onClick={() => handleToggle(ticket.id)}
+                      >
+                        See {showDescription[ticket.id] ? "less" : "more"}
+                      </Text>
+                    </>
+                  ) : (
                     <Text
                       title={ticket.descrpition}
                       color="dark"
                       fontSize={["12px", "14px"]}
                       lineHeight="20px"
                     >
-                      {ticket.descrpition}
+                      {ticket.description}
                     </Text>
-                  </Collapse>
-                  <Text
-                    as="button"
-                    color="primary.500"
-                    fontSize="14px"
-                    lineHeight="20px"
-                    onClick={() => handleToggle(ticket.id)}
-                  >
-                    See {showDescription[ticket.id] ? "less" : "more"}
-                  </Text>
+                  )}
                 </Box>
               </VStack>
               {ticket.quantity > 0 ? (
                 <VStack
-                  maxW="30%"
+                  maxW="25%"
                   justify="flex-end"
                   align="flex-end"
                   spacing="15px"

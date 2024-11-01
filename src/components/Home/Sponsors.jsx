@@ -1,5 +1,5 @@
 import React from "react";
-import { VStack, Flex, Box, Image } from "@chakra-ui/react";
+import { VStack, Heading, Text, Flex, Box, Image } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 
 const Sponsors = () => {
@@ -19,6 +19,14 @@ const Sponsors = () => {
       align="center"
       spacing={["50px", "50px", "75px", "100px"]}
     >
+      <VStack justify="center" align="center" spacing={["5px", "10px"]}>
+        <Heading color="dark" fontSize={["32px", "36px", "38px", "42px"]}>
+          Our Sponsors
+        </Heading>
+        <Text color="neutral.500" fontSize={["12px", "12px", "14px", "14px"]}>
+          Get To Know More
+        </Text>
+      </VStack>
       <Flex overflow="hidden">
         <Flex
           flexShrink="0"

@@ -15,6 +15,7 @@ import {
   Stack,
   Text,
   Button,
+  useToast,
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
@@ -72,6 +73,8 @@ const EventBooking = () => {
     }
   }
 
+  const toast = useToast();
+
   // Handle Paystack Payment with the updated selected tickets
   const handlePaystackPayment = (
     firstName,
@@ -82,7 +85,7 @@ const EventBooking = () => {
     total
   ) => {
     const handler = window.PaystackPop.setup({
-      key: "pk_test_2ee3c2c176bb56a26e8213b0ce1546e3088647d6",
+      key: "sk_live_08d7b086b679c330222c68bfede77c2da314dba2",
       name: `${firstName} ${lastName}`,
       email: email,
       phone: `${countryCode}${phone}`,
@@ -90,7 +93,14 @@ const EventBooking = () => {
       currency: "NGN",
       ref: `${new Date().getTime()}`, // Unique reference
       onClose: () => {
-        alert("Payment window closed");
+        toast({
+          position: "top",
+          title: "Payment canceled.",
+          description: "You have exited the payment process.",
+          status: "warning",
+          duration: 5000,
+          isClosable: true,
+        });
         setIsDisable(false);
         setIsSubmitting(false);
       },
@@ -99,6 +109,7 @@ const EventBooking = () => {
         // Redirect on successful payment verification
 
         window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}`;
+        setStep(1);
 
         setIsDisable(false);
         setIsSubmitting(false);
