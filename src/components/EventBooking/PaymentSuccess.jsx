@@ -36,13 +36,52 @@ const PaymentSuccess = () => {
   const query = new URLSearchParams(location.search);
   const reference = query.get("reference");
 
+  const [orderData, setOrderData] = useState([]);
+
   useEffect(() => {
     if (reference) {
-      // Make POST request to PHP backend to verify payment
+      // Extract order data from the DOM
+      const extractOrderData = () => {
+        const data = [];
+
+        // Assuming 'Tbody' is a React component that renders the table body
+        const tbodyRows = document.querySelectorAll("Tbody tr");
+
+        tbodyRows.forEach((row) => {
+          const cells = row.querySelectorAll("Td");
+          if (cells.length === 9) {
+            // Ensure the row has the expected number of cells
+            data.push({
+              orderId: cells[0].textContent,
+              attendeeName: cells[1].textContent,
+              email: cells[2].textContent,
+              ticketType: cells[3].textContent,
+              quantity: parseInt(cells[4].textContent),
+              ticketPrice: parseFloat(cells[5].textContent),
+              subtotal: parseFloat(cells[6].textContent),
+              fees: parseFloat(cells[7].textContent),
+              total: parseFloat(cells[8].textContent),
+            });
+          }
+        });
+
+        return data;
+      };
+
+      // Extract order data and update the state
+      const extractedData = extractOrderData();
+      console.log(extractedData);
+      setOrderData(extractedData);
+
+      // Make POST request to PHP backend to verify payment and save order data
       axios
-        .post("https://tlnevents.com/server/verify-payment.php", { reference })
+        .post("https://tlnevents.com/server/verify-payment.php", {
+          reference,
+          orderData: extractedData,
+        })
         .then((response) => {
           setPaymentStatus(response.data.status); // Success or failure status
+          console.log(response.data);
         })
         .catch((error) => {
           console.error("Error verifying payment:", error);
@@ -53,7 +92,7 @@ const PaymentSuccess = () => {
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
 
-  const [ticketType, setTicketType] = useState(event ? event.tickets : []);
+  const [ticketType] = useState(event ? event.tickets : []);
 
   // Helper function to generate a unique order ID per email
   function generateUniqueOrderId(email) {
@@ -130,7 +169,7 @@ const PaymentSuccess = () => {
                 .
               </Text>
             </VStack>
-            {/* <Box>
+            <Box>
               <TableContainer>
                 <Table variant="simple">
                   <TableCaption>
@@ -301,7 +340,7 @@ const PaymentSuccess = () => {
                   </Tfoot>
                 </Table>
               </TableContainer>
-            </Box> */}
+            </Box>
             <Flex>
               <Link to={`/${event.id}`}>
                 <Button bg="primary.500" _hover={{ bg: "primary.400" }}>

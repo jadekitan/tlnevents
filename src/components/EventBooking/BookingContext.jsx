@@ -67,14 +67,7 @@ const BookingContext = ({ children }) => {
     localStorage.setItem("assignMultiple", JSON.stringify(assignMultiple));
   }, [assignMultiple]);
 
-  // Debounce the localStorage update function
-  const saveToLocalStorage = useCallback(
-    debounce((data) => {
-      localStorage.setItem("contactData", JSON.stringify(data));
-    }, 10000), // Adjust debounce timing as needed
-    []
-  );
-
+  // Context state for contact data
   const [contactData, setContactData] = useState(() => {
     const storedContactData = localStorage.getItem("contactData");
     return storedContactData
@@ -97,21 +90,77 @@ const BookingContext = ({ children }) => {
         };
   });
 
-  // Save to localStorage on blur instead of every keystroke
-  const handleBlur = () => {
+  // Debounced localStorage save
+  const saveToLocalStorage = useCallback(
+    debounce((data) => {
+      localStorage.setItem("contactData", JSON.stringify(data));
+    }, 1000),
+    []
+  );
+
+  // General contact data change handler
+  const handleContactDataChange = useCallback(
+    (newData) => {
+      setContactData((prevData) => {
+        const updatedData = { ...prevData, ...newData };
+        saveToLocalStorage(updatedData);
+        return updatedData;
+      });
+    },
+    [saveToLocalStorage]
+  );
+
+  // Attendee-specific data change handler
+  // const handleAttendeeDataChange = useCallback(
+  //   (ticketId, index, field, value) => {
+  //     console.log("Updating:", { ticketId, index, field, value }); // Check if function is called
+  //     formik.setFieldValue(
+  //       `attendeeAddresses[${ticketId}][${index}].${field}`,
+  //       value
+  //     );
+  //     setContactData((prevData) => {
+  //       const updatedAttendeeAddresses = { ...prevData.attendeeAddresses };
+
+  //       // Ensure ticket and attendee exist before updating
+  //       if (!updatedAttendeeAddresses[ticketId]) {
+  //         updatedAttendeeAddresses[ticketId] = [];
+  //       }
+  //       if (!updatedAttendeeAddresses[ticketId][index]) {
+  //         updatedAttendeeAddresses[ticketId][index] = {
+  //           firstName: "",
+  //           lastName: "",
+  //           email: "",
+  //         };
+  //       }
+
+  //       // Update only the specific field
+  //       updatedAttendeeAddresses[ticketId][index] = {
+  //         ...updatedAttendeeAddresses[ticketId][index],
+  //         [field]: value,
+  //       };
+
+  //       const updatedData = {
+  //         ...prevData,
+  //         attendeeAddresses: updatedAttendeeAddresses,
+  //       };
+  //       saveToLocalStorage(updatedData);
+  //       return updatedData;
+  //     });
+  //   },
+  //   [saveToLocalStorage]
+  // );
+
+  // Call save on form blur
+  const handleBlur = useCallback(() => {
     saveToLocalStorage(contactData);
-  };
+  }, [contactData, saveToLocalStorage]);
 
-  const handleContactDataChange = (newData) => {
-    setContactData((prevData) => ({ ...prevData, ...newData }));
-  };
-
+  // Cleanup effect
   useEffect(() => {
     return () => {
-      // Cancel debounced save on unmount to avoid memory leaks
       saveToLocalStorage.cancel();
     };
-  }, []);
+  }, [saveToLocalStorage]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDisable, setIsDisable] = useState(false);
@@ -133,8 +182,12 @@ const BookingContext = ({ children }) => {
           setCountryCode,
           contactData,
           setContactData,
-          handleBlur,
           handleContactDataChange,
+          // handleAttendeeDataChange,
+          saveToLocalStorage,
+
+          handleBlur,
+
           assignMultiple,
           setAssignMultiple,
           isSubmitting,

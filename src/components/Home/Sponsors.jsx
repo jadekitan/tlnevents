@@ -19,14 +19,10 @@ const Sponsors = () => {
       align="center"
       spacing={["50px", "50px", "75px", "100px"]}
     >
-      <VStack justify="center" align="center" spacing={["5px", "10px"]}>
-        <Heading color="dark" fontSize={["32px", "36px", "38px", "42px"]}>
-          Our Sponsors
-        </Heading>
-        <Text color="neutral.500" fontSize={["12px", "12px", "14px", "14px"]}>
-          Get To Know More
-        </Text>
-      </VStack>
+      <Text color="neutral.500" fontSize={["12px", "12px", "14px", "14px"]}>
+        Our Sponsors
+      </Text>
+
       <Flex overflow="hidden">
         <Flex
           flexShrink="0"

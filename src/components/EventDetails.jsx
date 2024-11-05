@@ -356,7 +356,7 @@ END:VCALENDAR
             <Box
               display={["block", "block", "block", "none"]}
               w={["100%", "100%", "70%", "70%", "100%"]}
-              h={["384px", "384px", "400px", "384px", "384px"]}
+              h={["400px", "384px", "400px", "384px", "384px"]}
             >
               <Image
                 src={event.image}
@@ -372,7 +372,7 @@ END:VCALENDAR
               h="100%"
               align="flex-start"
               spacing="50px"
-              pb="100px"
+              pb="120px"
             >
               <VStack w="100%" align="flex-start" spacing={["10px", "20px"]}>
                 <Heading color="dark" fontSize={["28px", "32px"]}>
@@ -583,7 +583,6 @@ END:VCALENDAR
             bottom="0px"
             left="0"
             w="100%"
-            h="75px"
             bg="primary.500"
             borderTopRadius="8px"
             p="20px"

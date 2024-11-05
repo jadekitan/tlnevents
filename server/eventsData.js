@@ -71,7 +71,7 @@ export const eventsData = {
     },
     about: {
       description:
-        "Step into Lemonade Playground Experience – Play all day, Party all night! By day, kids dive into a world of playful adventures, laughter, and joy. As the night rolls in, adults take the spotlight with electrifying vibes, music, and memories waiting to be made. It’s not just a party; it’s a day-to-night celebration like no other. Sip on the sweetness of fun by day and dance through the night. The Lemonade Playground Experience – party all day, groove all night!",
+        "Step into Lemonade Playground Experience – Play all day, Party all night! By day, kids and adults dive into a world of playful adventures, laughter, and joy. As the night rolls in, adults take the spotlight with electrifying vibes, music, and memories waiting to be made. It’s not just a party; it’s a day-to-night celebration like no other. Sip on the sweetness of fun by day and dance through the night. The Lemonade Playground Experience – party all day, groove all night!",
       rating: 18,
       policy:
         "You can get a refund if:It’s within 24 hours of buying ticket This event is rescheduled or cancelled",

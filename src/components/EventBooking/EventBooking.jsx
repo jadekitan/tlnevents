@@ -85,7 +85,7 @@ const EventBooking = () => {
     total
   ) => {
     const handler = window.PaystackPop.setup({
-      key: "sk_live_08d7b086b679c330222c68bfede77c2da314dba2",
+      key: "pk_test_2ee3c2c176bb56a26e8213b0ce1546e3088647d6",
       name: `${firstName} ${lastName}`,
       email: email,
       phone: `${countryCode}${phone}`,
@@ -105,9 +105,7 @@ const EventBooking = () => {
         setIsSubmitting(false);
       },
       callback: (response) => {
-        // setStep(currentStep + 1);
         // Redirect on successful payment verification
-
         window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}`;
         setStep(1);
 
@@ -433,7 +431,7 @@ const EventBooking = () => {
                       bg="primary.500"
                       rounded="8px"
                       _hover={{ bg: "primary.500" }}
-                      _active={{ bg: "primary.400" }}
+                      _active={{ bg: "primary.500" }}
                       _focus={{ bg: "primary.500" }}
                       onClick={ContinueStep}
                       isDisabled={isDisable}
@@ -488,10 +486,14 @@ const EventBooking = () => {
                   w="122px"
                   rounded="8px"
                   bg="secondary.500"
-                  _hover={{ bg: "secondary.500" }}
-                  _active={{ bg: "secondary.500" }}
-                  _focus={{ bg: "secondary.500" }}
+                  _hover={{ bg: "primary.400" }}
+                  _active={{ bg: "primary.400" }}
+                  _focus={{ bg: "primary.400" }}
                   onClick={ContinueStep}
+                  isDisabled={isDisable}
+                  isLoading={isSubmitting}
+                  loadingText="Checkout"
+                  spinnerPlacement="end"
                 >
                   <Text
                     color="dark"
