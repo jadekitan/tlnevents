@@ -54,6 +54,13 @@ const BookingContext = ({ children }) => {
     );
   });
 
+  const clearTicketCounts = () => {
+    setTicketCounts(
+      ticketType.reduce((acc, ticket) => ({ ...acc, [ticket.id]: 0 }), {})
+    );
+    localStorage.removeItem("ticketCounts");
+  };
+
   // Fee percentage based on the event creator's subscription plan
   const [feePercentage, setFeePercentage] = useState(5); // Default fee percentage is 5%
 
@@ -62,6 +69,11 @@ const BookingContext = ({ children }) => {
   const [assignMultiple, setAssignMultiple] = useState(
     () => JSON.parse(localStorage.getItem("assignMultiple")) || false
   );
+
+  const clearAssignMultiple = () => {
+    setAssignMultiple(false);
+    localStorage.removeItem("assignMultiple");
+  };
 
   useEffect(() => {
     localStorage.setItem("assignMultiple", JSON.stringify(assignMultiple));
@@ -94,7 +106,7 @@ const BookingContext = ({ children }) => {
   const saveToLocalStorage = useCallback(
     debounce((data) => {
       localStorage.setItem("contactData", JSON.stringify(data));
-    }, 1000),
+    }, 300),
     []
   );
 
@@ -103,52 +115,14 @@ const BookingContext = ({ children }) => {
     (newData) => {
       setContactData((prevData) => {
         const updatedData = { ...prevData, ...newData };
-        saveToLocalStorage(updatedData);
+        requestAnimationFrame(() => {
+          saveToLocalStorage(updatedData);
+        });
         return updatedData;
       });
     },
     [saveToLocalStorage]
   );
-
-  // Attendee-specific data change handler
-  // const handleAttendeeDataChange = useCallback(
-  //   (ticketId, index, field, value) => {
-  //     console.log("Updating:", { ticketId, index, field, value }); // Check if function is called
-  //     formik.setFieldValue(
-  //       `attendeeAddresses[${ticketId}][${index}].${field}`,
-  //       value
-  //     );
-  //     setContactData((prevData) => {
-  //       const updatedAttendeeAddresses = { ...prevData.attendeeAddresses };
-
-  //       // Ensure ticket and attendee exist before updating
-  //       if (!updatedAttendeeAddresses[ticketId]) {
-  //         updatedAttendeeAddresses[ticketId] = [];
-  //       }
-  //       if (!updatedAttendeeAddresses[ticketId][index]) {
-  //         updatedAttendeeAddresses[ticketId][index] = {
-  //           firstName: "",
-  //           lastName: "",
-  //           email: "",
-  //         };
-  //       }
-
-  //       // Update only the specific field
-  //       updatedAttendeeAddresses[ticketId][index] = {
-  //         ...updatedAttendeeAddresses[ticketId][index],
-  //         [field]: value,
-  //       };
-
-  //       const updatedData = {
-  //         ...prevData,
-  //         attendeeAddresses: updatedAttendeeAddresses,
-  //       };
-  //       saveToLocalStorage(updatedData);
-  //       return updatedData;
-  //     });
-  //   },
-  //   [saveToLocalStorage]
-  // );
 
   // Call save on form blur
   const handleBlur = useCallback(() => {
@@ -161,6 +135,26 @@ const BookingContext = ({ children }) => {
       saveToLocalStorage.cancel();
     };
   }, [saveToLocalStorage]);
+
+  const clearContactData = () => {
+    setContactData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      countryCode: "+234",
+      attendeeAddresses: ticketType.reduce((acc, ticket) => {
+        const count = ticketCounts[ticket.id] || 0;
+        acc[ticket.id] = Array.from({ length: count }).map(() => ({
+          firstName: "",
+          lastName: "",
+          email: "",
+        }));
+        return acc;
+      }, {}),
+    });
+    localStorage.removeItem("contactData");
+  };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDisable, setIsDisable] = useState(false);
@@ -175,6 +169,7 @@ const BookingContext = ({ children }) => {
           setTicketType,
           ticketCounts,
           setTicketCounts,
+          clearTicketCounts,
           feePercentage,
           setFeePercentage,
           LeftArrow,
@@ -183,13 +178,12 @@ const BookingContext = ({ children }) => {
           contactData,
           setContactData,
           handleContactDataChange,
-          // handleAttendeeDataChange,
           saveToLocalStorage,
-
           handleBlur,
-
+          clearContactData,
           assignMultiple,
           setAssignMultiple,
+          clearAssignMultiple,
           isSubmitting,
           setIsSubmitting,
           isDisable,
