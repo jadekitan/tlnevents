@@ -18,6 +18,7 @@ import {
 import axios from "axios";
 import { useFormik } from "formik";
 import { multiBookingContext } from "./BookingContext";
+import { debounce } from "lodash";
 
 const EventContact = ({ handleNextStep, formRef }) => {
   const {
@@ -73,6 +74,80 @@ const EventContact = ({ handleNextStep, formRef }) => {
   };
 
   // const initialValues = { ...contactData };
+
+  const debouncedValidate = useCallback(
+    debounce((values) => {
+      const errors = {};
+
+      // Basic field validation
+      if (!values.firstName?.trim()) {
+        errors.firstName = "First name is required";
+      }
+      if (!values.lastName?.trim()) {
+        errors.lastName = "Last name is required";
+      }
+      if (!values.email?.trim()) {
+        errors.email = "Email is required";
+      } else if (
+        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
+      ) {
+        errors.email = "Invalid email address";
+      }
+      if (!values.phone?.trim()) {
+        errors.phone = "Phone number is required";
+      } else if (!validatePhoneNumber(values.phone, values.countryCode)) {
+        errors.phone = "Invalid phone number";
+      }
+
+      // Only validate attendeeAddresses if assignMultiple is true
+      if (assignMultiple) {
+        const attendeeErrors = {};
+        let hasAttendeeErrors = false;
+
+        // Iterate through all ticket types
+        Object.keys(ticketCounts).forEach((ticketId) => {
+          const ticketQuantity = ticketCounts[ticketId];
+          if (ticketQuantity > 0) {
+            const ticketErrors = [];
+
+            // Validate each attendee for this ticket type
+            for (let i = 0; i < ticketQuantity; i++) {
+              const attendee = values.attendeeAddresses?.[ticketId]?.[i] || {};
+              const attendeeError = {};
+
+              if (!attendee.firstName?.trim()) {
+                attendeeError.firstName = "First name is required";
+                hasAttendeeErrors = true;
+              }
+              if (!attendee.email?.trim()) {
+                attendeeError.email = "Email is required";
+                hasAttendeeErrors = true;
+              } else if (
+                !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(attendee.email)
+              ) {
+                attendeeError.email = "Invalid email address";
+                hasAttendeeErrors = true;
+              }
+
+              if (Object.keys(attendeeError).length > 0) {
+                ticketErrors[i] = attendeeError;
+              }
+            }
+
+            if (ticketErrors.length > 0) {
+              attendeeErrors[ticketId] = ticketErrors;
+            }
+          }
+        });
+
+        if (hasAttendeeErrors) {
+          errors.attendeeAddresses = attendeeErrors;
+        }
+      }
+
+      return errors;
+    }, 300)
+  );
 
   const validate = (values) => {
     const errors = {};
@@ -144,69 +219,20 @@ const EventContact = ({ handleNextStep, formRef }) => {
     return errors;
   };
 
-  const handleFocusOnError = () => {
-    // First, check the main form fields
-    const mainErrorFields = [
-      "firstName",
-      "lastName",
-      "email",
-      "phone",
-      "countryCode",
-    ];
-
-    for (const field of mainErrorFields) {
-      const errorElement = document.querySelector(`[name="${field}"]`);
-      if (formik.errors[field] && formik.touched[field] && errorElement) {
-        errorElement.focus();
-        return;
-      }
-    }
-
-    // If no main fields have errors, check attendee fields if multiple assignment is enabled
-    if (assignMultiple && formik.errors.attendeeAddresses) {
-      Object.keys(formik.errors.attendeeAddresses).forEach((ticketId) => {
-        const ticketErrors = formik.errors.attendeeAddresses[ticketId];
-
-        ticketErrors.forEach((attendeeError, index) => {
-          // Check for first name or email errors
-          if (attendeeError.firstName) {
-            const firstNameElement = document.querySelector(
-              `[name="attendeeAddresses[${ticketId}][${index}].firstName"]`
-            );
-            if (firstNameElement) {
-              firstNameElement.focus();
-              return false; // Exit the loop
-            }
-          }
-
-          if (attendeeError.email) {
-            const emailElement = document.querySelector(
-              `[name="attendeeAddresses[${ticketId}][${index}].email"`
-            );
-            if (emailElement) {
-              emailElement.focus();
-              return false; // Exit the loop
-            }
-          }
-        });
-      });
-    }
-  };
-
   const formik = useFormik({
     initialValues: contactData,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnMount: false,
     validateOnBlur: true,
-    validateOnChange: true,
+    validateOnChange: false,
     validate,
-    onSubmit: async (values, { setSubmitting, resetForm }) => {
+    onSubmit: async (values, { setSubmitting }) => {
       setIsSubmitting(true);
       setIsDisable(true);
       const errors = validate(values);
       if (Object.keys(errors).length > 0) {
         formik.setErrors(errors);
-        handleFocusOnError();
+
         setIsSubmitting(false);
         setIsDisable(false);
         return;
@@ -232,48 +258,12 @@ const EventContact = ({ handleNextStep, formRef }) => {
       } finally {
         setSubmitting(false);
       }
-      console.log(values);
+
       handleNextStep(); // Advance to the next step if everything is valid
     },
   });
 
   formRef.current = formik;
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const val = type === "checkbox" ? checked : value;
-    handleContactDataChange({
-      ...contactData,
-      [name]: val,
-    });
-    formik.handleChange(e);
-  };
-
-  // Handle attendee changes
-  // const handleAttendeeChange = useCallback(
-  //   (ticketId, index, field, value) => {
-  //     handleContactDataChange((prevData) => {
-  //       // Make sure we have an array for the specified ticketId
-  //       const currentAttendeeList = prevData.attendeeAddresses[ticketId] || [];
-
-  //       // Clone the current list and expand it if necessary to accommodate the current index
-  //       const updatedAttendeeList = [...currentAttendeeList];
-  //       updatedAttendeeList[index] = {
-  //         ...(updatedAttendeeList[index] || {}), // Keep existing data at this index
-  //         [field]: value, // Only update the field specified
-  //       };
-
-  //       return {
-  //         ...prevData,
-  //         attendeeAddresses: {
-  //           ...prevData.attendeeAddresses,
-  //           [ticketId]: updatedAttendeeList, // Update the specific ticketId with the new list
-  //         },
-  //       };
-  //     });
-  //   },
-  //   [handleContactDataChange]
-  // );
 
   const handleAttendeeDataChange = useCallback(
     (ticketId, index, field, value) => {
@@ -281,36 +271,32 @@ const EventContact = ({ handleNextStep, formRef }) => {
         `attendeeAddresses[${ticketId}][${index}].${field}`,
         value
       );
-      setContactData((prevData) => {
-        const updatedAttendeeAddresses = { ...prevData.attendeeAddresses };
 
-        // Ensure ticket and attendee exist before updating
-        if (!updatedAttendeeAddresses[ticketId]) {
-          updatedAttendeeAddresses[ticketId] = [];
-        }
-        if (!updatedAttendeeAddresses[ticketId][index]) {
-          updatedAttendeeAddresses[ticketId][index] = {
-            firstName: "",
-            lastName: "",
-            email: "",
+      // Batch state updates for attendee data
+      requestAnimationFrame(() => {
+        setContactData((prevData) => {
+          const updatedAddresses = { ...prevData.attendeeAddresses };
+          if (!updatedAddresses[ticketId]) {
+            updatedAddresses[ticketId] = [];
+          }
+          if (!updatedAddresses[ticketId][index]) {
+            updatedAddresses[ticketId][index] = {
+              firstName: "",
+              lastName: "",
+              email: "",
+            };
+          }
+          updatedAddresses[ticketId][index] = {
+            ...updatedAddresses[ticketId][index],
+            [field]: value,
           };
-        }
-
-        // Update only the specific field
-        updatedAttendeeAddresses[ticketId][index] = {
-          ...updatedAttendeeAddresses[ticketId][index],
-          [field]: value,
-        };
-
-        const updatedData = {
-          ...prevData,
-          attendeeAddresses: updatedAttendeeAddresses,
-        };
-        saveToLocalStorage(updatedData);
-        return updatedData;
+          const newData = { ...prevData, attendeeAddresses: updatedAddresses };
+          saveToLocalStorage(newData);
+          return newData;
+        });
       });
     },
-    [saveToLocalStorage]
+    [setContactData, saveToLocalStorage]
   );
 
   const handleAttendeeChange = (ticketId, index, field, value) => {
@@ -614,7 +600,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
           </FormControl>
         </Flex>
       </VStack>
-      {Object.values(ticketCounts).reduce((total, count) => total + count, 0) >
+      {Object.values(ticketCounts).reduce((total, count) => total + count, 0) >=
         1 && (
         <VStack
           justify="flex-start"

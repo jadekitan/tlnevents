@@ -27,30 +27,44 @@ const PaymentSuccess = () => {
     document.title = "Payment Successful | The Lemonade Network";
   }, []);
 
-  const { contactData, assignMultiple, ticketCounts, feePercentage } =
-    useContext(multiBookingContext);
+  const {
+    contactData,
+    setContactData,
+    assignMultiple,
+    clearAssignMultiple,
+    ticketCounts,
+    setTicketCounts,
+    feePercentage,
+    clearContactData,
+    clearTicketCounts,
+  } = useContext(multiBookingContext);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const location = useLocation();
 
   // Extract the reference from the URL query params
   const query = new URLSearchParams(location.search);
   const reference = query.get("reference");
+  const email = query.get("email");
+  const guest = query.get("guest");
 
   const [orderData, setOrderData] = useState([]);
+
+  const clearData = () => {
+    clearContactData();
+    clearTicketCounts();
+    clearAssignMultiple();
+  };
 
   useEffect(() => {
     if (reference) {
       // Extract order data from the DOM
       const extractOrderData = () => {
         const data = [];
-
-        // Assuming 'Tbody' is a React component that renders the table body
         const tbodyRows = document.querySelectorAll("Tbody tr");
 
         tbodyRows.forEach((row) => {
           const cells = row.querySelectorAll("Td");
           if (cells.length === 9) {
-            // Ensure the row has the expected number of cells
             data.push({
               orderId: cells[0].textContent,
               attendeeName: cells[1].textContent,
@@ -68,19 +82,18 @@ const PaymentSuccess = () => {
         return data;
       };
 
-      // Extract order data and update the state
       const extractedData = extractOrderData();
-      console.log(extractedData);
+
       setOrderData(extractedData);
 
-      // Make POST request to PHP backend to verify payment and save order data
       axios
         .post("https://tlnevents.com/server/verify-payment.php", {
           reference,
           orderData: extractedData,
         })
         .then((response) => {
-          setPaymentStatus(response.data.status); // Success or failure status
+          clearData();
+          setPaymentStatus(response.data.status);
           console.log(response.data);
         })
         .catch((error) => {
@@ -144,23 +157,19 @@ const PaymentSuccess = () => {
               Payment Succesful !
             </Heading>
             <VStack w="100%" textAlign="center" spacing="10px">
-              <Text color="dark" fontSize="16px">
+              <Text color="dark" fontSize={["12px", "16px"]}>
                 {/* <Text as="span" color="primary.500">
                   {contactData.firstName}
                 </Text>{" "} */}
-                Your order was successful. Paystack receipt has been sent to
-                your email address{" "}
+                Your order was successful. We've also sent a copy to your email
+                address{" "}
                 <Text as="span" color="primary.500">
-                  {contactData.email}
+                  {email}
                 </Text>
-                .
-                {/* {assignMultiple
-                  ? "and all the attending guests."
-                  : "."} */}
+                {guest ? " and all the attending guests." : "."}
               </Text>
-              <Text color="dark" fontSize="16px">
-                We'll send a copy to your email address very soon. For
-                enquiries, please email us at{" "}
+              <Text color="dark" fontSize={["12px", "16px"]}>
+                If you do not receive your ticket from us, please email us at{" "}
                 <Link to="mailto:info@thelemonadenetwork.ng">
                   <Text as="span" color="primary.500">
                     info@thelemonadenetwork.ng
@@ -169,7 +178,7 @@ const PaymentSuccess = () => {
                 .
               </Text>
             </VStack>
-            <Box>
+            <Box display="none">
               <TableContainer>
                 <Table variant="simple">
                   <TableCaption>

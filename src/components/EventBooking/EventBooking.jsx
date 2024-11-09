@@ -39,6 +39,7 @@ const EventBooking = () => {
     setIsSubmitting,
     isDisable,
     setIsDisable,
+    assignMultiple,
   } = useContext(multiBookingContext);
   {
     multiBookingContext;
@@ -85,7 +86,7 @@ const EventBooking = () => {
     total
   ) => {
     const handler = window.PaystackPop.setup({
-      key: "pk_test_2ee3c2c176bb56a26e8213b0ce1546e3088647d6",
+      key: "pk_live_f187425f68b9a16f8eaf02f135a0488952ab48f7",
       name: `${firstName} ${lastName}`,
       email: email,
       phone: `${countryCode}${phone}`,
@@ -106,7 +107,7 @@ const EventBooking = () => {
       },
       callback: (response) => {
         // Redirect on successful payment verification
-        window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}`;
+        window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}&email=${email}&guest=${assignMultiple}`;
         setStep(1);
 
         setIsDisable(false);
@@ -124,9 +125,7 @@ const EventBooking = () => {
       contactData.email,
       contactData.countryCode,
       contactData.phone,
-      total,
-      subtotal,
-      fees
+      total
     );
   };
 
@@ -162,7 +161,14 @@ const EventBooking = () => {
       setStep(currentStep + 1);
       scrollToSection("stepper");
     } else {
-      alert("Please select at least one ticket to continue.");
+      toast({
+        position: "top",
+        title: "Select A Ticket",
+        description: "Please select at least one ticket to continue.",
+        status: "info",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -173,7 +179,6 @@ const EventBooking = () => {
     if (currentStep === 2) {
       if (formRef.current) {
         formRef.current.handleSubmit(); // Trigger form submission
-
         // scrollToSection("stepper");
       }
     }
@@ -201,7 +206,6 @@ const EventBooking = () => {
         <VStack w="100%" align="flex-start" spacing="40px">
           <Box w="100%" display={currentStep === 3 ? "none" : "block"}>
             <Flex w="100%" align="center" gap="40px">
-              {/* <Image src="/logo.svg" /> */}
               <Flex w="100%" justify="space-between" align="center">
                 <Heading
                   color="dark"
@@ -469,7 +473,7 @@ const EventBooking = () => {
             px="20px"
             rounded="8px"
           >
-            {Object.values(ticketCounts).some((count) => count > 0) ? (
+            {Object.values(ticketCounts).some((count) => count >= 0) ? (
               <Flex
                 h="100%"
                 py="14px"
