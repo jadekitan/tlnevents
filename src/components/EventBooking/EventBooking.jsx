@@ -96,7 +96,7 @@ const EventBooking = () => {
       onClose: () => {
         toast({
           position: "top",
-          title: "Payment canceled.",
+          title: "Payment cancelled.",
           description: "You have exited the payment process.",
           status: "warning",
           duration: 5000,
