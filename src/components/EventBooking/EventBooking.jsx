@@ -86,7 +86,7 @@ const EventBooking = () => {
     total
   ) => {
     const handler = window.PaystackPop.setup({
-      key: "pk_live_f187425f68b9a16f8eaf02f135a0488952ab48f7",
+      key: "pk_test_2ee3c2c176bb56a26e8213b0ce1546e3088647d6",
       name: `${firstName} ${lastName}`,
       email: email,
       phone: `${countryCode}${phone}`,

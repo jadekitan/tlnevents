@@ -28,7 +28,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
     contactData,
     setContactData,
     handleContactDataChange,
-    // handleAttendeeDataChange,
     handleBlur,
     saveToLocalStorage,
     setCountryCode,
@@ -72,8 +71,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
     if (!country) return false;
     return phoneLength >= country.minLength && phoneLength <= country.maxLength;
   };
-
-  // const initialValues = { ...contactData };
 
   const debouncedValidate = useCallback(
     debounce((values) => {
