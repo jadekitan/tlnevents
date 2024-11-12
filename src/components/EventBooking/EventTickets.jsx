@@ -128,20 +128,7 @@ const EventTickets = () => {
     <VStack w="100%" align="flex-start" spacing={["20px", "40px"]}>
       <Flex justify="flex-start" align="center" gap={["10px", "20px"]}>
         <Link to={`/${event.id}`}>
-          <Box
-            as="button"
-            p="3px"
-            bg="primary.500"
-            rounded="6px"
-            onClick={() => {
-              if (currentStep === 1) {
-                console.log("Back to event page");
-              }
-              if (currentStep > 1) {
-                setStep(currentStep - 1);
-              }
-            }}
-          >
+          <Box as="button" p="3px" bg="primary.500" rounded="6px">
             <LeftArrow />
           </Box>
         </Link>

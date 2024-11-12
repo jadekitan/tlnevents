@@ -102,13 +102,6 @@ const PaymentSuccess = () => {
             item.ticketType,
             Number.parseInt(item.ticketPrice)
           );
-
-          // if (data.success) {
-          //   console.log(data);
-          //   console.log(extractedData);
-          // } else {
-          //   console.error("Order submission failed:", data.message);
-          // }
         } catch (error) {
           console.error("Error submitting order:", error.message);
         }
@@ -120,66 +113,6 @@ const PaymentSuccess = () => {
 
     handleOrderData();
   }, []); // Empty dependency array ensures this runs only on component mount
-
-  // useEffect(() => {
-  //   const extractOrderData = () => {
-  //     const data = [];
-  //     const tbodyRows = document.querySelectorAll("tbody tr");
-
-  //     tbodyRows.forEach((row) => {
-  //       const cells = row.querySelectorAll("td");
-  //       if (cells.length === 9) {
-  //         data.push({
-  //           orderId: cells[0].textContent,
-  //           attendeeName: cells[1].textContent,
-  //           email: cells[2].textContent,
-  //           ticketType: cells[3].textContent,
-  //           quantity: parseInt(cells[4].textContent, 10),
-  //           ticketPrice: parseFloat(cells[5].textContent),
-  //           subTotal: parseFloat(cells[6].textContent),
-  //           fees: parseFloat(cells[7].textContent),
-  //           total: parseFloat(cells[8].textContent),
-  //         });
-  //       }
-  //     });
-
-  //     return data;
-  //   };
-
-  //   const handleOrderData = async () => {
-  //     const extractedData = extractOrderData();
-  //     setOrderData(extractedData);
-
-  //     for (const item of extractedData) {
-  //       try {
-  //         const data = await newOrder(
-  //           Number.parseInt(referenceNumber),
-  //           item.attendeeName,
-  //           item.email,
-  //           Number.parseInt(item.fees),
-  //           Number.parseInt(item.quantity),
-  //           Number.parseInt(item.subTotal),
-  //           item.ticketType,
-  //           Number.parseInt(item.ticketPrice)
-  //         );
-
-  //         if (data.success) {
-  //           console.log(data);
-  //           console.log(extractedData);
-  //         } else {
-  //           console.error("Order submission failed:", data.message);
-  //         }
-  //       } catch (error) {
-  //         console.error("Error submitting order:", error.message);
-  //       }
-  //     }
-
-  //     // Clear data once all orders have been processed
-  //     clearData();
-  //   };
-
-  //   handleOrderData();
-  // }, []);
 
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data

@@ -29,7 +29,7 @@ const testimonialsData = [
   },
   {
     id: 3,
-    image: "https://tlnevents.com/assets/testimonial/odun.JPG",
+    image: "https://tlnevents.com/assets/testimonial/odun.jpg",
     text: "As a networking platform, Lemonade Network ticks all the boxes for me as they not only create events that allow you unwind and have absolute enjoyment, they also create opportunities to connect, network and collaborate with like minded professionals and what’s more? Their latter event is always better than their former which is an admirable trait that’s hard to come by as most people just want to throw parties for partying sake. It’s no surprise that thousands of people, myself inclusive, troop down to their events every time as they’ve proven themselves to be exceptional. Hearing about their triumphs is not enough, you should have a first hand experience.",
     name: "Odun",
     role: "Frequent Attendee",
@@ -43,7 +43,7 @@ const testimonialsData = [
   },
   {
     id: 5,
-    image: "https://tlnevents.com/assets/testimonial/vivian.JPG",
+    image: "https://tlnevents.com/assets/testimonial/vivian.jpg",
     text: "Hi, I’m Vivian 🥰 So whenever I hear The Lemonade Network is having an event, i clear my calendar asap so I don’t miss out on the fun and vibes🎉🎉🎉 You see ehn me I’m the life of the party ooo, energy goddess and I’m only found in places that are very lit and exciting. The Lemonade Network so far holds the record for the best and fun filled event, and they are overall best in encouraging and supporting upcoming acts and our safety is always top notch 👍 Looking forward to their next event🥰",
     name: "Vivan",
     role: "Frequent Attendee",
@@ -145,7 +145,14 @@ const Testimonials = () => {
               w={["100%", "100%", "100%", "40%"]}
               h={["40vh", "50vh", "50vh", "75vh"]}
             >
-              <Image w="100%" h="100%" rounded="8px" src={image} alt={name} />
+              <Image
+                w="100%"
+                h="100%"
+                rounded="8px"
+                objectFit="cover"
+                src={image}
+                alt={name}
+              />
             </Box>
             <VStack
               w={["100%", "100%", "100%", "50%"]}

@@ -86,7 +86,7 @@ const EventBooking = () => {
     total
   ) => {
     const handler = window.PaystackPop.setup({
-      key: "pk_test_2ee3c2c176bb56a26e8213b0ce1546e3088647d6",
+      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
       name: `${firstName} ${lastName}`,
       email: email,
       phone: `${countryCode}${phone}`,
@@ -434,9 +434,9 @@ const EventBooking = () => {
                       w="100%"
                       bg="primary.500"
                       rounded="8px"
-                      _hover={{ bg: "primary.500" }}
-                      _active={{ bg: "primary.500" }}
-                      _focus={{ bg: "primary.500" }}
+                      _hover={{ bg: "primary.400" }}
+                      _active={{ bg: "secondary.500" }}
+                      _focus={{ bg: "secondary.500" }}
                       onClick={ContinueStep}
                       isDisabled={isDisable}
                       isLoading={isSubmitting}
@@ -491,8 +491,8 @@ const EventBooking = () => {
                   rounded="8px"
                   bg="secondary.500"
                   _hover={{ bg: "primary.400" }}
-                  _active={{ bg: "primary.400" }}
-                  _focus={{ bg: "primary.400" }}
+                  _active={{ bg: "secondary.500" }}
+                  _focus={{ bg: "secondary.500" }}
                   onClick={ContinueStep}
                   isDisabled={isDisable}
                   isLoading={isSubmitting}
