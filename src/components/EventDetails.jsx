@@ -279,7 +279,7 @@ END:VCALENDAR
                   h="100%"
                   rounded="8px"
                   src={event.image}
-                  alt="Event banner"
+                  alt={`${event.name} Banner`}
                 />
               </Box>
               <Flex w="100%" justify="space-between" align="center">
@@ -360,7 +360,7 @@ END:VCALENDAR
             >
               <Image
                 src={event.image}
-                alt={event.id}
+                alt={`${event.name} Banner`}
                 width="100%"
                 height="100%"
                 rounded="8px"
