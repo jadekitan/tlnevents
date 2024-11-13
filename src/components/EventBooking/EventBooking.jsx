@@ -21,7 +21,6 @@ import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
 import EventTickets from "./EventTickets";
 import EventContact from "./EventContact";
-import PaymentTable from "./PaymentTable";
 import { IoClose } from "react-icons/io5";
 import { Link, useParams } from "react-router-dom";
 
@@ -138,10 +137,6 @@ const EventBooking = () => {
       case 2:
         return (
           <EventContact handleNextStep={handleNextStep} formRef={formRef} /> // Pass formRef and handleNextStep
-        );
-      case 3:
-        return (
-          <PaymentTable /> // Pass formRef and handleNextStep
         );
       default:
         return <EventTickets />;
