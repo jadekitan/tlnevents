@@ -33,6 +33,7 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import { AddIcon, MinusIcon } from "@chakra-ui/icons";
+import CheckoutForm from "./CheckoutForm";
 import { useParams } from "react-router-dom";
 import { eventsData } from "../../../server/eventsData";
 

@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, useContext } from "react";
 import {
   Box,
   Button,
@@ -6,8 +6,8 @@ import {
   FormLabel,
   Heading,
   Image,
-  Radio,
-  RadioGroup,
+  // Radio,
+  // RadioGroup,
   Text,
   VStack,
   HStack,
@@ -26,9 +26,9 @@ import {
 import { useParams, Link } from "react-router-dom";
 import { eventsData } from "../../../server/eventsData";
 import { CartContext } from "./CartProvider";
-import { AddIcon, MinusIcon, DeleteIcon } from "@chakra-ui/icons";
+import { AddIcon, MinusIcon } from "@chakra-ui/icons";
 import { FaShoppingCart } from "react-icons/fa";
-import { create } from "lodash";
+import { Radio, RadioGroup } from "@headlessui/react";
 
 const ProductDetails = () => {
   const { eventId } = useParams(); // Get the event ID from the URL
@@ -52,6 +52,7 @@ const ProductDetails = () => {
       setSelectedSize("");
       setSelectedColor("");
       toast({
+        position: "top",
         title: "Added to cart",
         description: `${product.name} has been added to your cart`,
         status: "success",
@@ -60,6 +61,10 @@ const ProductDetails = () => {
       });
     }
   };
+
+  function classNames(...classes) {
+    return classes.filter(Boolean).join(" ");
+  }
 
   return (
     <VStack
@@ -139,7 +144,7 @@ const ProductDetails = () => {
               display={["none", "none", "none", "flex"]}
               position="sticky"
               top="20px"
-              w="35%"
+              w="60%"
               justify="center"
               align="center"
               spacing="20px"
@@ -178,12 +183,43 @@ const ProductDetails = () => {
                 <Heading color="dark" fontSize={["28px", "32px"]}>
                   {product.name}
                 </Heading>
-                <Text color="primary.500" fontSize={["14px", "16px"]}>
+                <Text color="primary.500" fontSize={["20px", "22px"]}>
                   &#8358;{product.price.toLocaleString()}
                 </Text>
               </VStack>
 
               <FormControl>
+                <FormLabel>Color</FormLabel>
+                <fieldset aria-label="Choose a color" className="mt-4">
+                  <RadioGroup
+                    value={selectedColor}
+                    onChange={setSelectedColor}
+                    className="flex items-center space-x-3"
+                  >
+                    {product.colors.map((color) => (
+                      <Radio
+                        key={color}
+                        value={color}
+                        aria-label={color}
+                        className={classNames(
+                          color.selectedClass,
+                          "relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 focus:outline-none data-[checked]:ring-2 data-[focus]:data-[checked]:ring data-[focus]:data-[checked]:ring-offset-1"
+                        )}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={classNames(
+                            color.class,
+                            `size-8 rounded-full border border-${color} bg-${color} `
+                          )}
+                        />
+                      </Radio>
+                    ))}
+                  </RadioGroup>
+                </fieldset>
+              </FormControl>
+
+              {/* <FormControl>
                 <FormLabel>Color</FormLabel>
                 <RadioGroup value={selectedColor} onChange={setSelectedColor}>
                   <Stack direction="row" spacing={4}>
@@ -192,16 +228,20 @@ const ProductDetails = () => {
                         key={color}
                         value={color}
                         sx={{
-                          "& .chakra-radio__control": {
-                            backgroundColor: color, // Background for unselected state
-                            borderColor: color, // Border color for circle
+                          ".css-1cqh9jq span": {
+                            background: color,
+                            borderColor: color,
                           },
-                          "& .chakra-radio__control[data-checked]": {
-                            backgroundColor: "dark", // Background color when checked
-                            borderColor: color, // Border color when checked
+                          "[data-checked] &": {
+                            background: color,
+                            borderColor: "#b2b2b2",
+                            _before: {
+                              background: color,
+                            },
                           },
-                          "& .chakra-radio__control:hover": {
-                            opacity: 0.8, // Slightly dim when hovered
+                          "[data-checked]:hover &": {
+                            background: color,
+                            opacity: 0.8,
                           },
                         }}
                       >
@@ -210,9 +250,36 @@ const ProductDetails = () => {
                     ))}
                   </Stack>
                 </RadioGroup>
+              </FormControl> */}
+
+              <FormControl width="50%">
+                <FormLabel>Size</FormLabel>
+                <fieldset aria-label="Choose a size" className="mt-4">
+                  <RadioGroup
+                    value={selectedSize}
+                    onChange={setSelectedSize}
+                    className="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4"
+                  >
+                    {product.sizes.map((size) => (
+                      <Radio
+                        key={size}
+                        value={size}
+                        className={classNames(
+                          "group relative flex items-center justify-center rounded-md border px-4 py-0 text-sm font-medium uppercase focus:outline-none sm:flex-1 sm:py-2 cursor-pointer"
+                        )}
+                      >
+                        <span>{size}</span>
+                        <span
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -inset-px rounded-md border-2 border-transparent group-data-[focus]:border group-data-[checked]:border-[#BFDF37]"
+                        />
+                      </Radio>
+                    ))}
+                  </RadioGroup>
+                </fieldset>
               </FormControl>
 
-              <FormControl>
+              {/* <FormControl>
                 <FormLabel>Size</FormLabel>
                 <RadioGroup value={selectedSize} onChange={setSelectedSize}>
                   <Stack direction="row" spacing={4}>
@@ -223,7 +290,7 @@ const ProductDetails = () => {
                     ))}
                   </Stack>
                 </RadioGroup>
-              </FormControl>
+              </FormControl> */}
 
               <Stack w="100%" flexDir={["row"]} align="flex-start">
                 <HStack w="30%">
@@ -241,6 +308,9 @@ const ProductDetails = () => {
                 </HStack>
                 <Button
                   bg="primary.500"
+                  _hover={{ bg: "primary.400" }}
+                  active={{ bg: "primary.500" }}
+                  focus={{ bg: "primary.500" }}
                   width="60%"
                   rounded={["10px", "20px"]}
                   onClick={handleAddToCart}

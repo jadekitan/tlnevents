@@ -56,7 +56,7 @@ export const eventsData = {
         price: 20000,
         description: "Official festival t-shirt with artwork",
         sizes: ["S", "M", "L", "XL"],
-        colors: ["dark", "white", "grey"],
+        colors: ["gray-900", "white", "gray-200"],
         image: "https://tlnevents.com/assets/merch/lemonade X morhodes.jpg",
       },
       2: {

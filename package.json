@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.13.0",
     "@fontsource/urbanist": "^5.1.0",
     "@glidejs/glide": "^3.6.2",
+    "@headlessui/react": "^2.2.0",
     "axios": "^1.7.7",
     "date-fns": "^4.1.0",
     "formik": "^2.4.6",

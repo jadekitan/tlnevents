@@ -1,37 +1,14 @@
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, useContext } from "react";
 import {
-  Box,
   Button,
-  Card,
-  CardBody,
-  CardHeader,
-  CardFooter,
-  Container,
-  Drawer,
-  DrawerBody,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
   FormControl,
   FormLabel,
   Grid,
-  Heading,
-  Image,
   Input,
-  Radio,
-  RadioGroup,
-  Stack,
   Text,
-  useDisclosure,
   VStack,
-  HStack,
-  Badge,
-  IconButton,
   useToast,
 } from "@chakra-ui/react";
-import { AddIcon, MinusIcon, DeleteIcon } from "@chakra-ui/icons";
 import { CartContext } from "./CartProvider";
 
 const CheckoutForm = () => {
