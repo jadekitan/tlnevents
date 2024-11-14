@@ -11,6 +11,10 @@ import {
   useNumberInput,
   Button,
   Badge,
+  useDisclosure,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
@@ -25,7 +29,35 @@ const EventTickets = () => {
     ticketCounts,
     setTicketCounts,
     feePercentage,
+    clearContactData,
+    clearTicketCounts,
+    clearAssignMultiple,
   } = useContext(multiBookingContext);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+
+  const clearData = () => {
+    clearContactData();
+    clearTicketCounts();
+    clearAssignMultiple();
+  };
+
+  const handleArrow = () => {
+    const hasSelectedTickets = ticketType.some(
+      (ticket) => ticketCounts[ticket.id] > 0
+    );
+    if (currentStep === 1) {
+      if (hasSelectedTickets) {
+        onOpen();
+      } else {
+        window.location.href = `/${event.id}`;
+        clearData();
+      }
+    } else {
+      onOpen();
+    }
+  };
 
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
@@ -127,11 +159,59 @@ const EventTickets = () => {
   return (
     <VStack w="100%" align="flex-start" spacing={["20px", "40px"]}>
       <Flex justify="flex-start" align="center" gap={["10px", "20px"]}>
-        <Link to={`/${event.id}`}>
-          <Box as="button" p="3px" bg="primary.500" rounded="6px">
-            <LeftArrow />
-          </Box>
-        </Link>
+        <Box
+          as="button"
+          p="3px"
+          bg="primary.500"
+          rounded="6px"
+          onClick={handleArrow}
+        >
+          <LeftArrow />
+        </Box>
+
+        <AlertDialog
+          motionPreset="slideInBottom"
+          leastDestructiveRef={cancelRef}
+          onClose={onClose}
+          isOpen={isOpen}
+          isCentered
+        >
+          <AlertDialogOverlay />
+
+          <AlertDialogContent
+            borderRadius={["16px", "8px"]}
+            marginBottom={["0px", "auto"]}
+          >
+            <VStack align="center" spacing="20px" padding="30px 15px">
+              <Heading color="dark" fontSize="18px" lineHeight="28px">
+                Release Tickets
+              </Heading>
+              <Text textAlign="center">
+                Are you sure you want to cancel? This will cancel the order and
+                release your tickets?
+              </Text>
+              <Flex width="100%" justify="space-between">
+                <Button width="50%" ref={cancelRef} onClick={onClose}>
+                  Cancel
+                </Button>
+
+                <Button
+                  width="50%"
+                  bg="primary.500"
+                  color="dark"
+                  ml={3}
+                  onClick={() => {
+                    window.location.href = `/${event.id}`;
+                    setStep(1);
+                    clearData();
+                  }}
+                >
+                  Release Ticket
+                </Button>
+              </Flex>
+            </VStack>
+          </AlertDialogContent>
+        </AlertDialog>
         <Heading color="dark" fontSize={["18px", "22px"]} lineHeight="28px">
           Ticket Types
         </Heading>

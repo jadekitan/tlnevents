@@ -14,6 +14,10 @@ import {
   FormLabel,
   Checkbox,
   useToast,
+  useDisclosure,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useFormik } from "formik";
@@ -37,7 +41,36 @@ const EventContact = ({ handleNextStep, formRef }) => {
     ticketCounts,
     assignMultiple,
     setAssignMultiple,
+    clearContactData,
+    clearTicketCounts,
+    clearAssignMultiple,
   } = useContext(multiBookingContext);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+
+  const clearData = () => {
+    clearContactData();
+    clearTicketCounts();
+    clearAssignMultiple();
+  };
+
+  const handleArrow = () => {
+    const hasSelectedTickets = ticketType.some(
+      (ticket) => ticketCounts[ticket.id] > 0
+    );
+
+    if (currentStep === 2) {
+      if (hasSelectedTickets) {
+        onOpen();
+      } else {
+        setStep(currentStep - 1);
+        clearData();
+      }
+    } else {
+      onOpen();
+    }
+  };
 
   // List of country codes
   const countryCodes = [
@@ -435,17 +468,53 @@ const EventContact = ({ handleNextStep, formRef }) => {
           p="3px"
           bg="primary.500"
           rounded="6px"
-          onClick={() => {
-            if (currentStep === 1) {
-              console.log("Back to event page");
-            }
-            if (currentStep > 1) {
-              setStep(currentStep - 1);
-            }
-          }}
+          onClick={handleArrow}
         >
           <LeftArrow />
         </Box>
+        <AlertDialog
+          motionPreset="slideInBottom"
+          leastDestructiveRef={cancelRef}
+          onClose={onClose}
+          isOpen={isOpen}
+          isCentered
+        >
+          <AlertDialogOverlay />
+
+          <AlertDialogContent
+            borderRadius={["16px", "8px"]}
+            marginBottom={["0px", "auto"]}
+          >
+            <VStack align="center" spacing="20px" padding="30px 15px">
+              <Heading color="dark" fontSize="18px" lineHeight="28px">
+                Release Tickets
+              </Heading>
+              <Text textAlign="center">
+                Are you sure you want to cancel? This will cancel the order and
+                release your tickets?
+              </Text>
+              <Flex width="100%" justify="space-between">
+                <Button width="50%" ref={cancelRef} onClick={onClose}>
+                  Cancel
+                </Button>
+
+                <Button
+                  width="50%"
+                  bg="primary.500"
+                  color="dark"
+                  ml={3}
+                  onClick={() => {
+                    window.location.href = `/${event.id}`;
+                    setStep(1);
+                    clearData();
+                  }}
+                >
+                  Release Ticket
+                </Button>
+              </Flex>
+            </VStack>
+          </AlertDialogContent>
+        </AlertDialog>
         <Heading color="dark" fontSize={["18px", "22px"]} lineHeight="28px">
           Contact Information
         </Heading>
