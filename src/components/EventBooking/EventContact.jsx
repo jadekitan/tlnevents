@@ -22,6 +22,7 @@ import {
 import axios from "axios";
 import { useFormik } from "formik";
 import { multiBookingContext } from "./BookingContext";
+import { contacts } from "../../../server/contacts";
 import { debounce } from "lodash";
 
 const EventContact = ({ handleNextStep, formRef }) => {
@@ -258,6 +259,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
     validate,
     onSubmit: async (values, { setSubmitting }) => {
       setIsSubmitting(true);
+      setSubmitting(true);
       setIsDisable(true);
       const errors = validate(values);
       if (Object.keys(errors).length > 0) {
@@ -269,20 +271,13 @@ const EventContact = ({ handleNextStep, formRef }) => {
       }
 
       try {
-        const response = await fetch(
-          "https://tlnevents.com/server/contacts.php",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(values),
-          }
+        const allAttendees = Object.values(values.attendeeAddresses).flat();
+        const data = await contacts(
+          values.firstName,
+          values.lastName,
+          values.email,
+          allAttendees
         );
-        const result = await response.json();
-        if (result.success) {
-          // Successfully saved contact and attendees
-        } else {
-          console.error("Error:", result.message);
-        }
       } catch (error) {
         console.error("Unexpected error:", error);
       } finally {
@@ -465,6 +460,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
       <Flex justify="flex-start" align="center" gap={["10px", "20px"]}>
         <Box
           as="button"
+          type="button"
           p="3px"
           bg="primary.500"
           rounded="6px"
@@ -499,12 +495,12 @@ const EventContact = ({ handleNextStep, formRef }) => {
                 </Button>
 
                 <Button
+                  type="button"
                   width="50%"
                   bg="primary.500"
                   color="dark"
                   ml={3}
                   onClick={() => {
-                    window.location.href = `/${event.id}`;
                     setStep(1);
                     clearData();
                   }}
