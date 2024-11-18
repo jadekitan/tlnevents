@@ -2,7 +2,7 @@ export const eventsData = {
   lpe: {
     id: "lpe",
     url: "lpe",
-    image: "https://tlnevents.com/assets/event-banners/lpe.webp",
+    image: "https://tlnevents.com/assets/events-banner/lpe.webp",
     name: "Lemonade Playground Experience",
     venue: {
       name: "Muri Okuola Park",

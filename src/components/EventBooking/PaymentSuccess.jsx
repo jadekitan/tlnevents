@@ -182,9 +182,9 @@ const PaymentSuccess = () => {
               </Text>
               <Text color="dark" fontSize={["12px", "16px"]}>
                 If you do not receive your ticket from us, please email us at{" "}
-                <Link to="mailto:info@thelemonadenetwork.ng">
+                <Link to="mailto:info@lemonade.africa">
                   <Text as="span" color="primary.500">
-                    admin@lemonade.africa
+                    info@lemonade.africa
                   </Text>
                 </Link>
                 .

@@ -57,7 +57,7 @@ const Hero = () => {
         left="0"
         zIndex="-1"
       >
-        <source src="https://tlnevents.com/assets/hero.mp4" type="video/mp4" />
+        <source src="https://tlnevents.com/assets/lpe.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </Box>
       <VStack

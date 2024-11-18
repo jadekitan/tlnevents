@@ -14,10 +14,15 @@ import {
   FormLabel,
   Checkbox,
   useToast,
+  useDisclosure,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useFormik } from "formik";
 import { multiBookingContext } from "./BookingContext";
+import { contacts } from "../../../server/contacts";
 import { debounce } from "lodash";
 
 const EventContact = ({ handleNextStep, formRef }) => {
@@ -37,7 +42,36 @@ const EventContact = ({ handleNextStep, formRef }) => {
     ticketCounts,
     assignMultiple,
     setAssignMultiple,
+    clearContactData,
+    clearTicketCounts,
+    clearAssignMultiple,
   } = useContext(multiBookingContext);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+
+  const clearData = () => {
+    clearContactData();
+    clearTicketCounts();
+    clearAssignMultiple();
+  };
+
+  const handleArrow = () => {
+    const hasSelectedTickets = ticketType.some(
+      (ticket) => ticketCounts[ticket.id] > 0
+    );
+
+    if (currentStep === 2) {
+      if (hasSelectedTickets) {
+        onOpen();
+      } else {
+        setStep(currentStep - 1);
+        clearData();
+      }
+    } else {
+      onOpen();
+    }
+  };
 
   // List of country codes
   const countryCodes = [
@@ -225,6 +259,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
     validate,
     onSubmit: async (values, { setSubmitting }) => {
       setIsSubmitting(true);
+      setSubmitting(true);
       setIsDisable(true);
       const errors = validate(values);
       if (Object.keys(errors).length > 0) {
@@ -236,20 +271,13 @@ const EventContact = ({ handleNextStep, formRef }) => {
       }
 
       try {
-        const response = await fetch(
-          "https://tlnevents.com/server/contacts.php",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(values),
-          }
+        const allAttendees = Object.values(values.attendeeAddresses).flat();
+        const data = await contacts(
+          values.firstName,
+          values.lastName,
+          values.email,
+          allAttendees
         );
-        const result = await response.json();
-        if (result.success) {
-          // Successfully saved contact and attendees
-        } else {
-          console.error("Error:", result.message);
-        }
       } catch (error) {
         console.error("Unexpected error:", error);
       } finally {
@@ -432,20 +460,57 @@ const EventContact = ({ handleNextStep, formRef }) => {
       <Flex justify="flex-start" align="center" gap={["10px", "20px"]}>
         <Box
           as="button"
+          type="button"
           p="3px"
           bg="primary.500"
           rounded="6px"
-          onClick={() => {
-            if (currentStep === 1) {
-              console.log("Back to event page");
-            }
-            if (currentStep > 1) {
-              setStep(currentStep - 1);
-            }
-          }}
+          onClick={handleArrow}
         >
           <LeftArrow />
         </Box>
+        <AlertDialog
+          motionPreset="slideInBottom"
+          leastDestructiveRef={cancelRef}
+          onClose={onClose}
+          isOpen={isOpen}
+          isCentered
+        >
+          <AlertDialogOverlay />
+
+          <AlertDialogContent
+            borderRadius={["16px", "8px"]}
+            marginBottom={["0px", "auto"]}
+          >
+            <VStack align="center" spacing="20px" padding="30px 15px">
+              <Heading color="dark" fontSize="18px" lineHeight="28px">
+                Release Tickets
+              </Heading>
+              <Text textAlign="center">
+                Are you sure you want to cancel? This will cancel the order and
+                release your tickets?
+              </Text>
+              <Flex width="100%" justify="space-between">
+                <Button width="50%" ref={cancelRef} onClick={onClose}>
+                  Cancel
+                </Button>
+
+                <Button
+                  type="button"
+                  width="50%"
+                  bg="primary.500"
+                  color="dark"
+                  ml={3}
+                  onClick={() => {
+                    setStep(1);
+                    clearData();
+                  }}
+                >
+                  Release Ticket
+                </Button>
+              </Flex>
+            </VStack>
+          </AlertDialogContent>
+        </AlertDialog>
         <Heading color="dark" fontSize={["18px", "22px"]} lineHeight="28px">
           Contact Information
         </Heading>

@@ -141,7 +141,7 @@ const About = () => {
               objectFit="cover"
               rounded={["6px", "6px", "8px", "full"]}
               shadow="md"
-              src="https://tlnevents.com/assets/gallery/DSC_9238.JPG"
+              src="https://tlnevents.com/assets/gallery/DSC_9238.jpg"
               alt="goal"
             />
             <VStack

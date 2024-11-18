@@ -16,14 +16,17 @@ import {
   Text,
   Button,
   useToast,
+  useDisclosure,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
 import EventTickets from "./EventTickets";
 import EventContact from "./EventContact";
-import PaymentTable from "./PaymentTable";
 import { IoClose } from "react-icons/io5";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const EventBooking = () => {
   const steps = [{ title: "Tickets" }, { title: "Contact" }];
@@ -40,6 +43,9 @@ const EventBooking = () => {
     isDisable,
     setIsDisable,
     assignMultiple,
+    clearContactData,
+    clearTicketCounts,
+    clearAssignMultiple,
   } = useContext(multiBookingContext);
   {
     multiBookingContext;
@@ -139,10 +145,6 @@ const EventBooking = () => {
         return (
           <EventContact handleNextStep={handleNextStep} formRef={formRef} /> // Pass formRef and handleNextStep
         );
-      case 3:
-        return (
-          <PaymentTable /> // Pass formRef and handleNextStep
-        );
       default:
         return <EventTickets />;
     }
@@ -184,6 +186,31 @@ const EventBooking = () => {
     }
   };
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+
+  const clearData = () => {
+    clearContactData();
+    clearTicketCounts();
+    clearAssignMultiple();
+  };
+
+  const handleCancel = () => {
+    const hasSelectedTickets = ticketType.some(
+      (ticket) => ticketCounts[ticket.id] > 0
+    );
+    if (currentStep === 1) {
+      if (hasSelectedTickets) {
+        onOpen();
+      } else {
+        window.location.href = `/${event.id}`;
+        clearData();
+      }
+    } else {
+      onOpen();
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -215,9 +242,55 @@ const EventBooking = () => {
                   Check Out
                 </Heading>
 
-                <Link to={`/${event.url}`}>
-                  <IoClose color="dark" className=" w-6 h-6" />
-                </Link>
+                <IoClose
+                  color="dark"
+                  className=" w-6 h-6"
+                  onClick={handleCancel}
+                />
+
+                <AlertDialog
+                  motionPreset="slideInBottom"
+                  leastDestructiveRef={cancelRef}
+                  onClose={onClose}
+                  isOpen={isOpen}
+                  isCentered
+                >
+                  <AlertDialogOverlay />
+
+                  <AlertDialogContent
+                    borderRadius={["16px", "8px"]}
+                    marginBottom={["0px", "auto"]}
+                  >
+                    <VStack align="center" spacing="20px" padding="30px 15px">
+                      <Heading color="dark" fontSize="18px" lineHeight="28px">
+                        Release Tickets
+                      </Heading>
+                      <Text textAlign="center">
+                        Are you sure you want to cancel? This will cancel the
+                        order and release your tickets?
+                      </Text>
+                      <Flex width="100%" justify="space-between">
+                        <Button width="50%" ref={cancelRef} onClick={onClose}>
+                          Cancel
+                        </Button>
+
+                        <Button
+                          width="50%"
+                          bg="primary.500"
+                          color="dark"
+                          ml={3}
+                          onClick={() => {
+                            window.location.href = `/${event.id}`;
+                            setStep(1);
+                            clearData();
+                          }}
+                        >
+                          Release Ticket
+                        </Button>
+                      </Flex>
+                    </VStack>
+                  </AlertDialogContent>
+                </AlertDialog>
               </Flex>
             </Flex>
           </Box>
