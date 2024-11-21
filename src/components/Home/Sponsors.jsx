@@ -1,9 +1,19 @@
 import React from "react";
 import { VStack, Heading, Text, Flex, Box, Image } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
+import { Link } from "react-router-dom";
 
 const Sponsors = () => {
-  const brands = ["https://tlnevents.com/assets/sponsors/morenag-energy.png"];
+  const brands = [
+    {
+      image: "https://tlnevents.com/assets/sponsors/morenag-energy.png",
+      url: "https://morenagenergy.com",
+    },
+    {
+      image: "https://tlnevents.com/assets/sponsors/gameevo.png",
+      url: "https://gameevotech.com",
+    },
+  ];
 
   // Define keyframes for scrolling animation
   const scrollAnimation = keyframes`
@@ -38,15 +48,23 @@ const Sponsors = () => {
             e.currentTarget.style.animationPlayState = "running";
           }}
         >
-          {brands.map((image, i) => (
-            <Box
-              key={i}
-              maxH={["70px", "70px", "80px"]}
-              maxW={["100px", "100px", "150px", "150px"]}
-              flexShrink="0"
-            >
-              <Image w="100%" h="100%" objectFit="contain" src={image} />
-            </Box>
+          {brands.map((brand, i) => (
+            <Link to={brand.url} target="_blank">
+              <Box
+                key={i}
+                maxH={["70px", "70px", "80px"]}
+                maxW={["100px", "100px", "150px", "150px"]}
+                flexShrink="0"
+              >
+                <Image
+                  w="100%"
+                  h="100%"
+                  objectFit="contain"
+                  src={brand.image}
+                  bg={i == 1 ? "neutral.500" : null}
+                />
+              </Box>
+            </Link>
           ))}
         </Flex>
       </Flex>
