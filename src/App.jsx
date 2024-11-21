@@ -39,7 +39,7 @@ function App() {
         }
       />
       <Route
-        path="/:eventId/merch/:productId"
+        path="/:eventId/merch/:productId/:itemId"
         element={
           <CartProvider>
             <ProductDetails />

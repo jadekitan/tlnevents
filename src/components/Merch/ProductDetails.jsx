@@ -22,6 +22,11 @@ import {
   AccordionItem,
   AccordionButton,
   AccordionPanel,
+  List,
+  ListItem,
+  ListIcon,
+  OrderedList,
+  UnorderedList,
 } from "@chakra-ui/react";
 import { useParams, Link } from "react-router-dom";
 import { eventsData } from "../../../server/eventsData";
@@ -33,9 +38,12 @@ import { Radio, RadioGroup } from "@headlessui/react";
 const ProductDetails = () => {
   const { eventId } = useParams(); // Get the event ID from the URL
   const { productId } = useParams(); // Get the event ID from the URL
+  const { itemId } = useParams();
   const event = eventsData[eventId]; // Lookup event from local data
 
-  const product = event.merch[productId];
+  const merch = event.merch[productId];
+
+  const product = merch[itemId];
 
   const { cart, onOpen, renderCartDrawer, addToCart } = useContext(CartContext);
 
@@ -43,23 +51,25 @@ const ProductDetails = () => {
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
 
-  const toast = useToast();
-
   const handleAddToCart = () => {
-    if (selectedSize && selectedColor) {
-      addToCart(product, selectedSize, selectedColor, quantity);
-      setQuantity(1);
+    // Validate required selections
+    if (!selectedColor) return;
+    if (product.sizes && !selectedSize) return;
+
+    // Add to cart with appropriate options
+    addToCart(product, {
+      color: selectedColor,
+      size: product.sizes ? selectedSize : null,
+      quantity,
+    });
+
+    // Reset form and open cart
+    setQuantity(1);
+    setSelectedColor("");
+    if (product.sizes) {
       setSelectedSize("");
-      setSelectedColor("");
-      toast({
-        position: "top",
-        title: "Added to cart",
-        description: `${product.name} has been added to your cart`,
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-      });
     }
+    onOpen();
   };
 
   function classNames(...classes) {
@@ -73,6 +83,7 @@ const ProductDetails = () => {
       justify="center"
       align="center"
       spacing={["50px", "60px", "70px", "75px", "30px"]}
+      pb="50px"
     >
       <VStack
         w="100%"
@@ -92,7 +103,7 @@ const ProductDetails = () => {
           </Link>
           <Box as="button" onClick={onOpen} position="relative">
             <Box>
-              <FaShoppingCart className=" w-8 h-8" />
+              <FaShoppingCart className=" w-6 h-6" />
             </Box>
             {cart.length > 0 && (
               <Box
@@ -114,7 +125,7 @@ const ProductDetails = () => {
             )}
           </Box>
         </Flex>
-        <VStack w="100%" h="100%" align="flex-start" spacing="20px">
+        <VStack w="100%" h="100%" align="flex-start" spacing={["40px", "20px"]}>
           <Breadcrumb fontWeight="500" color="Dark">
             <BreadcrumbItem>
               <BreadcrumbLink href={`/${event.id}/merch`}>
@@ -155,18 +166,31 @@ const ProductDetails = () => {
                   h="100%"
                   rounded="8px"
                   src={product.image}
-                  alt="Event banner"
+                  alt={product.name}
                 />
               </Box>
             </Box>
+            <VStack
+              display={["flex", "none"]}
+              w="100%"
+              align="flex-start"
+              spacing={["10px", "10px"]}
+            >
+              <Heading color="dark" fontSize={["24px", "32px"]}>
+                {product.name}
+              </Heading>
+              <Text color="primary.500" fontSize={["18px", "22px"]}>
+                &#8358;{product.price.toLocaleString()}
+              </Text>
+            </VStack>
             <Box
               display={["block", "block", "block", "none"]}
               w={["100%", "100%", "70%", "70%", "100%"]}
-              h={["384px", "384px", "400px", "384px", "384px"]}
+              h={["344px", "384px", "400px", "384px", "384px"]}
             >
               <Image
                 src={product.image}
-                alt={product.id}
+                alt={product.name}
                 width="100%"
                 height="100%"
                 rounded="8px"
@@ -177,9 +201,14 @@ const ProductDetails = () => {
             <VStack
               w={["100%", "100%", "100%", "65%"]}
               align="flex-start"
-              spacing={["10px", "30px"]}
+              spacing={["40px", "30px"]}
             >
-              <VStack w="100%" align="flex-start" spacing={["10px", "10px"]}>
+              <VStack
+                display={["none", "flex"]}
+                w="100%"
+                align="flex-start"
+                spacing={["10px", "10px"]}
+              >
                 <Heading color="dark" fontSize={["28px", "32px"]}>
                   {product.name}
                 </Heading>
@@ -252,32 +281,34 @@ const ProductDetails = () => {
                 </RadioGroup>
               </FormControl> */}
 
-              <FormControl width="50%">
-                <FormLabel>Size</FormLabel>
-                <fieldset aria-label="Choose a size" className="mt-4">
-                  <RadioGroup
-                    value={selectedSize}
-                    onChange={setSelectedSize}
-                    className="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4"
-                  >
-                    {product.sizes.map((size) => (
-                      <Radio
-                        key={size}
-                        value={size}
-                        className={classNames(
-                          "group relative flex items-center justify-center rounded-md border px-4 py-0 text-sm font-medium uppercase focus:outline-none sm:flex-1 sm:py-2 cursor-pointer"
-                        )}
-                      >
-                        <span>{size}</span>
-                        <span
-                          aria-hidden="true"
-                          className="pointer-events-none absolute -inset-px rounded-md border-2 border-transparent group-data-[focus]:border group-data-[checked]:border-[#BFDF37]"
-                        />
-                      </Radio>
-                    ))}
-                  </RadioGroup>
-                </fieldset>
-              </FormControl>
+              {product.sizes && (
+                <FormControl width={["100%", "50%"]}>
+                  <FormLabel>Size</FormLabel>
+                  <fieldset aria-label="Choose a size" className="mt-4">
+                    <RadioGroup
+                      value={selectedSize}
+                      onChange={setSelectedSize}
+                      className="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4"
+                    >
+                      {product?.sizes?.map((size) => (
+                        <Radio
+                          key={size}
+                          value={size}
+                          className={classNames(
+                            "group relative flex items-center justify-center rounded-md border px-4 py-3 text-sm font-medium uppercase focus:outline-none sm:flex-1 sm:py-2 cursor-pointer"
+                          )}
+                        >
+                          <span>{size}</span>
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute -inset-px rounded-md border-2 border-transparent group-data-[focus]:border group-data-[checked]:border-[#BFDF37]"
+                          />
+                        </Radio>
+                      ))}
+                    </RadioGroup>
+                  </fieldset>
+                </FormControl>
+              )}
 
               {/* <FormControl>
                 <FormLabel>Size</FormLabel>
@@ -292,8 +323,8 @@ const ProductDetails = () => {
                 </RadioGroup>
               </FormControl> */}
 
-              <Stack w="100%" flexDir={["row"]} align="flex-start">
-                <HStack w="30%">
+              <Stack w="100%" flexDir={["column", "row"]} align="flex-start">
+                <HStack display={["none", "flex"]} w="30%">
                   <IconButton
                     icon={<MinusIcon />}
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -311,10 +342,12 @@ const ProductDetails = () => {
                   _hover={{ bg: "primary.400" }}
                   active={{ bg: "primary.500" }}
                   focus={{ bg: "primary.500" }}
-                  width="60%"
+                  width={["100%", "60%"]}
                   rounded={["10px", "20px"]}
                   onClick={handleAddToCart}
-                  isDisabled={!selectedSize || !selectedColor}
+                  isDisabled={
+                    !selectedColor || (product.sizes && !selectedSize)
+                  }
                 >
                   Add to Cart
                 </Button>
@@ -339,24 +372,71 @@ const ProductDetails = () => {
                             </Box>
                             {isExpanded ? (
                               <MinusIcon
-                                color={["#F48020", "primary.500"]}
+                                color={["primary.500"]}
                                 fontSize="16px"
                               />
                             ) : (
                               <AddIcon
-                                color={["#F48020", "primary.500"]}
+                                color={["primary.500"]}
                                 fontSize="16px"
                               />
                             )}
                           </AccordionButton>
                         </h2>
-                        <AccordionPanel
-                          textAlign="left"
-                          fontSize={["12px", "14px", "17px"]}
-                          pb={4}
-                        >
-                          {product.description}
+                        {product.description.head && (
+                          <AccordionPanel
+                            textAlign="left"
+                            fontSize={["12px", "14px", "17px"]}
+                            pb={4}
+                          >
+                            {product.description.head}
+                          </AccordionPanel>
+                        )}
+
+                        <AccordionPanel p="0">
+                          <UnorderedList styleType="'&bull;'">
+                            {product.description.color && (
+                              <ListItem>
+                                <Text
+                                  textAlign="left"
+                                  fontSize={["12px", "14px", "17px"]}
+                                  pb={4}
+                                  pl={4}
+                                >
+                                  <Text as="span" fontWeight="600">
+                                    Color:{"  "}
+                                  </Text>
+                                  {product.description.color}
+                                </Text>
+                              </ListItem>
+                            )}
+                            {product.description.size && (
+                              <ListItem>
+                                <Text
+                                  textAlign="left"
+                                  fontSize={["12px", "14px", "17px"]}
+                                  pb={4}
+                                  pl={4}
+                                >
+                                  <Text as="span" fontWeight="600">
+                                    Size:{"  "}
+                                  </Text>
+                                  {product.description.size}
+                                </Text>
+                              </ListItem>
+                            )}
+                          </UnorderedList>
                         </AccordionPanel>
+
+                        {product.description.footer && (
+                          <AccordionPanel
+                            textAlign="left"
+                            fontSize={["12px", "14px", "17px"]}
+                            pb={4}
+                          >
+                            {product.description.footer}
+                          </AccordionPanel>
+                        )}
                       </>
                     )}
                   </AccordionItem>
@@ -364,7 +444,7 @@ const ProductDetails = () => {
               </Accordion>
             </VStack>
           </Stack>
-          <Box
+          {/* <Box
             display={["block", "block", "block", "none"]}
             position="fixed"
             bottom="0px"
@@ -382,7 +462,7 @@ const ProductDetails = () => {
                 </Button>
               </Link>
             </VStack>
-          </Box>
+          </Box> */}
         </VStack>
       </VStack>
       {renderCartDrawer()}
