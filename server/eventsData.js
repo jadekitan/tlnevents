@@ -29,13 +29,36 @@ export const eventsData = {
       children: [
         {
           id: 1,
-          name: "Playground Children Early Bird Pass",
+          name: "Playground Children Regular Pass",
           price: 5000,
           quantity: 100,
           maxQuantity: 5,
           step: 1,
-          description:
-            "Give your little ones an unforgettable experience filled with excitement and joy! With the Playground Children Early Bird Pass, they'll enjoy access to exclusive goodies and activities tailored just for them.",
+          description: {
+            info: "Give your little ones an unforgettable experience filled with excitement and joy! With the Playground Children Early Bird Pass, they'll enjoy access to exclusive goodies and activities tailored just for them",
+            perks: [
+              "Regular Entry",
+              "Free Popcorn & Candy Floss",
+              "Access to Select Games & Activities",
+            ],
+          },
+        },
+        {
+          id: 2,
+          name: "Playground Children Premium Pass",
+          price: 15000,
+          quantity: 100,
+          maxQuantity: 5,
+          step: 1,
+          description: {
+            info: "Elevate your little ones' adventure with the Playground Children Premium Pass! Make their day extraordinary with premium goodies and expanded activities tailored for a memorable experience.",
+            perks: [
+              "Priority Entry",
+              "Free Popcorn & Candy Floss,",
+              "All-Access Games & Activities",
+              "A Special Gift from Santa",
+            ],
+          },
         },
       ],
       adult: [
@@ -46,8 +69,11 @@ export const eventsData = {
           quantity: 100,
           maxQuantity: 5,
           step: 1,
-          description:
-            "This Entry Ticket grants you full access to the entire experience, designed to keep you entertained, engaged, and immersed in the lively atmosphere!",
+
+          description: {
+            info: "This Entry Ticket grants you full access to the entire experience, designed to keep you entertained, engaged, and immersed in the lively atmosphere!",
+            perks: ["Regular Entry"],
+          },
         },
       ],
     },

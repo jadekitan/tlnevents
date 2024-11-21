@@ -15,6 +15,11 @@ import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogOverlay,
+  List,
+  ListItem,
+  ListIcon,
+  OrderedList,
+  UnorderedList,
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
@@ -23,8 +28,6 @@ import { useParams } from "react-router-dom";
 const EventTickets = () => {
   const {
     LeftArrow,
-    purchaseType,
-    currentStep,
     setStep,
     ticketType,
     ticketCounts,
@@ -263,20 +266,47 @@ const EventTickets = () => {
             <Flex w="100%" justify="space-between" align="flex-start">
               <VStack w="70%" align="flex-start">
                 <Box>
-                  {ticket.description.length > 200 ? (
+                  {ticket.description.info.length > 120 &&
+                  ticket.description.perks.length > 0 ? (
                     <>
                       <Collapse
                         startingHeight={60}
                         in={showDescription[ticket.id]}
                       >
-                        <Text
-                          title={ticket.description}
-                          color="dark"
-                          fontSize={["12px", "14px"]}
-                          lineHeight="20px"
-                        >
-                          {ticket.description}
-                        </Text>
+                        <VStack align="flex-start" spacing="10px">
+                          <Text
+                            title={ticket.description.info}
+                            color="dark"
+                            fontSize={["12px", "14px"]}
+                            lineHeight="20px"
+                          >
+                            {ticket.description.info}
+                          </Text>
+                          {ticket.description.perks && (
+                            <VStack align="flex-start" spacing="0">
+                              <Heading
+                                color="dark"
+                                fontSize={["14px", "20px"]}
+                                lineHeight="28px"
+                              >
+                                Perks
+                              </Heading>
+                              <UnorderedList py="0">
+                                {ticket.description.perks.map((perk, i) => (
+                                  <ListItem key={i}>
+                                    <Text
+                                      color="dark"
+                                      fontSize={["12px", "14px"]}
+                                      lineHeight="20px"
+                                    >
+                                      {perk}
+                                    </Text>
+                                  </ListItem>
+                                ))}
+                              </UnorderedList>
+                            </VStack>
+                          )}
+                        </VStack>
                       </Collapse>
                       <Text
                         as="button"
@@ -289,14 +319,40 @@ const EventTickets = () => {
                       </Text>
                     </>
                   ) : (
-                    <Text
-                      title={ticket.descrpition}
-                      color="dark"
-                      fontSize={["12px", "14px"]}
-                      lineHeight="20px"
-                    >
-                      {ticket.description}
-                    </Text>
+                    <VStack align="flex-start" spacing="10px">
+                      <Text
+                        title={ticket.description.info}
+                        color="dark"
+                        fontSize={["12px", "14px"]}
+                        lineHeight="20px"
+                      >
+                        {ticket.description.info}
+                      </Text>
+                      {ticket.description.perks && (
+                        <VStack align="flex-start" spacing="0">
+                          <Heading
+                            color="dark"
+                            fontSize={["14px", "20px"]}
+                            lineHeight="28px"
+                          >
+                            Perks
+                          </Heading>
+                          <UnorderedList py="0">
+                            {ticket.description.perks.map((perk, i) => (
+                              <ListItem key={i}>
+                                <Text
+                                  color="dark"
+                                  fontSize={["12px", "14px"]}
+                                  lineHeight="20px"
+                                >
+                                  {perk}
+                                </Text>
+                              </ListItem>
+                            ))}
+                          </UnorderedList>
+                        </VStack>
+                      )}
+                    </VStack>
                   )}
                 </Box>
               </VStack>

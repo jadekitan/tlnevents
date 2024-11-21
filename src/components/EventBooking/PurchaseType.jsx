@@ -69,7 +69,7 @@ const PurchaseType = ({ name, onChange }) => {
       icon: <FaPeoplePulling className=" w-10 h-10" />,
       title: "Adult",
       description:
-        "For attendees above 18 years, offering full access to all event features and activities.",
+        "For attendees above 16 years, offering full access to all event features and activities.",
     },
   ];
 
