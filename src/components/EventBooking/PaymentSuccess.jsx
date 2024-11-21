@@ -47,6 +47,7 @@ const PaymentSuccess = () => {
   const referenceNumber = query.get("reference");
   const email = query.get("email");
   const guest = query.get("guest");
+  const type = query.get("type");
 
   const [orderData, setOrderData] = useState([]);
 
@@ -117,7 +118,13 @@ const PaymentSuccess = () => {
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
 
-  const [ticketType] = useState(event ? event.tickets : []);
+  const [ticketType, setTicketType] = useState(
+    event
+      ? type === "children"
+        ? event.tickets.children
+        : event.tickets.adult
+      : []
+  );
 
   // Helper function to generate a unique order ID per email
   function generateUniqueOrderId(email) {

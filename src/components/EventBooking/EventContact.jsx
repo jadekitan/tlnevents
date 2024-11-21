@@ -42,6 +42,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
     ticketCounts,
     assignMultiple,
     setAssignMultiple,
+    clearPurchaseType,
     clearContactData,
     clearTicketCounts,
     clearAssignMultiple,
@@ -51,6 +52,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
   const cancelRef = React.useRef();
 
   const clearData = () => {
+    clearPurchaseType();
     clearContactData();
     clearTicketCounts();
     clearAssignMultiple();
@@ -61,7 +63,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
       (ticket) => ticketCounts[ticket.id] > 0
     );
 
-    if (currentStep === 2) {
+    if (currentStep === 3) {
       if (hasSelectedTickets) {
         onOpen();
       } else {
@@ -272,11 +274,12 @@ const EventContact = ({ handleNextStep, formRef }) => {
 
       try {
         const allAttendees = Object.values(values.attendeeAddresses).flat();
-        const data = await contacts(
+        await contacts(
           values.firstName,
           values.lastName,
           values.email,
-          allAttendees
+          allAttendees,
+          "Ticket"
         );
       } catch (error) {
         console.error("Unexpected error:", error);
@@ -501,7 +504,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
                   color="dark"
                   ml={3}
                   onClick={() => {
-                    setStep(1);
+                    setStep(currentStep - 2);
                     clearData();
                   }}
                 >

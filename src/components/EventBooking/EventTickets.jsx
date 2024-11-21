@@ -18,17 +18,19 @@ import {
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const EventTickets = () => {
   const {
     LeftArrow,
+    purchaseType,
     currentStep,
     setStep,
     ticketType,
     ticketCounts,
     setTicketCounts,
     feePercentage,
+    clearPurchaseType,
     clearContactData,
     clearTicketCounts,
     clearAssignMultiple,
@@ -38,25 +40,10 @@ const EventTickets = () => {
   const cancelRef = React.useRef();
 
   const clearData = () => {
+    clearPurchaseType();
     clearContactData();
     clearTicketCounts();
     clearAssignMultiple();
-  };
-
-  const handleArrow = () => {
-    const hasSelectedTickets = ticketType.some(
-      (ticket) => ticketCounts[ticket.id] > 0
-    );
-    if (currentStep === 1) {
-      if (hasSelectedTickets) {
-        onOpen();
-      } else {
-        window.location.href = `/${event.id}`;
-        clearData();
-      }
-    } else {
-      onOpen();
-    }
   };
 
   const { eventId } = useParams(); // Get the event ID from the URL
@@ -164,7 +151,7 @@ const EventTickets = () => {
           p="3px"
           bg="primary.500"
           rounded="6px"
-          onClick={handleArrow}
+          onClick={onOpen}
         >
           <LeftArrow />
         </Box>
@@ -201,7 +188,6 @@ const EventTickets = () => {
                   color="dark"
                   ml={3}
                   onClick={() => {
-                    window.location.href = `/${event.id}`;
                     setStep(1);
                     clearData();
                   }}

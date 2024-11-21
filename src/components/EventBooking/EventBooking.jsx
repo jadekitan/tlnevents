@@ -23,17 +23,19 @@ import {
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
+import PurchaseType from "./PurchaseType";
 import EventTickets from "./EventTickets";
 import EventContact from "./EventContact";
 import { IoClose } from "react-icons/io5";
 import { useParams } from "react-router-dom";
 
 const EventBooking = () => {
-  const steps = [{ title: "Tickets" }, { title: "Contact" }];
+  const steps = [{ title: "Type" }, { title: "Tickets" }, { title: "Contact" }];
 
   const {
     currentStep,
     setStep,
+    purchaseType,
     ticketType,
     ticketCounts,
     feePercentage,
@@ -43,6 +45,7 @@ const EventBooking = () => {
     isDisable,
     setIsDisable,
     assignMultiple,
+    clearPurchaseType,
     clearContactData,
     clearTicketCounts,
     clearAssignMultiple,
@@ -80,6 +83,13 @@ const EventBooking = () => {
     }
   }
 
+  const clearData = () => {
+    clearPurchaseType();
+    clearContactData();
+    clearTicketCounts();
+    clearAssignMultiple();
+  };
+
   const toast = useToast();
 
   // Handle Paystack Payment with the updated selected tickets
@@ -113,8 +123,9 @@ const EventBooking = () => {
       },
       callback: (response) => {
         // Redirect on successful payment verification
-        window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}&email=${email}&guest=${assignMultiple}`;
+        window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}&email=${email}&type=${purchaseType}&guest=${assignMultiple}`;
         setStep(1);
+        clearData();
 
         setIsDisable(false);
         setIsSubmitting(false);
@@ -140,8 +151,10 @@ const EventBooking = () => {
   const showStep = (step) => {
     switch (step) {
       case 1:
-        return <EventTickets />;
+        return <PurchaseType />;
       case 2:
+        return <EventTickets />;
+      case 3:
         return (
           <EventContact handleNextStep={handleNextStep} formRef={formRef} /> // Pass formRef and handleNextStep
         );
@@ -168,7 +181,7 @@ const EventBooking = () => {
         title: "Select A Ticket",
         description: "Please select at least one ticket to continue.",
         status: "info",
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
       });
     }
@@ -176,9 +189,23 @@ const EventBooking = () => {
 
   const ContinueStep = () => {
     if (currentStep === 1) {
-      handleContinue();
+      if (purchaseType) {
+        setStep(2);
+      } else {
+        toast({
+          position: "top",
+          title: "Select A Purchase Type",
+          description: "Please select a purchase type to continue.",
+          status: "info",
+          duration: 3000,
+          isClosable: true,
+        }); // show alert if continue is clicked without selection
+      }
     }
     if (currentStep === 2) {
+      handleContinue();
+    }
+    if (currentStep === 3) {
       if (formRef.current) {
         formRef.current.handleSubmit(); // Trigger form submission
         // scrollToSection("stepper");
@@ -189,25 +216,18 @@ const EventBooking = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = React.useRef();
 
-  const clearData = () => {
-    clearContactData();
-    clearTicketCounts();
-    clearAssignMultiple();
-  };
-
   const handleCancel = () => {
     const hasSelectedTickets = ticketType.some(
       (ticket) => ticketCounts[ticket.id] > 0
     );
-    if (currentStep === 1) {
-      if (hasSelectedTickets) {
-        onOpen();
-      } else {
-        window.location.href = `/${event.id}`;
-        clearData();
-      }
-    } else {
+
+    if (purchaseType && hasSelectedTickets) {
       onOpen();
+    } else {
+      setStep(1);
+      window.location.href = `/${event.id}`;
+
+      clearData();
     }
   };
 
@@ -231,7 +251,7 @@ const EventBooking = () => {
       >
         {/* <Header /> */}
         <VStack w="100%" align="flex-start" spacing="40px">
-          <Box w="100%" display={currentStep === 3 ? "none" : "block"}>
+          <Box w="100%">
             <Flex w="100%" align="center" gap="40px">
               <Flex w="100%" justify="space-between" align="center">
                 <Heading
@@ -305,12 +325,7 @@ const EventBooking = () => {
               align="flex-start"
               spacing="20px"
             >
-              <Box
-                id="stepper"
-                position="relative"
-                width={["100%", "85%"]}
-                display={currentStep === 3 ? "none" : "block"}
-              >
+              <Box id="stepper" position="relative" width={["100%", "85%"]}>
                 <Stepper index={currentStep} size="sm" gap="0">
                   {steps.map((step, index) => (
                     <Step key={index} gap="10px">
@@ -383,15 +398,13 @@ const EventBooking = () => {
           align="flex-start"
         >
           <Box
-            w={currentStep === 3 ? "100%" : ["100%", "100%", "100%", "544px"]}
+            w={["100%", "100%", "100%", "544px"]}
             pb={["100px", "100px", "100px", 0]}
           >
             {showStep(currentStep)}
           </Box>
           <VStack
-            display={
-              currentStep === 3 ? "none" : ["none", "none", "none", "flex"]
-            }
+            display={["none", "none", "none", "flex"]}
             position="sticky"
             top="20px"
             w="450px"
@@ -413,7 +426,37 @@ const EventBooking = () => {
                 <Heading color="dark" fontSize="22px" lineHeight="28px">
                   {event.name}
                 </Heading>
-                {Object.values(ticketCounts).some((count) => count > 0) ? (
+                {currentStep === 1 ? (
+                  purchaseType ? (
+                    <Button
+                      type="submit"
+                      w="100%"
+                      bg="primary.500"
+                      rounded="8px"
+                      _hover={{ bg: "primary.400" }}
+                      _active={{ bg: "secondary.500" }}
+                      _focus={{ bg: "secondary.500" }}
+                      onClick={ContinueStep}
+                      isDisabled={isDisable}
+                      isLoading={isSubmitting}
+                      loadingText="Checkout"
+                      spinnerPlacement="end"
+                    >
+                      <Text
+                        color="dark"
+                        fontSize="14px"
+                        fontWeight="600"
+                        lineHeight="20px"
+                      >
+                        Continue
+                      </Text>
+                    </Button>
+                  ) : (
+                    <Text color="dark" fontSize="16px" lineHeight="24px">
+                      Please, choose a purchase type to continue
+                    </Text>
+                  )
+                ) : Object.values(ticketCounts).some((count) => count > 0) ? (
                   <VStack
                     width="100%"
                     justify="flex-start"
@@ -578,7 +621,7 @@ const EventBooking = () => {
                     fontWeight="600"
                     lineHeight="20px"
                   >
-                    {currentStep === steps.length - 1 ? "Continue" : "Checkout"}
+                    {currentStep === steps.length ? "Checkout" : "Continue"}
                   </Text>
                 </Button>
               </Flex>
