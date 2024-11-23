@@ -577,24 +577,30 @@ END:VCALENDAR
               </Flex>
             </VStack>
           </Stack>
-          <Box
-            display={["block", "block", "block", "none"]}
-            position="fixed"
-            bottom="0px"
-            left="0"
-            w="100%"
-            bg="primary.500"
-            borderTopRadius="8px"
-            p="20px"
-          >
-            <VStack w="100%" justify="center" align="center">
+          <Link to={`/${event.id}/checkout`}>
+            <Box
+              as="button"
+              display={["block", "block", "block", "none"]}
+              position="fixed"
+              bottom="0px"
+              left="0"
+              bg="rgba(0, 0, 0, 0.4)"
+              w="100%"
+              p="10px"
+            >
+              <Button w="100%" bg="primary.500" rounded="8px">
+                <Text>Get Ticket</Text>
+              </Button>
+
+              {/* <VStack w="100%" justify="center" align="center">
               <Link to={`/${event.id}/checkout`}>
                 <Button size="lg" bg="secondary.500" color="dark">
                   Get Ticket
                 </Button>
               </Link>
-            </VStack>
-          </Box>
+            </VStack> */}
+            </Box>
+          </Link>
         </VStack>
       </VStack>
     </VStack>

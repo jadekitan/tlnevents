@@ -22,7 +22,6 @@ import {
 import axios from "axios";
 import { useFormik } from "formik";
 import { multiBookingContext } from "./BookingContext";
-import { contacts } from "../../../server/contacts";
 import { debounce } from "lodash";
 
 const EventContact = ({ handleNextStep, formRef }) => {
@@ -259,7 +258,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
     validateOnBlur: true,
     validateOnChange: false,
     validate,
-    onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: (values, { setSubmitting }) => {
       setIsSubmitting(true);
       setSubmitting(true);
       setIsDisable(true);
@@ -271,22 +270,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
         setIsDisable(false);
         return;
       }
-
-      try {
-        const allAttendees = Object.values(values.attendeeAddresses).flat();
-        await contacts(
-          values.firstName,
-          values.lastName,
-          values.email,
-          allAttendees,
-          "Ticket"
-        );
-      } catch (error) {
-        console.error("Unexpected error:", error);
-      } finally {
-        setSubmitting(false);
-      }
-
       handleNextStep(); // Advance to the next step if everything is valid
     },
   });

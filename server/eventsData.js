@@ -69,7 +69,6 @@ export const eventsData = {
           quantity: 100,
           maxQuantity: 5,
           step: 1,
-
           description: {
             info: "This Entry Ticket grants you full access to the entire experience, designed to keep you entertained, engaged, and immersed in the lively atmosphere!",
             perks: ["Regular Entry"],
