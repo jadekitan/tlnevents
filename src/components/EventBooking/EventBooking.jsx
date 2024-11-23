@@ -28,6 +28,7 @@ import EventTickets from "./EventTickets";
 import EventContact from "./EventContact";
 import { IoClose } from "react-icons/io5";
 import { useParams } from "react-router-dom";
+import { contacts } from "../../../server/contacts";
 
 const EventBooking = () => {
   const steps = [{ title: "Type" }, { title: "Tickets" }, { title: "Contact" }];
@@ -122,11 +123,20 @@ const EventBooking = () => {
         setIsSubmitting(false);
       },
       callback: (response) => {
+        const allAttendees = Object.values(
+          contactData.attendeeAddresses
+        ).flat();
+        contacts(
+          contactData.firstName,
+          contactData.lastName,
+          contactData.email,
+          allAttendees,
+          "Ticket"
+        );
         // Redirect on successful payment verification
         window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}&email=${email}&type=${purchaseType}&guest=${assignMultiple}`;
         setStep(1);
         clearData();
-
         setIsDisable(false);
         setIsSubmitting(false);
       },
@@ -191,6 +201,7 @@ const EventBooking = () => {
     if (currentStep === 1) {
       if (purchaseType) {
         setStep(2);
+        window.location.href = `/${event.id}/checkout?type=${purchaseType}`;
       } else {
         toast({
           position: "top",
@@ -220,13 +231,13 @@ const EventBooking = () => {
     const hasSelectedTickets = ticketType.some(
       (ticket) => ticketCounts[ticket.id] > 0
     );
-
-    if (purchaseType && hasSelectedTickets) {
+    if (purchaseType) {
+      onOpen();
+    } else if (hasSelectedTickets) {
       onOpen();
     } else {
       setStep(1);
       window.location.href = `/${event.id}`;
-
       clearData();
     }
   };
@@ -589,7 +600,81 @@ const EventBooking = () => {
             px="20px"
             rounded="8px"
           >
-            {Object.values(ticketCounts).some((count) => count >= 0) ? (
+            {currentStep === 1 ? (
+              purchaseType ? (
+                <Flex
+                  h="100%"
+                  py="14px"
+                  px="20px"
+                  rounded="8px"
+                  bg="primary.500"
+                  justify="space-between"
+                  align="center"
+                >
+                  <Heading color="dark" fontSize="24px" lineHeight="32px">
+                    ₦ 0
+                  </Heading>
+                  <Button
+                    w="122px"
+                    rounded="8px"
+                    bg="secondary.500"
+                    _hover={{ bg: "primary.400" }}
+                    _active={{ bg: "secondary.500" }}
+                    _focus={{ bg: "secondary.500" }}
+                    onClick={ContinueStep}
+                    isDisabled={isDisable}
+                    isLoading={isSubmitting}
+                    loadingText="Checkout"
+                    spinnerPlacement="end"
+                  >
+                    <Text
+                      color="dark"
+                      fontSize="14px"
+                      fontWeight="600"
+                      lineHeight="20px"
+                    >
+                      {currentStep === steps.length ? "Checkout" : "Continue"}
+                    </Text>
+                  </Button>
+                </Flex>
+              ) : (
+                <Flex
+                  h="100%"
+                  py="14px"
+                  px="20px"
+                  rounded="8px"
+                  bg="primary.500"
+                  justify="space-between"
+                  align="center"
+                >
+                  <Heading color="dark" fontSize="24px" lineHeight="32px">
+                    ₦ 0
+                  </Heading>
+                  <Button
+                    w="122px"
+                    rounded="8px"
+                    bg="secondary.500"
+                    _hover={{ bg: "primary.400" }}
+                    _active={{ bg: "secondary.500" }}
+                    _focus={{ bg: "secondary.500" }}
+                    onClick={ContinueStep}
+                    isDisabled={isDisable}
+                    isLoading={isSubmitting}
+                    loadingText="Checkout"
+                    spinnerPlacement="end"
+                  >
+                    <Text
+                      color="dark"
+                      fontSize="14px"
+                      fontWeight="600"
+                      lineHeight="20px"
+                    >
+                      {currentStep === steps.length ? "Checkout" : "Continue"}
+                    </Text>
+                  </Button>
+                </Flex>
+              )
+            ) : Object.values(ticketCounts).some((count) => count >= 0) ? (
               <Flex
                 h="100%"
                 py="14px"
