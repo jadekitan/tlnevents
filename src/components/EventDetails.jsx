@@ -372,7 +372,7 @@ END:VCALENDAR
               h="100%"
               align="flex-start"
               spacing="50px"
-              pb="120px"
+              pb="80px"
             >
               <VStack w="100%" align="flex-start" spacing={["10px", "20px"]}>
                 <Heading color="dark" fontSize={["28px", "32px"]}>
@@ -579,12 +579,12 @@ END:VCALENDAR
           </Stack>
           <Link to={`/${event.id}/checkout`}>
             <Box
-              as="button"
               display={["block", "block", "block", "none"]}
               position="fixed"
               bottom="0px"
               left="0"
-              bg="rgba(0, 0, 0, 0.4)"
+              bg="#fff"
+              boxShadow="xs"
               w="100%"
               p="10px"
             >
