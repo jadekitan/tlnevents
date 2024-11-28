@@ -21,9 +21,8 @@ const Store = () => {
   const event = eventsData[eventId]; // Lookup event from local data
 
   const products = event ? event.merch : {};
-  const item = products[itemId];
 
-  const { cart, renderCartDrawer, onOpen } = useContext(CartContext);
+  const { cart, renderCartDrawer } = useContext(CartContext);
 
   return (
     <VStack
@@ -43,29 +42,31 @@ const Store = () => {
             alt="The Lemonade Logo"
           ></Image>
         </Link>
-        <Box as="button" onClick={onOpen} position="relative">
-          <Box>
-            <FaShoppingCart className=" w-6 h-6" />
-          </Box>
-          {cart.length > 0 && (
-            <Box
-              position="absolute"
-              top="-2"
-              right="-2"
-              bg="red.500"
-              color="white"
-              borderRadius="full"
-              w={5}
-              h={5}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              fontSize="xs"
-            >
-              {cart.length}
+        <Link to={`/${event.id}/merch/cart`}>
+          <Box position="relative">
+            <Box>
+              <FaShoppingCart className=" w-6 h-6" />
             </Box>
-          )}
-        </Box>
+            {cart.length > 0 && (
+              <Box
+                position="absolute"
+                top="-2"
+                right="-2"
+                bg="primary.500"
+                color="white"
+                borderRadius="full"
+                w={4}
+                h={4}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                fontSize="xs"
+              >
+                <Text>{cart.length}</Text>
+              </Box>
+            )}
+          </Box>
+        </Link>
       </Flex>
       <VStack w="100%" align="flex-start" spacing="100px">
         <VStack w="100%" align="flex-start" spacing="50px">
@@ -87,7 +88,7 @@ const Store = () => {
                 to={`/${event.id}/merch/tees/${product.id}`}
               >
                 <VStack key={product.id} spacing={4}>
-                  <Box h={["200px", "250px"]}>
+                  <Box h={["200px", "250px"]} boxShadow="sm">
                     <Image
                       w="100%"
                       h="100%"

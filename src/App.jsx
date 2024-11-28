@@ -5,6 +5,7 @@ import BookingContext from "./components/EventBooking/BookingContext.jsx";
 import EventBooking from "./components/EventBooking/EventBooking.jsx";
 import PaymentSuccess from "./components/EventBooking/PaymentSuccess.jsx";
 import CartProvider from "./components/Merch/CartProvider.jsx";
+import Cart from "./components/Merch/Cart.jsx";
 import Store from "./components/Merch/Store.jsx";
 import ProductDetails from "./components/Merch/ProductDetails.jsx";
 
@@ -43,6 +44,14 @@ function App() {
         element={
           <CartProvider>
             <ProductDetails />
+          </CartProvider>
+        }
+      />
+      <Route
+        path="/:eventId/merch/cart"
+        element={
+          <CartProvider>
+            <Cart />
           </CartProvider>
         }
       />

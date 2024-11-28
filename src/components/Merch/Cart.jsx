@@ -1,118 +1,54 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useEffect, useContext, useState, useRef } from "react";
 import {
   Box,
   Button,
-  Card,
-  CardBody,
-  CardHeader,
-  CardFooter,
-  Container,
-  Drawer,
-  DrawerBody,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  FormControl,
-  FormLabel,
-  Grid,
   Heading,
-  Image,
-  Input,
-  Radio,
-  RadioGroup,
-  Stack,
   Text,
-  useDisclosure,
   VStack,
   HStack,
-  Badge,
   IconButton,
-  useToast,
   Flex,
-  ButtonGroup,
+  Image,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  useToast,
 } from "@chakra-ui/react";
-import { AddIcon, MinusIcon, DeleteIcon } from "@chakra-ui/icons";
+import {
+  AddIcon,
+  MinusIcon,
+  DeleteIcon,
+  ChevronRightIcon,
+} from "@chakra-ui/icons";
 import CheckoutForm from "./CheckoutForm";
+import { CartContext } from "./CartProvider";
+import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { eventsData } from "../../../server/eventsData";
-import { debounce } from "lodash";
+import { Helmet } from "react-helmet-async";
 
-export const CartContext = React.createContext();
-
-const CartProvider = ({ children }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+const Cart = () => {
+  useEffect(() => {
+    document.title = "Shopping Cart | The Lemonade Network";
+  }, []);
+  const {
+    cart,
+    checkoutStep,
+    setCheckoutStep,
+    getTotal,
+    contactData,
+    removeFromCart,
+  } = useContext(CartContext);
 
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
-
-  const products = useState(event ? event.merch : []);
-
-  const [cart, setCart] = useState([]);
-  const [checkoutStep, setCheckoutStep] = useState("cart");
-
-  const addToCart = (product, options) => {
-    const { size = null, color, quantity = 1 } = options;
-
-    const cartItemId = size
-      ? `${product.id}-${size}-${color}`
-      : `${product.id}-${color}`;
-
-    setCart((prevCart) => {
-      const existingItem = prevCart.find(
-        (item) => item.cartItemId === cartItemId
-      );
-
-      if (existingItem) {
-        // Update quantity if item exists
-        return prevCart.map((item) =>
-          item.cartItemId === cartItemId
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      }
-
-      const newItem = {
-        ...product,
-        cartItemId,
-        color,
-        quantity,
-        ...(size && { size }),
-      };
-
-      return [...prevCart, newItem];
-    });
-  };
-
-  const updateQuantity = (cartItemId, newQuantity) => {
-    if (newQuantity < 1) return;
-
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.cartItemId === cartItemId
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
-    );
-  };
-
-  const removeFromCart = (cartItemId) => {
-    setCart((prevCart) =>
-      prevCart.filter((item) => item.cartItemId !== cartItemId)
-    );
-  };
-
-  const getTotal = () => {
-    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  };
-
-  const total = getTotal();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDisable, setIsDisable] = useState(false);
 
   const toast = useToast();
+
+  const total = getTotal();
 
   const handlePaystackPayment = (
     firstName,
@@ -163,20 +99,62 @@ const CartProvider = ({ children }) => {
       total
     );
   };
-
   const formRef = useRef(null);
+  return (
+    <>
+      <Helmet>
+        <title>Shopping Cart | The Lemonade Network</title>
+        <meta
+          property="og:title"
+          content="Shopping Cart | The Lemonade Network"
+        />
+      </Helmet>
+      <VStack
+        w="100%"
+        h="100%"
+        justify="center"
+        align="center"
+        spacing={["25px", "60px", "70px", "75px", "30px"]}
+      >
+        <Flex
+          width="100%"
+          h="80px"
+          boxShadow="sm"
+          justify="space-between"
+          align="center"
+          px={["20px", "50px", "75px", "100px"]}
+        >
+          <Link to="/">
+            <Image
+              w={["100px", "120px"]}
+              src="/logo.webp"
+              alt="The Lemonade Logo"
+            />
+          </Link>
 
-  // New function to render the Cart Drawer
-  const renderCartDrawer = () => (
-    <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
-      <DrawerOverlay />
-      <DrawerContent>
-        <DrawerCloseButton />
-        <DrawerHeader>
-          {checkoutStep === "cart" ? "Shopping Cart" : "Checkout"}
-        </DrawerHeader>
+          <Breadcrumb
+            spacing="8px"
+            separator={<ChevronRightIcon color="gray.500" />}
+          >
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/${event.id}/merch`}>
+                <Text color="neutral.500" fontSize={["14px", "16px"]}>
+                  Merch
+                </Text>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
 
-        <DrawerBody>
+            <BreadcrumbItem isCurrentPage>
+              <BreadcrumbLink href="#">
+                <Text color="dark" fontSize={["16px", "18px"]}>
+                  {checkoutStep === "cart" ? "Cart" : "Checkout"}
+                </Text>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </Breadcrumb>
+        </Flex>
+
+        <Box py="20px" px={["20px", "50px", "75px", "100px"]}>
           {cart.length > 0 ? (
             checkoutStep === "cart" ? (
               <VStack spacing={4}>
@@ -235,12 +213,19 @@ const CartProvider = ({ children }) => {
               <CheckoutForm handleNextStep={handleNextStep} formRef={formRef} />
             )
           ) : (
-            <VStack width="100%">
-              <Text color="gray.500">Your cart is empty</Text>
+            <VStack width="100%" height="70vh" justify="center" spacing="20px">
+              <Text color="gray.500" fontSize={["18px", "24px"]}>
+                There are no items in your cart
+              </Text>
+              <Link to={`/${event.id}/merch`}>
+                <Button bg="primary.500">
+                  <Text fontSize={["14px", "16px"]}>Continue Shopping</Text>
+                </Button>
+              </Link>
             </VStack>
           )}
-        </DrawerBody>
-        <DrawerFooter>
+        </Box>
+        <Box>
           {cart.length > 0 ? (
             checkoutStep === "cart" ? (
               <Flex
@@ -320,77 +305,10 @@ const CartProvider = ({ children }) => {
               </Flex>
             )
           ) : null}
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
-  );
-  const [contactData, setContactData] = useState(() => {
-    const storedContactData = localStorage.getItem("contactData");
-    return storedContactData
-      ? JSON.parse(storedContactData)
-      : {
-          firstName: "",
-          lastName: "",
-          email: "",
-          phone: "",
-          countryCode: "+234",
-        };
-  });
-
-  // Debounced localStorage save
-  const saveToLocalStorage = useCallback(
-    debounce((data) => {
-      localStorage.setItem("contactData", JSON.stringify(data));
-    }, 300),
-    []
-  );
-
-  // General contact data change handler
-  const handleContactDataChange = useCallback(
-    (newData) => {
-      setContactData((prevData) => {
-        const updatedData = { ...prevData, ...newData };
-        requestAnimationFrame(() => {
-          saveToLocalStorage(updatedData);
-        });
-        return updatedData;
-      });
-    },
-    [saveToLocalStorage]
-  );
-
-  // Call save on form blur
-  const handleBlur = useCallback(() => {
-    saveToLocalStorage(contactData);
-  }, [contactData, saveToLocalStorage]);
-
-  return (
-    <CartContext.Provider
-      value={{
-        cart,
-        addToCart,
-        updateQuantity,
-        getTotal,
-        checkoutStep,
-        setCheckoutStep,
-        onOpen,
-        renderCartDrawer,
-        isOpen,
-        onClose,
-        contactData,
-        setContactData,
-        handleContactDataChange,
-        handleBlur,
-        isSubmitting,
-        setIsSubmitting,
-        isDisable,
-        setIsDisable,
-        removeFromCart
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+        </Box>
+      </VStack>
+    </>
   );
 };
 
-export default CartProvider;
+export default Cart;

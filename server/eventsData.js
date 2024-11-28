@@ -93,7 +93,7 @@ export const eventsData = {
           sizes: ["M", "L", "XL", "XXL"],
           colors: ["black", "white", "pink"],
           image:
-            "https://tlnevents.com/assets/merch/tees/lemonade-tee(white-back).jpg",
+            "https://tlnevents.com/assets/merch/tees/lemonade-tee(black-back).jpg",
         },
         "playground-vibes-tee": {
           id: "playground-vibes-tee",
@@ -110,7 +110,7 @@ export const eventsData = {
           sizes: ["M", "L", "XL", "XXL"],
           colors: ["black", "white", "pink"],
           image:
-            "https://tlnevents.com/assets/merch/tees/playground-vibes-tee(white-back).jpg",
+            "https://tlnevents.com/assets/merch/tees/playground-vibes-tee(pink-back).jpg",
         },
         "rewind-repeat-tee": {
           id: "rewind-repeat-tee",

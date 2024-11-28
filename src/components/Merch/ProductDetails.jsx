@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Box,
   Button,
@@ -22,18 +22,32 @@ import {
   AccordionItem,
   AccordionButton,
   AccordionPanel,
+  Drawer,
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
   List,
   ListItem,
   ListIcon,
   OrderedList,
   UnorderedList,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useParams, Link } from "react-router-dom";
 import { eventsData } from "../../../server/eventsData";
 import { CartContext } from "./CartProvider";
-import { AddIcon, MinusIcon } from "@chakra-ui/icons";
+import {
+  AddIcon,
+  MinusIcon,
+  DeleteIcon,
+  CheckCircleIcon,
+} from "@chakra-ui/icons";
 import { FaShoppingCart } from "react-icons/fa";
 import { Radio, RadioGroup } from "@headlessui/react";
+import { Helmet } from "react-helmet-async";
 
 const ProductDetails = () => {
   const { eventId } = useParams(); // Get the event ID from the URL
@@ -45,7 +59,44 @@ const ProductDetails = () => {
 
   const product = merch[itemId];
 
-  const { cart, onOpen, renderCartDrawer, addToCart } = useContext(CartContext);
+  useEffect(() => {
+    setTimeout(() => {
+      document.title = `${product?.name} | The Lemonade Network`;
+      // Set or update description meta tag
+      let descriptionMeta = document.querySelector('meta[name="description"]');
+      if (!descriptionMeta) {
+        descriptionMeta = document.createElement("meta");
+        descriptionMeta.name = "description";
+        document.head.appendChild(descriptionMeta);
+      }
+      descriptionMeta.content =
+        event.about?.description || "Default description";
+
+      // Set or update Open Graph meta tags
+      const ogTags = [
+        { property: "og:title", content: product?.name },
+        {
+          property: "og:description",
+          content: product?.description?.head || "Default description",
+        },
+        { property: "og:image", content: product?.image },
+        { property: "og:url", content: `https://tlnevents.com/${event.id}` },
+      ];
+
+      ogTags.forEach(({ property, content }) => {
+        let metaTag = document.querySelector(`meta[property="${property}"]`);
+        if (!metaTag) {
+          metaTag = document.createElement("meta");
+          metaTag.setAttribute("property", property);
+          document.head.appendChild(metaTag);
+        }
+        metaTag.content = content;
+      });
+    }, 100);
+  }, []);
+
+  const { cart, renderCartDrawer, addToCart, removeFromCart, getTotal } =
+    useContext(CartContext);
 
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
@@ -76,6 +127,7 @@ const ProductDetails = () => {
     return classes.filter(Boolean).join(" ");
   }
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <VStack
       w="100%"
@@ -101,29 +153,31 @@ const ProductDetails = () => {
               alt="The Lemonade Logo"
             ></Image>
           </Link>
-          <Box as="button" onClick={onOpen} position="relative">
-            <Box>
-              <FaShoppingCart className=" w-6 h-6" />
-            </Box>
-            {cart.length > 0 && (
-              <Box
-                position="absolute"
-                top="-2"
-                right="-2"
-                bg="primary.500"
-                color="white"
-                borderRadius="full"
-                w={4}
-                h={4}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                fontSize="xs"
-              >
-                <Text>{cart.length}</Text>
+          <Link to={`/${event.id}/merch/cart`}>
+            <Box position="relative">
+              <Box>
+                <FaShoppingCart className=" w-6 h-6" />
               </Box>
-            )}
-          </Box>
+              {cart.length > 0 && (
+                <Box
+                  position="absolute"
+                  top="-2"
+                  right="-2"
+                  bg="primary.500"
+                  color="white"
+                  borderRadius="full"
+                  w={4}
+                  h={4}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  fontSize="xs"
+                >
+                  <Text>{cart.length}</Text>
+                </Box>
+              )}
+            </Box>
+          </Link>
         </Flex>
         <VStack w="100%" h="100%" align="flex-start" spacing={["40px", "20px"]}>
           <Breadcrumb fontWeight="500" color="Dark">
@@ -351,6 +405,166 @@ const ProductDetails = () => {
                 >
                   Add to Cart
                 </Button>
+                <Drawer
+                  isOpen={isOpen}
+                  placement="right"
+                  onClose={onClose}
+                  size="md"
+                >
+                  <DrawerOverlay />
+                  <DrawerContent>
+                    <DrawerCloseButton />
+                    <DrawerHeader>Added To Cart!</DrawerHeader>
+
+                    <DrawerBody>
+                      {cart.length > 0 ? (
+                        <VStack spacing={4}>
+                          {cart.map((item) => (
+                            <Box
+                              key={item.cartItemId}
+                              p={4}
+                              borderWidth={1}
+                              borderRadius="lg"
+                              width="full"
+                            >
+                              <VStack width="100%" align="start" spacing="0px">
+                                <Flex
+                                  w="100%"
+                                  justify="space-between"
+                                  align="center"
+                                >
+                                  <Text fontWeight="bold">{item.name}</Text>
+                                  <IconButton
+                                    bg="transparent"
+                                    icon={<DeleteIcon w="15px" />}
+                                    onClick={() =>
+                                      removeFromCart(item.cartItemId)
+                                    }
+                                  />
+                                </Flex>
+                                <HStack align="flex-start">
+                                  <Box w="50px" h="50px">
+                                    <Image w="100%" h="100%" src={item.image} />
+                                  </Box>
+                                  <VStack align="flex-start">
+                                    <Text color="gray.600">
+                                      Color: {item.color}, Size: {item.size},
+                                      Qty: {item.quantity}
+                                    </Text>
+                                    {/*<Text color="neutral.500">
+                                      Quantity: {item.quantity}
+                                    </Text> */}
+                                    <Text>
+                                      ₦{" "}
+                                      {(
+                                        item.price * item.quantity
+                                      ).toLocaleString()}
+                                    </Text>
+                                  </VStack>
+                                </HStack>
+                              </VStack>
+                            </Box>
+                          ))}
+                        </VStack>
+                      ) : (
+                        <VStack
+                          width="100%"
+                          h="70vh"
+                          justify="center"
+                          align="center"
+                        >
+                          <CheckCircleIcon
+                            w="50px"
+                            h="50px"
+                            color="primary.500"
+                          />
+                          <Text color="gray.500">Item removed from Cart</Text>
+                        </VStack>
+                      )}
+                    </DrawerBody>
+                    <DrawerFooter>
+                      {cart.length > 0 ? (
+                        <Flex
+                          width="100%"
+                          h="100%"
+                          py="14px"
+                          px="20px"
+                          rounded="8px"
+                          bg="primary.500"
+                          justify="space-between"
+                          align="center"
+                        >
+                          <Heading
+                            color="dark"
+                            fontSize="24px"
+                            lineHeight="32px"
+                          >
+                            {` ₦ ${getTotal().toLocaleString()}`}
+                          </Heading>
+                          <Link to={`${event.id}/merch/cart`}>
+                            <Button
+                              w="122px"
+                              rounded="8px"
+                              bg="secondary.500"
+                              _hover={{ bg: "primary.400" }}
+                              _active={{ bg: "secondary.500" }}
+                              _focus={{ bg: "secondary.500" }}
+                              onClick={() => setCheckoutStep("checkout")}
+                            >
+                              <Text
+                                color="dark"
+                                fontSize="14px"
+                                fontWeight="600"
+                                lineHeight="20px"
+                              >
+                                View Cart
+                              </Text>
+                            </Button>
+                          </Link>
+                        </Flex>
+                      ) : (
+                        <Flex
+                          width="100%"
+                          h="100%"
+                          py="14px"
+                          px="20px"
+                          rounded="8px"
+                          bg="primary.500"
+                          justify="space-between"
+                          align="center"
+                        >
+                          <Heading
+                            color="dark"
+                            fontSize="24px"
+                            lineHeight="32px"
+                          >
+                            ₦ 0
+                          </Heading>
+                          <Link to={`${event.id}/merch/cart`}>
+                            <Button
+                              w="122px"
+                              rounded="8px"
+                              bg="secondary.500"
+                              _hover={{ bg: "primary.400" }}
+                              _active={{ bg: "secondary.500" }}
+                              _focus={{ bg: "secondary.500" }}
+                              onClick={() => setCheckoutStep("checkout")}
+                            >
+                              <Text
+                                color="dark"
+                                fontSize="14px"
+                                fontWeight="600"
+                                lineHeight="20px"
+                              >
+                                View Cart
+                              </Text>
+                            </Button>
+                          </Link>
+                        </Flex>
+                      )}
+                    </DrawerFooter>
+                  </DrawerContent>
+                </Drawer>
               </Stack>
               <Accordion allowToggle w="100%">
                 <VStack w="100%" align="center" columnGap="49px">
