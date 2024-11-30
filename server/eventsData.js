@@ -77,23 +77,211 @@ export const eventsData = {
       ],
     },
     merch: {
-      r8eufiasfjef9qeriqegivjadjqef4: {
-        id: "r8eufiasfjef9qeriqegivjadjqef4",
-        name: "Lemonade X MoRhodes Tees",
-        price: 20000,
-        description: "Official festival t-shirt with artwork",
-        sizes: ["S", "M", "L", "XL"],
-        colors: ["dark", "white", "grey"],
-        image: "https://tlnevents.com/assets/merch/lemonade X morhodes.jpg",
+      tees: {
+        "lemonade-tee": {
+          id: "lemonade-tee",
+          name: "Lemonade Tee",
+          price: 35000,
+          description: {
+            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
+            color:
+              "Available in Black, White, and Pink, perfect for versatile styling.",
+            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
+            footer:
+              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
+          },
+          sizes: ["M", "L", "XL", "XXL"],
+          colors: ["Black", "White", "Pink"],
+          image:
+            "https://tlnevents.com/assets/merch/tees/lemonade-tee(black-back).jpg",
+          hasFrontView: true,
+          hasBackView: true,
+        },
+
+        "playground-vibes-tee": {
+          id: "playground-vibes-tee",
+          name: "Playground Vibes Tee",
+          price: 35000,
+          description: {
+            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
+            color:
+              "Available in Black, White, and Pink, perfect for versatile styling.",
+            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
+            footer:
+              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
+          },
+          sizes: ["M", "L", "XL", "XXL"],
+          colors: ["Black", "White", "Pink"],
+          image:
+            "https://tlnevents.com/assets/merch/tees/playground-vibes-tee(pink-back).jpg",
+          hasFrontView: true,
+          hasBackView: true,
+        },
+        "rewind-repeat-tee": {
+          id: "rewind-repeat-tee",
+          name: "Rewind Repeat Tee",
+          price: 35000,
+          description: {
+            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
+            color:
+              "Available in Black, White, and Pink, perfect for versatile styling.",
+            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
+            footer:
+              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
+          },
+          sizes: ["M", "L", "XL", "XXL"],
+          colors: ["Black", "White", "Pink"],
+          image:
+            "https://tlnevents.com/assets/merch/tees/rewind-repeat-tee(white-back).jpg",
+          hasBackView: true,
+          hasFrontView: false,
+        },
       },
-      2: {
-        id: 2,
-        name: "Festival Hoodie",
-        price: 45.0,
-        description: "Comfortable hoodie with festival logo",
-        sizes: ["S", "M", "L", "XL"],
-        colors: ["Black", "Gray"],
-        image: "https://tlnevents.com/assets/event-banners/lpe.webp",
+      "crop-tops": {
+        "wrangler-crop-top": {
+          id: "wrangler-crop-top",
+          name: "Wrangler Crop Top",
+          price: 25000,
+          description: {
+            head: "Bold and striking, this crop top is ideal for making a statement at the event or beyond.",
+            color: "Iconic combinations of Black and White and Red and White.",
+            size: " S, M, L, XL, XXL.",
+            footer:
+              "With a Wrangler-inspired edge, this piece brings an effortlessly cool vibe.",
+          },
+          sizes: ["S", "M", "L", "XL", "XXL"],
+          colors: ["Black", "Red"],
+          image:
+            "https://tlnevents.com/assets/merch/crop-tops/wrangler-crop-top(black-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
+        },
+        "washed-crop-top": {
+          id: "washed-crop-top",
+          name: "Washed Crop Top",
+          price: 25000,
+          description: {
+            head: "Effortlessly chic with a touch of vintage, the washed crop top is the perfect balance of comfort and style.",
+            color: "Subtle tones like White, Black, and Pink.",
+            size: " S, M, L, XL, XXL.",
+            footer:
+              "Its washed aesthetic offers a laid-back, retro charm suitable for all-day wear.",
+          },
+          sizes: ["S", "M", "L", "XL", "XXL"],
+          colors: ["White", "Black"],
+          image:
+            "https://tlnevents.com/assets/merch/crop-tops/washed-crop-top(black-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
+        },
+        "ringer-baby-crop-top": {
+          id: "ringer-baby-crop-top",
+          name: "Ringer Baby Crop Top",
+          price: 25000,
+          description: {
+            head: "Cute and sporty, the ringer baby crop top is made to elevate your casual style.",
+            color:
+              "Fresh combos like Cream and Blue, Black and White, and Pink and Cream.",
+            size: " S, M, L, XL.",
+            footer:
+              "With ringer-style edges and soft fabric, it’s a playful choice for any Lemonade Playground enthusiast.",
+          },
+          sizes: ["S", "M", "L", "XL"],
+          colors: ["Cream & Blue", "Cream & Green"],
+          image:
+            "https://tlnevents.com/assets/merch/crop-tops/ringer-baby-crop-top(cream & green-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
+        },
+      },
+      "bucket-hats": {
+        "fisherman-bucket-hat": {
+          id: "fisherman-bucket-hat",
+          name: "Fisherman Bucket Hat",
+          price: 23000,
+          description: {
+            head: "Relaxed yet trendy, this hat is a festival staple.",
+            color: "White, Black, and Pink for versatile styling",
+            size: "One size fits all.",
+            footer:
+              "Its lightweight fabric ensures comfort while protecting you from the sun.",
+          },
+          colors: ["White", "Pink"],
+          image:
+            "https://tlnevents.com/assets/merch/bucket-hats/fisherman-bucket-hat(pink-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
+        },
+        "denim-bucket-hat": {
+          id: "denim-bucket-hat",
+          name: " Denim Bucket Hat",
+          price: 23000,
+          description: {
+            head: "Add an edge to your look with this denim-inspired classic.",
+            color: "Available in Grey, Orange, and Black.",
+            size: "One size fits all.",
+            footer:
+              "Pair it with casual outfits for a modern, street-style vibe.",
+          },
+          colors: ["Grey"],
+          image:
+            "https://tlnevents.com/assets/merch/bucket-hats/denim-bucket-hat(grey-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
+        },
+      },
+      caps: {
+        "3d-panel": {
+          id: "3d-panel",
+          name: "3D panel",
+          price: 20000,
+          description: {
+            head: "A bold and modern option that stands out with its detailed 3D panels.",
+            color: "Sleek Black, vibrant Yellow, and clean White.",
+            size: "One size fits all.",
+            footer: "This cap adds a sporty edge to your ensemble.",
+          },
+          colors: ["Black", "Yellow", "White"],
+          image:
+            "https://tlnevents.com/assets/merch/caps/3d-panel(black-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
+        },
+        "2tone-daddy-hat": {
+          id: "2tone-daddy-hat",
+          name: "2tone Daddy Hat",
+          price: 20000,
+          description: {
+            head: "Classic and cool, this two-tone design brings subtle sophistication to your outfit.",
+            color:
+              "Creative combinations like Chocolate and Cream, Black and White, and Cream and Green.",
+            size: "One size fits all.",
+            footer:
+              "Designed for ultimate comfort and style, this cap suits any occasion.",
+          },
+          colors: ["Chocolate & Cream", "White & Black", "Cream & Green"],
+          image:
+            "https://tlnevents.com/assets/merch/caps/2tone-daddy-hat(cream & green-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
+        },
+        "draw-string-daddy-hat": {
+          id: "draw-string-daddy-hat",
+          name: "Draw String Daddy Hat",
+          price: 20000,
+          description: {
+            head: "A unique twist on traditional caps, featuring a drawstring design for a custom fit.",
+            color: "Warm tones like Cream, Chocolate, and Wine.",
+            size: "One size fits all.",
+            footer:
+              "With a perfect blend of style and practicality, it’s a standout accessory for fans of the Lemonade Playground Experience.",
+          },
+          colors: ["green", "wine"],
+          image:
+            "https://tlnevents.com/assets/merch/caps/draw-string-daddy-hat(green-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
+        },
       },
     },
     about: {

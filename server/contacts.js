@@ -1,13 +1,21 @@
 import axios from "axios";
 import { baseURL } from "./base";
 
-export async function contacts(firstName, lastName, email, allAtendees, type) {
+export async function contacts(
+  firstName,
+  lastName,
+  email,
+  phone,
+  attendees,
+  type
+) {
   try {
     const response = await axios.post(`${baseURL}/contacts`, {
       firstName,
       lastName,
       email,
-      attendeeAddresses: allAtendees,
+      phone,
+      attendees,
       type,
     });
     return {
@@ -15,21 +23,25 @@ export async function contacts(firstName, lastName, email, allAtendees, type) {
       message: response.data.message,
       data: response.data.data,
     };
-    // Return the data from the response
   } catch (error) {
     if (error.response) {
-      // The request was made and the server responded with a status code outside of the range of 2xx
+      // Handle server errors
       return {
         success: false,
         status: error.response.status,
-        message: error.response.data.message || "Something went wrong",
+        message:
+          error.response.data.message ||
+          "An error occurred while processing your request.",
       };
     } else if (error.request) {
-      // The request was made but no response was received
-      return { success: false, message: "No response received from server" };
+      // Handle no response received
+      return {
+        success: false,
+        message: "No response received from the server.",
+      };
     } else {
-      // Something happened in setting up the request
-      return { success: false, message: error.message };
+      // Handle other errors
+      return { success: false, message: `Error: ${error.message}` };
     }
   }
 }

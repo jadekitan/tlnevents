@@ -28,7 +28,6 @@ import EventTickets from "./EventTickets";
 import EventContact from "./EventContact";
 import { IoClose } from "react-icons/io5";
 import { useParams } from "react-router-dom";
-import { contacts } from "../../../server/contacts";
 
 const EventBooking = () => {
   const steps = [{ title: "Type" }, { title: "Tickets" }, { title: "Contact" }];
@@ -123,16 +122,6 @@ const EventBooking = () => {
         setIsSubmitting(false);
       },
       callback: (response) => {
-        const allAttendees = Object.values(
-          contactData.attendeeAddresses
-        ).flat();
-        contacts(
-          contactData.firstName,
-          contactData.lastName,
-          contactData.email,
-          allAttendees,
-          "Ticket"
-        );
         // Redirect on successful payment verification
         window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}&email=${email}&type=${purchaseType}&guest=${assignMultiple}`;
         setStep(1);
@@ -270,7 +259,7 @@ const EventBooking = () => {
                   fontSize={["18px", "22px"]}
                   lineHeight="28px"
                 >
-                  Check Out
+                  Checkout
                 </Heading>
 
                 <IoClose

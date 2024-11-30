@@ -86,7 +86,7 @@ const Hero = () => {
         {/* Get Tickets Button */}
         <Flex align="center" gap="40px">
           <Link
-            to={`/${eventData.url}/checkout`}
+            to={`/${eventData.url}`}
             _hover={{ textDecoration: "none" }}
             target="_blank"
           >
@@ -96,11 +96,11 @@ const Hero = () => {
               _hover={{ bg: "primary.400" }}
               color="dark"
             >
-              Get Ticket
+              View Event
             </Button>
           </Link>
           <Link
-            to={`/${eventData.url}`}
+            to={`/${eventData.url}/merch`}
             _hover={{ textDecoration: "none" }}
             target="_blank"
           >
@@ -110,7 +110,7 @@ const Hero = () => {
               _hover={{ bg: "primary.400" }}
               color="dark"
             >
-              View Event
+              Get Merch
             </Button>
           </Link>
         </Flex>

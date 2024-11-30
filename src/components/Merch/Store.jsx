@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useEffect, useContext } from "react";
 import {
   Box,
   Grid,
@@ -7,472 +7,358 @@ import {
   Text,
   VStack,
   Flex,
-  Center,
 } from "@chakra-ui/react";
 import { useParams, Link } from "react-router-dom";
 import { eventsData } from "../../../server/eventsData";
 import { CartContext } from "./CartProvider";
 import { FaShoppingCart } from "react-icons/fa";
-import { FaArrowLeftLong, FaArrowRightLong } from "react-icons/fa6";
-import { useSwipeable } from "react-swipeable";
+import { Helmet } from "react-helmet-async";
 
 const Store = () => {
   // Sample product data
   const { eventId } = useParams(); // Get the event ID from the URL
-  const { itemId } = useParams();
   const event = eventsData[eventId]; // Lookup event from local data
 
   const products = event ? event.merch : {};
-  const item = products[itemId];
-
-  const { cart, renderCartDrawer, onOpen } = useContext(CartContext);
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handleSwipeLeft = () => {
-    if (currentIndex < products.tees.length - 2) {
-      setCurrentIndex(currentIndex + 2);
-    }
-  };
-
-  const handleSwipeRight = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 2);
-    }
-  };
-
-  const handlers = useSwipeable({
-    onSwipedLeft: handleSwipeLeft,
-    onSwipedRight: handleSwipeRight,
-  });
 
   useEffect(() => {
-    let interval;
-    const mediaQuery = window.matchMedia("(min-width: 1024px)");
-
-    const updateIndex = () => {
-      if (mediaQuery.matches) {
-        // If screen width is >= 1024px
-        setCurrentIndex((prevIndex) =>
-          prevIndex < products.tees.length - 3 ? prevIndex + 3 : 0
-        );
-      } else {
-        // For smaller screens (less than 1024px)
-        setCurrentIndex((prevIndex) =>
-          prevIndex < products.tees.length - 2 ? prevIndex + 2 : 0
-        );
+    setTimeout(() => {
+      document.title = `${event?.name} Merch | The Lemonade Network Events`;
+      // Set or update description meta tag
+      let descriptionMeta = document.querySelector('meta[name="description"]');
+      if (!descriptionMeta) {
+        descriptionMeta = document.createElement("meta");
+        descriptionMeta.name = "description";
+        document.head.appendChild(descriptionMeta);
       }
-    };
+      descriptionMeta.content =
+        `Purchase your ${event.name} Merchandise.`;
 
-    interval = setInterval(updateIndex, 3000); // Adjust index every 3 seconds
+      // Set or update Open Graph meta tags
+      const ogTags = [
+        { property: "og:title", content: `${event?.name} Merch | The Lemonade Network Events` },
+        {
+          property: "og:description",
+          content: `Purchase your ${event.name} Merchandise.`,
+        },
+        { property: "og:image", content: "https://tlnevents.com/full-logo.jpg" },
+        { property: "og:url", content: `https://tlnevents.com/${event.id}/merch` },
+      ];
 
-    // Cleanup the interval and media query listener on component unmount
-    return () => {
-      clearInterval(interval);
-    };
-  }, [products.tees.length]);
+      ogTags.forEach(({ property, content }) => {
+        let metaTag = document.querySelector(`meta[property="${property}"]`);
+        if (!metaTag) {
+          metaTag = document.createElement("meta");
+          metaTag.setAttribute("property", property);
+          document.head.appendChild(metaTag);
+        }
+        metaTag.content = content;
+      });
+    }, 100);
+  }, []);
+
+  const { cart } = useContext(CartContext);
 
   return (
-    <VStack
-      w="100%"
-      h="100%"
-      justify="center"
-      align="center"
-      spacing={["25px", "60px", "70px", "75px", "50px"]}
-      px={["20px", "50px", "75px", "100px"]}
-      pb="50px"
-    >
-      <Flex w="100%" justify="space-between" align="center" py="20px">
-        <Link to="/">
-          <Image
-            w={["120px", "150px"]}
-            src="/logo.webp"
-            alt="The Lemonade Logo"
-          ></Image>
-        </Link>
-        <Box as="button" onClick={onOpen} position="relative">
-          <Box>
-            <FaShoppingCart className=" w-6 h-6" />
-          </Box>
-          {cart.length > 0 && (
-            <Box
-              position="absolute"
-              top="-2"
-              right="-2"
-              bg="red.500"
-              color="white"
-              borderRadius="full"
-              w={5}
-              h={5}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              fontSize="xs"
-            >
-              {cart.length}
+    <>
+      <Helmet>
+        <meta charset="UTF-8" />
+        <link
+          rel="icon"
+          type="image/svg+xml"
+          href="https://tlnevents.com/favicon.png"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{event?.name} Merch | The Lemonade Network Events</title>
+        <meta
+          name="description"
+          content={`Purchase your ${event.name} Merchandise.`}
+        />
+        <meta
+          property="og:title"
+          content={`${event?.name} Merch | The Lemonade Network Events`}
+        />
+        <meta
+          property="og:description"
+          content={`Purchase your ${event.name} Merchandise.`}
+        />
+        <meta
+          property="og:image"
+          content="https://tlnevents.com/full-logo.jpg"
+        />
+        <meta
+          property="og:url"
+          content={`https://tlnevents.com/${event?.id}/merch`}
+        />
+        <meta property="og:type" content="website" />
+      </Helmet>
+      <VStack
+        w="100%"
+        h="100%"
+        justify="center"
+        align="center"
+        spacing={["25px", "60px", "70px", "75px", "50px"]}
+        px={["20px", "50px", "75px", "100px"]}
+        pb="50px"
+      >
+        <Flex w="100%" justify="space-between" align="center" py="20px">
+          <Link to="/">
+            <Image
+              w={["120px", "150px"]}
+              src="/logo.webp"
+              alt="The Lemonade Logo"
+            ></Image>
+          </Link>
+          <Link to={`/${event.id}/merch/cart`}>
+            <Box position="relative">
+              <Box>
+                <FaShoppingCart className=" w-6 h-6" />
+              </Box>
+              {cart.length > 0 && (
+                <Box
+                  position="absolute"
+                  top="-2"
+                  right="-2"
+                  bg="primary.500"
+                  color="white"
+                  borderRadius="full"
+                  w={4}
+                  h={4}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  fontSize="xs"
+                >
+                  <Text>{cart.length}</Text>
+                </Box>
+              )}
             </Box>
-          )}
-        </Box>
-      </Flex>
-      <VStack w="100%" align="flex-start" spacing="100px">
-        <VStack w="100%" align="flex-start" spacing="50px">
-          <Heading color="dark" fontSize={["28px", "32px"]}>
-            Exclusive T-Shirts
-          </Heading>
+          </Link>
+        </Flex>
+        <VStack w="100%" align="flex-start" spacing="100px">
+          <VStack w="100%" align="flex-start" spacing="50px">
+            <Heading color="dark" fontSize={["28px", "32px"]}>
+              Exclusive T-Shirts
+            </Heading>
 
-          <Box w="100%" position="relative">
-            <Flex
-              w="100%"
-              {...handlers}
-              overflowX={["hidden", "hidden", "hidden", "hidden"]}
-              position="relative"
+            <Grid
+              templateColumns={{
+                base: "repeat(2, 1fr)",
+                md: "repeat(2, 1fr)",
+                lg: "repeat(3, 1fr)",
+              }}
+              gap={10}
             >
-              <Flex
-                w="100%"
-                align="flex-start"
-                gap={["20px", 8]}
-                transform={[
-                  `translateX(-${currentIndex * 50}%)`,
-                  `translateX(-${currentIndex * 20}%)`,
-                ]}
-                transition="transform 0.5s"
-              >
-                {Object.values(products.tees).map((product) => (
-                  <Link
-                    key={product.id}
-                    to={`/${event.id}/merch/tees/${product.id}`}
-                  >
-                    <Box maxW={["400px", "256px"]} maxH="100%">
-                      <VStack
-                        width="100%"
+              {Object.values(products.tees).map((product) => (
+                <Link
+                  key={product.id}
+                  to={`/${event.id}/merch/tees/${product.id}`}
+                >
+                  <VStack key={product.id} spacing={4}>
+                    <Box h={["200px", "250px"]} boxShadow="sm">
+                      <Image
+                        w="100%"
                         h="100%"
-                        flex={["0 0 45%", "0 0 45%", "0 0 45%", "0 0 45%"]}
-                        justify="space-between"
-                        align="flex-start"
-                      >
-                        <Box h="250px">
-                          <Image
-                            w="100%"
-                            h="100%"
-                            src={product.image}
-                            alt={product.name}
-                            borderRadius="md"
-                            objectFit="cover"
-                          />
-                        </Box>
-                        <VStack
-                          w="100%"
-                          justify="flex-start"
-                          align="flex-start"
-                          spacing="0"
-                        >
-                          <Heading
-                            title={product.name}
-                            color="dark"
-                            fontSize={["18px", "22px"]}
-                            fontWeight="500"
-                            lineHeight="24px"
-                            maxW={["160px", "200px", "256px"]} // Set the maximum width for the text container
-                            noOfLines={2} // Limit to two lines
-                            isTruncated={false} // Set this to false, since 'noOfLines' handles truncation
-                            overflow="hidden" // Ensures overflow text is hidden
-                            display="-webkit-box" // Needed for truncating after a specific number of lines
-                            textOverflow="ellipsis" // Adds the ellipsis for overflow
-                            css={{
-                              WebkitLineClamp: 2, // Specifies the number of lines to clamp to
-                              WebkitBoxOrient: "vertical", // Establishes vertical orientation
-                            }}
-                          >
-                            {product.name}
-                          </Heading>
-                          <Text
-                            color="primary.500"
-                            fontSize={["14px", "18px"]}
-                            fontWeight="600"
-                          >
-                            ₦ {product.price.toLocaleString()}
-                          </Text>
-                        </VStack>
-                      </VStack>
+                        src={product.image}
+                        alt={product.name}
+                        borderRadius="md"
+                        objectFit="cover"
+                      />
                     </Box>
-                  </Link>
-                ))}
-              </Flex>
-            </Flex>
-          </Box>
-
-          <Box
-            display={[
-              products.tees.length <= 2 ? "none" : "block",
-              products.tees.length <= 3 ? "none" : "block",
-            ]}
-            w="100%"
-            align="center"
-          >
-            <Flex w={["100px", "158px"]} justify="space-between" align="center">
-              <Box
-                as="button"
-                w={["30px", "40px"]}
-                h={["30px", "40px"]}
-                rounded="full"
-                bg={currentIndex > 0 ? "primary-color500" : "primary-color50"}
-                onClick={() => {
-                  if (currentIndex > 1) {
-                    setCurrentIndex(currentIndex - 2);
-                  }
-                }}
-              >
-                <Center>
-                  <FaArrowLeftLong
-                    color="white"
-                    className=" w-[14px] h-[14px]"
-                  />
-                </Center>
-              </Box>
-              <Box
-                as="button"
-                w={["30px", "40px"]}
-                h={["30px", "40px"]}
-                rounded="full"
-                bg={
-                  currentIndex < products.tees.length - 2
-                    ? "primary-color500"
-                    : "primary-color50"
-                }
-                onClick={() => {
-                  if (currentIndex < products.tees.length - 2) {
-                    setCurrentIndex(currentIndex + 2);
-                  }
-                }}
-              >
-                <Center>
-                  <FaArrowRightLong
-                    color="white"
-                    className=" w-[14px] h-[14px]"
-                  />
-                </Center>
-              </Box>
-            </Flex>
-          </Box>
-
-          <Grid
-            templateColumns={{
-              base: "repeat(1, 1fr)",
-              md: "repeat(2, 1fr)",
-              lg: "repeat(3, 1fr)",
-            }}
-            gap={10}
-          >
-            {Object.values(products.tees).map((product) => (
-              <Link
-                key={product.id}
-                to={`/${event.id}/merch/tees/${product.id}`}
-              >
-                <VStack key={product.id} spacing={4}>
-                  <Box h="250px">
-                    <Image
+                    <VStack
                       w="100%"
-                      h="100%"
-                      src={product.image}
-                      alt={product.name}
-                      borderRadius="md"
-                      objectFit="cover"
-                    />
-                  </Box>
-                  <VStack
-                    w="100%"
-                    justify="flex-start"
-                    align="flex-start"
-                    spacing="0"
-                  >
-                    <Heading
-                      color="dark"
-                      fontSize={["18px", "22px"]}
-                      fontWeight="500"
+                      justify="flex-start"
+                      align="flex-start"
+                      spacing="0"
                     >
-                      {product.name}
-                    </Heading>
-                    <Text
-                      color="primary.500"
-                      fontSize={["14px", "18px"]}
-                      fontWeight="600"
-                    >
-                      ₦ {product.price.toLocaleString()}
-                    </Text>
+                      <Heading
+                        color="dark"
+                        fontSize={["14px", "18px", "22px"]}
+                        fontWeight="500"
+                      >
+                        {product.name}
+                      </Heading>
+                      <Text
+                        color="primary.500"
+                        fontSize={["12px", "14px", "18px"]}
+                        fontWeight="600"
+                      >
+                        ₦ {product.price.toLocaleString()}
+                      </Text>
+                    </VStack>
                   </VStack>
-                </VStack>
-              </Link>
-            ))}
-          </Grid>
-        </VStack>
-        <VStack w="100%" align="flex-start" spacing="50px">
-          <Heading color="dark" fontSize={["28px", "32px"]}>
-            Crop Tops
-          </Heading>
+                </Link>
+              ))}
+            </Grid>
+          </VStack>
+          <VStack w="100%" align="flex-start" spacing="50px">
+            <Heading color="dark" fontSize={["28px", "32px"]}>
+              Crop Tops
+            </Heading>
 
-          <Grid
-            templateColumns={{
-              base: "repeat(1, 1fr)",
-              md: "repeat(2, 1fr)",
-              lg: "repeat(3, 1fr)",
-            }}
-            gap={10}
-          >
-            {Object.values(products["crop-tops"]).map((product) => (
-              <Link
-                key={product.id}
-                to={`/${event.id}/merch/crop-tops/${product.id}`}
-              >
-                <VStack key={product.id} spacing={4}>
-                  <Box h="250px">
-                    <Image
+            <Grid
+              templateColumns={{
+                base: "repeat(2, 1fr)",
+                md: "repeat(2, 1fr)",
+                lg: "repeat(3, 1fr)",
+              }}
+              gap={10}
+            >
+              {Object.values(products["crop-tops"]).map((product) => (
+                <Link
+                  key={product.id}
+                  to={`/${event.id}/merch/crop-tops/${product.id}`}
+                >
+                  <VStack key={product.id} spacing={4}>
+                    <Box h={["200px", "250px"]}>
+                      <Image
+                        w="100%"
+                        h="100%"
+                        src={product.image}
+                        alt={product.name}
+                        borderRadius="md"
+                        objectFit="cover"
+                      />
+                    </Box>
+                    <VStack
                       w="100%"
-                      h="100%"
-                      src={product.image}
-                      alt={product.name}
-                      borderRadius="md"
-                      objectFit="cover"
-                    />
-                  </Box>
-                  <VStack
-                    w="100%"
-                    justify="flex-start"
-                    align="flex-start"
-                    spacing="0"
-                  >
-                    <Heading
-                      color="dark"
-                      fontSize={["18px", "22px"]}
-                      fontWeight="500"
+                      justify="flex-start"
+                      align="flex-start"
+                      spacing="0"
                     >
-                      {product.name}
-                    </Heading>
-                    <Text
-                      color="primary.500"
-                      fontSize={["14px", "18px"]}
-                      fontWeight="600"
-                    >
-                      ₦ {product.price.toLocaleString()}
-                    </Text>
+                      <Heading
+                        color="dark"
+                        fontSize={["14px", "18px", "22px"]}
+                        fontWeight="500"
+                      >
+                        {product.name}
+                      </Heading>
+                      <Text
+                        color="primary.500"
+                        fontSize={["12px", "14px", "18px"]}
+                        fontWeight="600"
+                      >
+                        ₦ {product.price.toLocaleString()}
+                      </Text>
+                    </VStack>
                   </VStack>
-                </VStack>
-              </Link>
-            ))}
-          </Grid>
-        </VStack>
-        <VStack w="100%" align="flex-start" spacing="50px">
-          <Heading color="dark" fontSize={["28px", "32px"]}>
-            Bucket Hats
-          </Heading>
+                </Link>
+              ))}
+            </Grid>
+          </VStack>
+          <VStack w="100%" align="flex-start" spacing="50px">
+            <Heading color="dark" fontSize={["28px", "32px"]}>
+              Bucket Hats
+            </Heading>
 
-          <Grid
-            templateColumns={{
-              base: "repeat(1, 1fr)",
-              md: "repeat(2, 1fr)",
-              lg: "repeat(3, 1fr)",
-            }}
-            gap={10}
-          >
-            {Object.values(products["bucket-hats"]).map((product) => (
-              <Link
-                key={product.id}
-                to={`/${event.id}/merch/bucket-hats/${product.id}`}
-              >
-                <VStack key={product.id} spacing={4}>
-                  <Box h="250px">
-                    <Image
+            <Grid
+              templateColumns={{
+                base: "repeat(2, 1fr)",
+                md: "repeat(2, 1fr)",
+                lg: "repeat(3, 1fr)",
+              }}
+              gap={10}
+            >
+              {Object.values(products["bucket-hats"]).map((product) => (
+                <Link
+                  key={product.id}
+                  to={`/${event.id}/merch/bucket-hats/${product.id}`}
+                >
+                  <VStack key={product.id} spacing={4}>
+                    <Box h={["200px", "250px"]}>
+                      <Image
+                        w="100%"
+                        h="100%"
+                        src={product.image}
+                        alt={product.name}
+                        borderRadius="md"
+                        objectFit="cover"
+                      />
+                    </Box>
+                    <VStack
                       w="100%"
-                      h="100%"
-                      src={product.image}
-                      alt={product.name}
-                      borderRadius="md"
-                      objectFit="cover"
-                    />
-                  </Box>
-                  <VStack
-                    w="100%"
-                    justify="flex-start"
-                    align="flex-start"
-                    spacing="0"
-                  >
-                    <Heading
-                      color="dark"
-                      fontSize={["18px", "22px"]}
-                      fontWeight="500"
+                      justify="flex-start"
+                      align="flex-start"
+                      spacing="0"
                     >
-                      {product.name}
-                    </Heading>
-                    <Text
-                      color="primary.500"
-                      fontSize={["14px", "18px"]}
-                      fontWeight="600"
-                    >
-                      ₦ {product.price.toLocaleString()}
-                    </Text>
+                      <Heading
+                        color="dark"
+                        fontSize={["14px", "18px", "22px"]}
+                        fontWeight="500"
+                      >
+                        {product.name}
+                      </Heading>
+                      <Text
+                        color="primary.500"
+                        fontSize={["12px", "14px", "18px"]}
+                        fontWeight="600"
+                      >
+                        ₦ {product.price.toLocaleString()}
+                      </Text>
+                    </VStack>
                   </VStack>
-                </VStack>
-              </Link>
-            ))}
-          </Grid>
-        </VStack>
-        <VStack w="100%" align="flex-start" spacing="50px">
-          <Heading color="dark" fontSize={["28px", "32px"]}>
-            Face Caps
-          </Heading>
+                </Link>
+              ))}
+            </Grid>
+          </VStack>
+          <VStack w="100%" align="flex-start" spacing="50px">
+            <Heading color="dark" fontSize={["28px", "32px"]}>
+              Face Caps
+            </Heading>
 
-          <Grid
-            templateColumns={{
-              base: "repeat(1, 1fr)",
-              md: "repeat(2, 1fr)",
-              lg: "repeat(3, 1fr)",
-            }}
-            gap={10}
-          >
-            {Object.values(products.caps).map((product) => (
-              <Link
-                key={product.id}
-                to={`/${event.id}/merch/caps/${product.id}`}
-              >
-                <VStack key={product.id} spacing={4}>
-                  <Box h="250px">
-                    <Image
+            <Grid
+              templateColumns={{
+                base: "repeat(2, 1fr)",
+                md: "repeat(2, 1fr)",
+                lg: "repeat(3, 1fr)",
+              }}
+              gap={10}
+            >
+              {Object.values(products.caps).map((product) => (
+                <Link
+                  key={product.id}
+                  to={`/${event.id}/merch/caps/${product.id}`}
+                >
+                  <VStack key={product.id} spacing={4}>
+                    <Box h={["200px", "250px"]}>
+                      <Image
+                        w="100%"
+                        h="100%"
+                        src={product.image}
+                        alt={product.name}
+                        borderRadius="md"
+                        objectFit="cover"
+                      />
+                    </Box>
+                    <VStack
                       w="100%"
-                      h="100%"
-                      src={product.image}
-                      alt={product.name}
-                      borderRadius="md"
-                      objectFit="cover"
-                    />
-                  </Box>
-                  <VStack
-                    w="100%"
-                    justify="flex-start"
-                    align="flex-start"
-                    spacing="0"
-                  >
-                    <Heading
-                      color="dark"
-                      fontSize={["18px", "22px"]}
-                      fontWeight="500"
+                      justify="flex-start"
+                      align="flex-start"
+                      spacing="0"
                     >
-                      {product.name}
-                    </Heading>
-                    <Text
-                      color="primary.500"
-                      fontSize={["14px", "18px"]}
-                      fontWeight="600"
-                    >
-                      ₦ {product.price.toLocaleString()}
-                    </Text>
+                      <Heading
+                        color="dark"
+                        fontSize={["14px", "18px", "22px"]}
+                        fontWeight="500"
+                      >
+                        {product.name}
+                      </Heading>
+                      <Text
+                        color="primary.500"
+                        fontSize={["12px", "14px", "18px"]}
+                        fontWeight="600"
+                      >
+                        ₦ {product.price.toLocaleString()}
+                      </Text>
+                    </VStack>
                   </VStack>
-                </VStack>
-              </Link>
-            ))}
-          </Grid>
+                </Link>
+              ))}
+            </Grid>
+          </VStack>
         </VStack>
       </VStack>
-      {renderCartDrawer()}
-    </VStack>
+    </>
   );
 };
 

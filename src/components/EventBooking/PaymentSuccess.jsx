@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from "react";
+import React, { useContext, useCallback, useEffect, useState, useRef } from "react";
 import {
   Box,
   Flex,
@@ -20,8 +20,7 @@ import {
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
 import { useLocation, Link, useParams } from "react-router-dom";
-import axios from "axios";
-import { newOrder } from "../../../server/newOrders";
+import { order } from "../../../server/order";
 
 const PaymentSuccess = () => {
   useEffect(() => {
@@ -49,7 +48,7 @@ const PaymentSuccess = () => {
   const guest = query.get("guest");
   const type = query.get("type");
 
-  const [orderData, setOrderData] = useState([]);
+
 
   const clearData = () => {
     clearContactData();
@@ -57,68 +56,132 @@ const PaymentSuccess = () => {
     clearAssignMultiple();
   };
 
-  const hasExtractedData = useRef(false); // Ensure extraction only happens once
+  const [orderData, setOrderData] = useState([]);
+  const hasExtractedData = useRef(false);
 
-  useEffect(() => {
-    const extractOrderData = () => {
-      const data = [];
-      const tbodyRows = document.querySelectorAll("tbody tr");
-
-      tbodyRows.forEach((row) => {
-        const cells = row.querySelectorAll("td");
-        if (cells.length === 9) {
-          data.push({
-            orderId: cells[0].textContent,
-            attendeeName: cells[1].textContent,
-            email: cells[2].textContent,
-            ticketType: cells[3].textContent,
-            quantity: parseInt(cells[4].textContent, 10),
-            ticketPrice: parseFloat(cells[5].textContent),
-            subTotal: parseFloat(cells[6].textContent),
-            fees: parseFloat(cells[7].textContent),
-            total: parseFloat(cells[8].textContent),
-          });
-        }
-      });
-
-      return data;
-    };
-
-    const handleOrderData = async () => {
-      if (hasExtractedData.current) return; // Prevent re-execution
-      hasExtractedData.current = true;
-
-      const extractedData = extractOrderData();
-      setOrderData(extractedData);
-
-      for (const item of extractedData) {
-        try {
-          const data = await newOrder(
-            Number.parseInt(referenceNumber),
-            item.attendeeName,
-            item.email,
-            Number.parseInt(item.fees),
-            Number.parseInt(item.quantity),
-            Number.parseInt(item.subTotal),
-            item.ticketType,
-            Number.parseInt(item.ticketPrice)
-          );
-        } catch (error) {
-          console.error("Error submitting order:", error.message);
-        }
+  const extractOrderData = () => {
+    const data = [];
+    const tbodyRows = document.querySelectorAll("tbody tr");
+    tbodyRows.forEach((row) => {
+      const cells = row.querySelectorAll("td");
+      if (cells.length === 9) {
+        data.push({
+          orderId: cells[0].textContent.trim(),
+          attendeeName: cells[1].textContent.trim(),
+          email: cells[2].textContent.trim(),
+          ticketType: cells[3].textContent.trim(),
+          quantity: parseInt(cells[4].textContent.trim(), 10),
+          ticketPrice: parseFloat(cells[5].textContent.trim()),
+          subTotal: parseFloat(cells[6].textContent.trim()),
+          fees: parseFloat(cells[7].textContent.trim()),
+          total: parseFloat(cells[8].textContent.trim()),
+        });
       }
+    });
+    return data;
+  };
 
-      // Clear data once all orders have been processed
-      clearData();
-    };
+  console.log(extractOrderData())
 
-    handleOrderData();
-  }, []); // Empty dependency array ensures this runs only on component mount
+  // const handleOrderSubmission = async () => {
+  //   if (hasExtractedData.current) return;
+
+  //   const extractedData = extractOrderData();
+  //   setOrderData(extractedData);
+
+  //   for (const item of extractedData) {
+  //     await order(
+  //       referenceNumber,
+  //       item.attendeeName,
+  //       item.email,
+  //       item.fees,
+  //       item.quantity,
+  //       item.subTotal,
+  //       item.ticketType,
+  //       item.ticketPrice
+  //     );
+  //   }
+
+  //   hasExtractedData.current = true;
+  //   clearData();
+  // };
+
+  // useEffect(() => {
+  //   handleOrderSubmission();
+  // }, [referenceNumber]);
+
+  // useEffect(() => {
+  //   const extractOrderData = () => {
+  //     const data = [];
+  //     const tbodyRows = document.querySelectorAll("tbody tr");
+
+  //     tbodyRows.forEach((row) => {
+  //       const cells = row.querySelectorAll("td");
+  //       if (cells.length === 9) {
+  //         data.push({
+  //           orderId: cells[0].textContent.trim(),
+  //           attendeeName: cells[1].textContent.trim(),
+  //           email: cells[2].textContent.trim(),
+  //           ticketType: cells[3].textContent.trim(),
+  //           quantity: parseInt(cells[4].textContent.trim(), 10),
+  //           ticketPrice: parseFloat(cells[5].textContent.trim()),
+  //           subTotal: parseFloat(cells[6].textContent.trim()),
+  //           fees: parseFloat(cells[7].textContent.trim()),
+  //           total: parseFloat(cells[8].textContent.trim()),
+  //         });
+  //       }
+  //     });
+
+  //     return data;
+  //   };
+
+
+
+  //   const handleOrderData = async () => {
+  //     if (hasExtractedData.current) return; // Prevent re-execution
+  //     hasExtractedData.current = true;
+
+  //     // Extract data from table rows
+  //     const extractedData = extractOrderData();
+  //     setOrderData(extractedData);
+
+  //     // Submit each order
+  //     const errors = [];
+  //     for (const item of extractedData) {
+  //       try {
+  //         const result = await order(
+  //           referenceNumber, // Ensure referenceNumber is passed correctly
+  //           item.attendeeName,
+  //           item.email,
+  //           item.fees,
+  //           item.quantity,
+  //           item.subTotal,
+  //           item.ticketType,
+  //           item.ticketPrice
+  //         );
+  //         if (!result.success) {
+  //           errors.push({ item, message: result.message });
+  //         }
+  //       } catch (error) {
+  //         errors.push({ item, message: error.message });
+  //       }
+  //     }
+
+  //     if (errors.length > 0) {
+  //       console.error("Order submission errors:", errors);
+  //     }
+
+  //     // Clear data or handle post-submission logic here
+  //     clearData();
+  //   };
+
+  //   handleOrderData();
+  // }, [referenceNumber]); // Empty dependency array ensures this runs only on component mount
 
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
 
-  const [ticketType, setTicketType] = useState(
+  const [ticketType] = useState(
     event
       ? type === "children"
         ? event.tickets.children

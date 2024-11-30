@@ -23,6 +23,7 @@ import axios from "axios";
 import { useFormik } from "formik";
 import { multiBookingContext } from "./BookingContext";
 import { debounce } from "lodash";
+import { contacts } from "../../../server/contacts";
 
 const EventContact = ({ handleNextStep, formRef }) => {
   const {
@@ -258,18 +259,33 @@ const EventContact = ({ handleNextStep, formRef }) => {
     validateOnBlur: true,
     validateOnChange: false,
     validate,
-    onSubmit: (values, { setSubmitting }) => {
+    onSubmit: async (values, { setSubmitting }) => {
       setIsSubmitting(true);
       setSubmitting(true);
       setIsDisable(true);
-      const errors = validate(values);
-      if (Object.keys(errors).length > 0) {
-        formik.setErrors(errors);
+      try {
+        // Flatten all attendee addresses
+        const allAttendees = Object.values(contactData.attendeeAddresses || {}).flat();
 
-        setIsSubmitting(false);
-        setIsDisable(false);
-        return;
-      }
+        // Validate inputs
+        const errors = validate(values);
+        if (Object.keys(errors).length > 0) {
+          formik.setErrors(errors);
+          setIsSubmitting(false);
+          setSubmitting(false);
+          setIsDisable(false);
+          return;
+        }
+
+        contacts(
+          contactData.firstName,
+          contactData.lastName,
+          contactData.email,
+          contactData.phone,
+          allAttendees,
+          "Ticket"
+        );
+      } catch (error) { }
       handleNextStep(); // Advance to the next step if everything is valid
     },
   });
@@ -650,46 +666,46 @@ const EventContact = ({ handleNextStep, formRef }) => {
       </VStack>
       {Object.values(ticketCounts).reduce((total, count) => total + count, 0) >=
         1 && (
-        <VStack
-          justify="flex-start"
-          align="flex-start"
-          spacing={["10px", "20px"]}
-        >
-          <Heading color="dark" fontSize={["16px", "20px"]} lineHeight="28px">
-            Assign tickets to multiple attendees?
-          </Heading>
-          <Flex justify="flex-start" align="center" gap="10px">
-            <Text color="dark" fontSize="14px">
-              No
-            </Text>
-            <FormControl>
-              <Switch
-                size="lg"
-                id="multiple-attendees"
-                isChecked={assignMultiple}
-                onChange={(e) => setAssignMultiple(e.target.checked)}
-                sx={{
-                  ".chakra-switch__track": {
-                    backgroundColor: "neutral.500", // unselected state track color
-                  },
-                  ".chakra-switch__thumb": {
-                    backgroundColor: "dark", // unselected state thumb color
-                  },
-                  "&[data-checked] .chakra-switch__track": {
-                    backgroundColor: "neutral.500", // selected state track color
-                  },
-                  "&[data-checked] .chakra-switch__thumb": {
-                    backgroundColor: "primary.500", // selected state thumb color
-                  },
-                }}
-              />
-            </FormControl>
-            <Text color="dark" fontSize="14px">
-              Yes
-            </Text>
-          </Flex>
-        </VStack>
-      )}
+          <VStack
+            justify="flex-start"
+            align="flex-start"
+            spacing={["10px", "20px"]}
+          >
+            <Heading color="dark" fontSize={["16px", "20px"]} lineHeight="28px">
+              Assign tickets to multiple attendees?
+            </Heading>
+            <Flex justify="flex-start" align="center" gap="10px">
+              <Text color="dark" fontSize="14px">
+                No
+              </Text>
+              <FormControl>
+                <Switch
+                  size="lg"
+                  id="multiple-attendees"
+                  isChecked={assignMultiple}
+                  onChange={(e) => setAssignMultiple(e.target.checked)}
+                  sx={{
+                    ".chakra-switch__track": {
+                      backgroundColor: "neutral.500", // unselected state track color
+                    },
+                    ".chakra-switch__thumb": {
+                      backgroundColor: "dark", // unselected state thumb color
+                    },
+                    "&[data-checked] .chakra-switch__track": {
+                      backgroundColor: "neutral.500", // selected state track color
+                    },
+                    "&[data-checked] .chakra-switch__thumb": {
+                      backgroundColor: "primary.500", // selected state thumb color
+                    },
+                  }}
+                />
+              </FormControl>
+              <Text color="dark" fontSize="14px">
+                Yes
+              </Text>
+            </Flex>
+          </VStack>
+        )}
 
       {assignMultiple && (
         <VStack w="100%" align="flex-start" spacing="40px">
@@ -724,9 +740,8 @@ const EventContact = ({ handleNextStep, formRef }) => {
                       type="text"
                       id={`attendee-firstname-${ticketId}-${i}`}
                       name={`attendeeAddresses[${ticketId}][${i}].firstName`}
-                      placeholder={`First Name (${
-                        ticketType[ticketId - 1]?.name || "Unknown"
-                      })`}
+                      placeholder={`First Name (${ticketType[ticketId - 1]?.name || "Unknown"
+                        })`}
                       value={
                         formik.values.attendeeAddresses?.[ticketId]?.[i]
                           ?.firstName || ""
@@ -760,9 +775,8 @@ const EventContact = ({ handleNextStep, formRef }) => {
                       type="text"
                       id={`attendee-lastname-${ticketId}-${i}`}
                       name={`attendeeAddresses[${ticketId}][${i}].lastName`}
-                      placeholder={`Last Name (${
-                        ticketType[ticketId - 1]?.name || "Unknown"
-                      })`}
+                      placeholder={`Last Name (${ticketType[ticketId - 1]?.name || "Unknown"
+                        })`}
                       value={
                         formik.values.attendeeAddresses?.[ticketId]?.[i]
                           ?.lastName || ""
@@ -794,9 +808,8 @@ const EventContact = ({ handleNextStep, formRef }) => {
                       type="email"
                       id={`attendee-email-${ticketId}-${i}`}
                       name={`attendeeAddresses[${ticketId}][${i}].email`}
-                      placeholder={`Email Address (${
-                        ticketType[ticketId - 1]?.name || "Unknown"
-                      })`}
+                      placeholder={`Email Address (${ticketType[ticketId - 1]?.name || "Unknown"
+                        })`}
                       value={
                         formik.values.attendeeAddresses?.[ticketId]?.[i]
                           ?.email || ""

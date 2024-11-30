@@ -18,6 +18,8 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  AvatarGroup,
+  Avatar
 } from "@chakra-ui/react";
 import { eventsData } from "../../server/eventsData";
 import { format, parseISO } from "date-fns";
@@ -94,14 +96,12 @@ const EventDetails = () => {
   // Manually format times using UTC hours and minutes to avoid timezone shifts
   const startTimeWithMeridiem = `${String(
     startDate.getUTCHours() % 12 || 12
-  ).padStart(2, "0")}:${String(startDate.getUTCMinutes()).padStart(2, "0")} ${
-    startDate.getUTCHours() >= 12 ? "PM" : "AM"
-  }`;
+  ).padStart(2, "0")}:${String(startDate.getUTCMinutes()).padStart(2, "0")} ${startDate.getUTCHours() >= 12 ? "PM" : "AM"
+    }`;
   const endTimeWithMeridiem = `${String(
     endDate.getUTCHours() % 12 || 12
-  ).padStart(2, "0")}:${String(endDate.getUTCMinutes()).padStart(2, "0")} ${
-    endDate.getUTCHours() >= 12 ? "PM" : "AM"
-  }`;
+  ).padStart(2, "0")}:${String(endDate.getUTCMinutes()).padStart(2, "0")} ${endDate.getUTCHours() >= 12 ? "PM" : "AM"
+    }`;
 
   // 3. Format in (Wed, August 21st 7:00 PM) with meridiem, UTC-based
   const startFormattedDate = `${format(startDate, "EEE")}, ${format(
@@ -394,6 +394,82 @@ END:VCALENDAR
                   {event.about.description}
                 </Text>
               </VStack>
+              {/* {event.merch && (
+                <Flex w="100%" justify="space-between" align="center" key={category}>
+                  <VStack
+                    w="100%"
+                    justify="flex-start"
+                    align="flex-start"
+                    spacing={["18px", "20px"]}
+                  >
+                    
+              <Heading color="neutral.500" fontSize={["24px", "28px"]}>
+                Merch
+              </Heading><Box>
+                {Object.keys(event.merch).map((category) => {
+                  // Get all items in the current category
+                  const items = Object.values(event.merch[category]);
+
+                  // Pick a random item
+                  const randomItem = items[Math.floor(Math.random() * items.length)];
+
+                  // Create a list of all item names in the category
+                  const itemNames = items.map((item) => item.name).join(", ");
+
+                  return (
+                    < Stack
+                      w="100%"
+                      flexDir={["column", "row"]}
+                      overflow="hidden"
+                      align={["flex-start", "center"]}
+                      gap="20px"
+                    >
+                     
+                      < Avatar
+                        size="md"
+                        border="none"
+                        src={Array.isArray(randomItem.image) ? randomItem.image[0] : randomItem.image}
+                        alt={randomItem.name}
+                      />
+                      <Heading
+                        color="white"
+                        fontFamily="outfit"
+                        fontSize="16px"
+                        whiteSpace="nowrap"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                      >
+                        {randomItem.name}
+                      </Heading>
+                    </Stack>)
+                })}
+              </Box>
+
+
+              
+              <Link to={`/${event.id}/merch/${category}/${randomItem.id}`}>
+                <Button
+                  bg="primary-color900"
+                  color="white"
+                  _hover={{ bg: "primary-color500" }}
+                  rounded="8px"
+                >
+                  <Text
+                    fontFamily="outfit"
+                    fontSize="14px"
+                    fontWeight="600"
+                    lineHeight="20px"
+                  >
+                    View Details
+                  </Text>
+                </Button>
+              </Link>
+
+
+            </VStack>
+          </Flex>)} */}
+
+
               <Box w="100%" h="1px" bg="primary.500"></Box>
               <VStack w="100%" align="flex-start" spacing="20px">
                 <Heading color="neutral.500" fontSize={["24px", "28px"]}>
@@ -602,8 +678,8 @@ END:VCALENDAR
             </Box>
           </Link>
         </VStack>
-      </VStack>
-    </VStack>
+      </VStack >
+    </VStack >
   );
 };
 
