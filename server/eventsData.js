@@ -91,10 +91,13 @@ export const eventsData = {
               "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
           },
           sizes: ["M", "L", "XL", "XXL"],
-          colors: ["black", "white", "pink"],
+          colors: ["Black", "White", "Pink"],
           image:
             "https://tlnevents.com/assets/merch/tees/lemonade-tee(black-back).jpg",
+          hasFrontView: true,
+          hasBackView: true,
         },
+
         "playground-vibes-tee": {
           id: "playground-vibes-tee",
           name: "Playground Vibes Tee",
@@ -108,9 +111,11 @@ export const eventsData = {
               "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
           },
           sizes: ["M", "L", "XL", "XXL"],
-          colors: ["black", "white", "pink"],
+          colors: ["Black", "White", "Pink"],
           image:
             "https://tlnevents.com/assets/merch/tees/playground-vibes-tee(pink-back).jpg",
+          hasFrontView: true,
+          hasBackView: true,
         },
         "rewind-repeat-tee": {
           id: "rewind-repeat-tee",
@@ -125,9 +130,11 @@ export const eventsData = {
               "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
           },
           sizes: ["M", "L", "XL", "XXL"],
-          colors: ["black", "white", "pink"],
+          colors: ["Black", "White", "Pink"],
           image:
             "https://tlnevents.com/assets/merch/tees/rewind-repeat-tee(white-back).jpg",
+          hasBackView: true,
+          hasFrontView: false,
         },
       },
       "crop-tops": {
@@ -143,9 +150,11 @@ export const eventsData = {
               "With a Wrangler-inspired edge, this piece brings an effortlessly cool vibe.",
           },
           sizes: ["S", "M", "L", "XL", "XXL"],
-          colors: ["black", "red"],
+          colors: ["Black", "Red"],
           image:
             "https://tlnevents.com/assets/merch/crop-tops/wrangler-crop-top(black-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
         },
         "washed-crop-top": {
           id: "washed-crop-top",
@@ -159,9 +168,11 @@ export const eventsData = {
               "Its washed aesthetic offers a laid-back, retro charm suitable for all-day wear.",
           },
           sizes: ["S", "M", "L", "XL", "XXL"],
-          colors: ["white", "black", "pink"],
+          colors: ["White", "Black"],
           image:
             "https://tlnevents.com/assets/merch/crop-tops/washed-crop-top(black-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
         },
         "ringer-baby-crop-top": {
           id: "ringer-baby-crop-top",
@@ -176,9 +187,11 @@ export const eventsData = {
               "With ringer-style edges and soft fabric, it’s a playful choice for any Lemonade Playground enthusiast.",
           },
           sizes: ["S", "M", "L", "XL"],
-          colors: ["cream", "black", "white"],
+          colors: ["Cream & Blue", "Cream & Green"],
           image:
-            "https://tlnevents.com/assets/merch/crop-tops/ringer-baby-crop-top(black-front).jpg",
+            "https://tlnevents.com/assets/merch/crop-tops/ringer-baby-crop-top(cream & green-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
         },
       },
       "bucket-hats": {
@@ -193,9 +206,11 @@ export const eventsData = {
             footer:
               "Its lightweight fabric ensures comfort while protecting you from the sun.",
           },
-          colors: ["white", "black", "pink"],
+          colors: ["White", "Pink"],
           image:
-            "https://tlnevents.com/assets/merch/bucket-hats/fisherman-bucket-hat(black).jpg",
+            "https://tlnevents.com/assets/merch/bucket-hats/fisherman-bucket-hat(pink-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
         },
         "denim-bucket-hat": {
           id: "denim-bucket-hat",
@@ -208,9 +223,11 @@ export const eventsData = {
             footer:
               "Pair it with casual outfits for a modern, street-style vibe.",
           },
-          colors: ["grey", "orange", "black"],
+          colors: ["Grey"],
           image:
-            "https://tlnevents.com/assets/merch/bucket-hats/denim-bucket-hat(grey).jpg",
+            "https://tlnevents.com/assets/merch/bucket-hats/denim-bucket-hat(grey-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
         },
       },
       caps: {
@@ -224,8 +241,11 @@ export const eventsData = {
             size: "One size fits all.",
             footer: "This cap adds a sporty edge to your ensemble.",
           },
-          colors: ["black", "yellow", "white"],
-          image: "https://tlnevents.com/assets/merch/caps/3d-panel(black).jpg",
+          colors: ["Black", "Yellow", "White"],
+          image:
+            "https://tlnevents.com/assets/merch/caps/3d-panel(black-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
         },
         "2tone-daddy-hat": {
           id: "2tone-daddy-hat",
@@ -239,9 +259,11 @@ export const eventsData = {
             footer:
               "Designed for ultimate comfort and style, this cap suits any occasion.",
           },
-          colors: ["chocolate", "black", "green"],
+          colors: ["Chocolate & Cream", "White & Black", "Cream & Green"],
           image:
-            "https://tlnevents.com/assets/merch/caps/2tone-daddy-hat(green).jpg",
+            "https://tlnevents.com/assets/merch/caps/2tone-daddy-hat(cream & green-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
         },
         "draw-string-daddy-hat": {
           id: "draw-string-daddy-hat",
@@ -254,9 +276,11 @@ export const eventsData = {
             footer:
               "With a perfect blend of style and practicality, it’s a standout accessory for fans of the Lemonade Playground Experience.",
           },
-          colors: ["cream", "chocolate", "wine"],
+          colors: ["green", "wine"],
           image:
-            "https://tlnevents.com/assets/merch/caps/draw-string-daddy-hat(cream).jpg",
+            "https://tlnevents.com/assets/merch/caps/draw-string-daddy-hat(green-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
         },
       },
     },

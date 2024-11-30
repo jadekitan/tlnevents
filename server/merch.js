@@ -1,14 +1,28 @@
 import axios from "axios";
 import { baseURL } from "./base";
 
-export async function contacts(firstName, lastName, email, allAtendees, type) {
+export async function merch(
+  name,
+  productName,
+  email,
+  phone,
+  size,
+  color,
+  quantity,
+  price,
+  total
+) {
   try {
-    const response = await axios.post(`${baseURL}/contacts`, {
-      firstName,
-      lastName,
+    const response = await axios.post(`${baseURL}/merch `, {
+      name,
+      productName,
       email,
-      type,
-      attendeeAddresses: allAtendees,
+      phone,
+      size,
+      color,
+      quantity,
+      price,
+      total,
     });
     return {
       success: true,

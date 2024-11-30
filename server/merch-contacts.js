@@ -1,14 +1,13 @@
 import axios from "axios";
 import { baseURL } from "./base";
 
-export async function contacts(firstName, lastName, email, allAtendees, type) {
+export async function contacts(firstName, lastName, email, type) {
   try {
     const response = await axios.post(`${baseURL}/contacts`, {
       firstName,
       lastName,
       email,
       type,
-      attendeeAddresses: allAtendees,
     });
     return {
       success: true,
