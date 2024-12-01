@@ -123,9 +123,8 @@ const EventBooking = () => {
       },
       callback: (response) => {
         // Redirect on successful payment verification
-        window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}&email=${email}&type=${purchaseType}&guest=${assignMultiple}`;
+        window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}&email=${email}&guest=${assignMultiple}`;
         setStep(1);
-        clearData();
         setIsDisable(false);
         setIsSubmitting(false);
       },
