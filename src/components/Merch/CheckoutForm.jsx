@@ -596,7 +596,7 @@ const CheckoutForm = () => {
             <Box
               display={["block", "block", "block", "none"]}
               w="100%"
-              h="93px"
+              h="73px"
               position="fixed"
               left="0"
               bottom="17px"

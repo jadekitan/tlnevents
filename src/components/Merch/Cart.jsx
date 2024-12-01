@@ -161,7 +161,7 @@ const Cart = () => {
                       // "https://tlnevents.com/assets/merch/category/product-name(color-view).jpg"
                       const baseImage = item.image; // Use item's image property
                       const colorPart = item.color.toLowerCase(); // Use color from the item
-                      const viewPart = item.hasFrontView ? "front" : "back"; // Handle selected view
+                      const viewPart = item.view || "front";; // Handle selected view
 
                       // Replace the image in the original URL with the new color and view
                       return baseImage.replace(/\(.*\)/, `(${colorPart}-${viewPart})`);
@@ -329,7 +329,7 @@ const Cart = () => {
             <Box
               display={["block", "block", "block", "none"]}
               w="100%"
-              h="93px"
+              h="73px"
               position="fixed"
               left="0"
               bottom="17px"

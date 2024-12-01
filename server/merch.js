@@ -15,15 +15,17 @@ export async function merch(
   try {
     const response = await axios.post(`${baseURL}/merch `, {
       merch: [
-        name,
-        productName,
-        email,
-        phone,
-        size,
-        color,
-        quantity,
-        price,
-        total,
+        {
+          name,
+          productName,
+          email,
+          phone,
+          size,
+          color,
+          quantity,
+          price,
+          total,
+        },
       ],
     });
     return {

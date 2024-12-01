@@ -156,6 +156,7 @@ const ProductDetails = () => {
       color: selectedColor,
       size: product.sizes ? selectedSize : null,
       quantity,
+      view: selectedView
     });
 
     onOpen();
@@ -623,7 +624,10 @@ const ProductDetails = () => {
                               fontSize="24px"
                               lineHeight="32px"
                             >
-                              {` ₦ ${getTotal().toLocaleString()}`}
+                              {/* Calculate the total price */}
+                              {`₦ ${[cart[cart.length - 1]]
+                                .reduce((total, item) => total + item.price * item.quantity, 0)
+                                .toLocaleString()}`}
                             </Heading>
                             <Link to={`/${event.id}/merch/cart`}>
                               <Button
@@ -685,6 +689,7 @@ const ProductDetails = () => {
                           </Flex>
                         )}
                       </DrawerFooter>
+
                     </DrawerContent>
                   </Drawer>
                 </Stack>

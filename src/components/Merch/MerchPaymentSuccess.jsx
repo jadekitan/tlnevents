@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import {
   Box,
   Flex,
@@ -66,10 +66,8 @@ const MerchPaymentSuccess = () => {
 
   // Extract the reference from the URL query params
   const query = new URLSearchParams(location.search);
-  const referenceNumber = query.get("reference");
   const email = query.get("email");
 
-  const [orderData, setOrderData] = useState([]);
 
   const clearData = () => {
     clearContactData();
@@ -96,16 +94,13 @@ const MerchPaymentSuccess = () => {
         total: item.price * item.quantity
       }));
 
-      setOrderData(extractedData);
-
-      // Process each order
       for (const item of extractedData) {
         try {
           await merch(
             item.name,
             item.productName,
             item.email,
-            contactData.phone,
+            item.phone,
             item.size,
             item.color,
             item.quantity,
@@ -116,12 +111,13 @@ const MerchPaymentSuccess = () => {
         } catch (error) {
           console.error("Error submitting order:", error);
         }
-
       }
+
+      // Rest of the function remains the same...
     };
 
     processOrders();
-  }, [cart, contactData]); // Empty dependency array ensures this runs only on component mount
+  }, [cart, contactData]);
 
   const event = eventsData[eventId]; // Lookup event from local data
 

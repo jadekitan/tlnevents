@@ -23,11 +23,11 @@ const CartProvider = ({ children }) => {
   };
 
   const addToCart = (product, options) => {
-    const { size = null, color, quantity = 1 } = options;
+    const { size = null, color, quantity = 1, view = "front" } = options;
 
     const cartItemId = size
-      ? `${product.id}-${size}-${color}`
-      : `${product.id}-${color}`;
+      ? `${product.id}-${size}-${color}-${view}`
+      : `${product.id}-${color}-${view}`;
 
     setCart((prevCart) => {
       const existingItem = prevCart.find(
@@ -48,12 +48,14 @@ const CartProvider = ({ children }) => {
         cartItemId,
         color,
         quantity,
+        view, // Store selected view
         ...(size && { size }),
       };
 
       return [...prevCart, newItem];
     });
   };
+
 
   const updateQuantity = (cartItemId, newQuantity) => {
     if (newQuantity < 1) return;
