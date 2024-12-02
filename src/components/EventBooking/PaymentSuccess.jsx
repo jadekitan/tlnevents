@@ -21,7 +21,7 @@ import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
 import { useLocation, Link, useParams } from "react-router-dom";
 import axios from "axios";
-import { newOrder } from "../../../server/newOrders";
+import { order } from "../../../server/order";
 
 const PaymentSuccess = () => {
   useEffect(() => {
@@ -30,16 +30,15 @@ const PaymentSuccess = () => {
 
   const {
     contactData,
-    setContactData,
-    assignMultiple,
     clearAssignMultiple,
     ticketCounts,
-    setTicketCounts,
     feePercentage,
     clearContactData,
     clearTicketCounts,
+    ticketType
   } = useContext(multiBookingContext);
-  const [paymentStatus, setPaymentStatus] = useState(null);
+
+
   const location = useLocation();
 
   // Extract the reference from the URL query params
@@ -92,7 +91,7 @@ const PaymentSuccess = () => {
 
       for (const item of extractedData) {
         try {
-          const data = await newOrder(
+          const data = await order(
             Number.parseInt(referenceNumber),
             item.attendeeName,
             item.email,
@@ -117,7 +116,7 @@ const PaymentSuccess = () => {
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
 
-  const [ticketType] = useState(event ? event.tickets : []);
+  // const [ticketType] = useState(event ? event.tickets : []);
 
   // Helper function to generate a unique order ID per email
   function generateUniqueOrderId(email) {
@@ -170,9 +169,6 @@ const PaymentSuccess = () => {
             </Heading>
             <VStack w="100%" textAlign="center" spacing="10px">
               <Text color="dark" fontSize={["12px", "16px"]}>
-                {/* <Text as="span" color="primary.500">
-                  {contactData.firstName}
-                </Text>{" "} */}
                 Your order was successful. We've also sent a copy to your email
                 address{" "}
                 <Text as="span" color="primary.500">
@@ -182,9 +178,9 @@ const PaymentSuccess = () => {
               </Text>
               <Text color="dark" fontSize={["12px", "16px"]}>
                 If you do not receive your ticket from us, please email us at{" "}
-                <Link to="mailto:info@thelemonadenetwork.ng">
+                <Link to="mailto:info@lemonade.africa">
                   <Text as="span" color="primary.500">
-                    admin@lemonade.africa
+                    info@lemonade.africa
                   </Text>
                 </Link>
                 .
@@ -211,7 +207,7 @@ const PaymentSuccess = () => {
                     </Tr>
                   </Thead>
 
-                  {assignMultiple ? (
+                  {guest === "true" ? (
                     <Tbody>
                       {Object.keys(ticketCounts).map((ticketId) => {
                         const ticketQuantity = ticketCounts[ticketId];
@@ -362,13 +358,18 @@ const PaymentSuccess = () => {
                 </Table>
               </TableContainer>
             </Box>
-            <Flex>
+            <VStack>
               <Link to={`/${event.id}`}>
                 <Button bg="primary.500" _hover={{ bg: "primary.400" }}>
                   Back to Event
                 </Button>
               </Link>
-            </Flex>
+              <Link to={`/${event.id}`}>
+                <Text color="dark" fontSize={["14px", "16px"]}>
+                  Shop Merch
+                </Text>
+              </Link>
+            </VStack>
           </VStack>
         </VStack>
       </VStack>

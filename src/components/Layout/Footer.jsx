@@ -25,14 +25,14 @@ const Footer = () => {
           </Link>
           <Flex justify="center" align="center" gap="20px">
             <Box display={["block", "block", "block", "none"]}>
-              <Link to="mailto:info@thelemonadenetwork.ng">
+              <Link to="mailto:info@lemonade.africa">
                 <IoMailOutline />
               </Link>
             </Box>
             <Box display={["none", "none", "none", "block"]}>
               <Link to="mailto: info@lemonade.africa">
                 <Text color="dark" fontSize="16px" lineHeight="24px">
-                  info@thelemonadenetwork.ng
+                  info@lemonade.africa
                 </Text>
               </Link>
             </Box>

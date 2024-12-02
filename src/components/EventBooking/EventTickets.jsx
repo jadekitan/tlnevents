@@ -11,24 +11,38 @@ import {
   useNumberInput,
   Button,
   Badge,
+  useDisclosure,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogOverlay,
+  ListItem,
+  UnorderedList,
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
-import { eventsData } from "../../../server/eventsData";
-import { Link, useParams } from "react-router-dom";
 
 const EventTickets = () => {
   const {
     LeftArrow,
-    currentStep,
     setStep,
     ticketType,
     ticketCounts,
     setTicketCounts,
     feePercentage,
+    clearPurchaseType,
+    clearContactData,
+    clearTicketCounts,
+    clearAssignMultiple,
   } = useContext(multiBookingContext);
 
-  const { eventId } = useParams(); // Get the event ID from the URL
-  const event = eventsData[eventId]; // Lookup event from local data
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+
+  const clearData = () => {
+    clearPurchaseType();
+    clearContactData();
+    clearTicketCounts();
+    clearAssignMultiple();
+  };
 
   // Handle ticket count changes and persist to localStorage
   const handleTicketCountChange = (ticketId, value) => {
@@ -47,13 +61,13 @@ const EventTickets = () => {
     ticketId,
     ticketCounts,
     setTicketCounts,
-    step,
-    max,
+    step = 1, // Default to single-step increment
+    max = 5, // Default max value
     price,
   }) => {
     const { getInputProps, getIncrementButtonProps, getDecrementButtonProps } =
       useNumberInput({
-        step: step, // Dynamic step (e.g., 2 for duo tickets, 3 for group tickets)
+        step, // Dynamic step (e.g., 2 for duo tickets, 3 for group tickets)
         value: ticketCounts[ticketId], // Bind value to ticketCounts state
         min: 0,
         max: max * step, // Max value considering step
@@ -65,7 +79,7 @@ const EventTickets = () => {
             value = Math.floor(value / step) * step;
           }
 
-          value = Math.min(value, max * step);
+          value = Math.min(value, max * step) || 0;
 
           setTicketCounts(ticketId, value);
         },
@@ -74,40 +88,36 @@ const EventTickets = () => {
     const inc = getIncrementButtonProps();
     const dec = getDecrementButtonProps();
     const input = getInputProps({
-      value: ticketCounts[ticketId],
-      onChange: (e) => {
-        let value =
-          e.target.value === "" ? 0 : Math.max(0, parseInt(e.target.value, 10));
-
-        // Ensure the entered value is a multiple of the step
-        if (value % step !== 0) {
-          value = Math.floor(value / step) * step;
-        }
-
-        // Ensure value does not exceed the maximum allowed tickets
-        value = Math.min(value, max * step);
-
-        setTicketCounts(ticketId, value);
-      },
       inputMode: "numeric", // Allow numeric inputs only
-      maxLength: 2, // Limit input to 2 digits
+      maxLength: String(max * step).length, // Dynamic max length
     });
 
     return (
-      <HStack maxW="100%">
-        <Button minW={["20px", "30px"]} h={["20px", "30px"]} p="0px" {...dec}>
+      <HStack maxW="100%" spacing={2}>
+        <Button
+          minW={["20px", "30px"]}
+          h={["20px", "30px"]}
+          p="0px"
+          fontSize="sm"
+          {...dec}
+        >
           -
         </Button>
         <Input
           width="100%"
           height={["20px", "30px"]}
           p={["0px", "10px"]}
-          color="dark"
           fontSize={["12px", "16px"]}
           textAlign="center"
           {...input}
         />
-        <Button minW={["20px", "30px"]} h={["20px", "30px"]} p="0px" {...inc}>
+        <Button
+          minW={["20px", "30px"]}
+          h={["20px", "30px"]}
+          p="0px"
+          fontSize="sm"
+          {...inc}
+        >
           +
         </Button>
       </HStack>
@@ -127,11 +137,58 @@ const EventTickets = () => {
   return (
     <VStack w="100%" align="flex-start" spacing={["20px", "40px"]}>
       <Flex justify="flex-start" align="center" gap={["10px", "20px"]}>
-        <Link to={`/${event.id}`}>
-          <Box as="button" p="3px" bg="primary.500" rounded="6px">
-            <LeftArrow />
-          </Box>
-        </Link>
+        <Box
+          as="button"
+          p="3px"
+          bg="primary.500"
+          rounded="6px"
+          onClick={onOpen}
+        >
+          <LeftArrow />
+        </Box>
+
+        <AlertDialog
+          motionPreset="slideInBottom"
+          leastDestructiveRef={cancelRef}
+          onClose={onClose}
+          isOpen={isOpen}
+          isCentered
+        >
+          <AlertDialogOverlay />
+
+          <AlertDialogContent
+            borderRadius={["16px", "8px"]}
+            marginBottom={["0px", "auto"]}
+          >
+            <VStack align="center" spacing="20px" padding="30px 15px">
+              <Heading color="dark" fontSize="18px" lineHeight="28px">
+                Release Tickets
+              </Heading>
+              <Text textAlign="center">
+                Are you sure you want to cancel? This will cancel the order and
+                release your tickets?
+              </Text>
+              <Flex width="100%" justify="space-between">
+                <Button width="50%" ref={cancelRef} onClick={onClose}>
+                  Cancel
+                </Button>
+
+                <Button
+                  width="50%"
+                  bg="primary.500"
+                  color="dark"
+                  ml={3}
+                  onClick={() => {
+                    setStep(1);
+                    clearData();
+                  }}
+                >
+                  Release Ticket
+                </Button>
+              </Flex>
+            </VStack>
+          </AlertDialogContent>
+        </AlertDialog>
         <Heading color="dark" fontSize={["18px", "22px"]} lineHeight="28px">
           Ticket Types
         </Heading>
@@ -197,20 +254,46 @@ const EventTickets = () => {
             <Flex w="100%" justify="space-between" align="flex-start">
               <VStack w="70%" align="flex-start">
                 <Box>
-                  {ticket.description.length > 200 ? (
+                  {ticket.description.perks.length >= 3 ? (
                     <>
                       <Collapse
-                        startingHeight={60}
+                        startingHeight={100}
                         in={showDescription[ticket.id]}
                       >
-                        <Text
-                          title={ticket.description}
-                          color="dark"
-                          fontSize={["12px", "14px"]}
-                          lineHeight="20px"
-                        >
-                          {ticket.description}
-                        </Text>
+                        <VStack align="flex-start" spacing="10px">
+                          {ticket.description.perks && (
+                            <VStack align="flex-start" spacing="0">
+                              <Heading
+                                color="dark"
+                                fontSize={["14px", "20px"]}
+                                lineHeight="28px"
+                              >
+                                Perks
+                              </Heading>
+                              <UnorderedList py="0">
+                                {ticket.description.perks.map((perk, i) => (
+                                  <ListItem key={i}>
+                                    <Text
+                                      color="dark"
+                                      fontSize={["12px", "14px"]}
+                                      lineHeight="20px"
+                                    >
+                                      {perk}
+                                    </Text>
+                                  </ListItem>
+                                ))}
+                              </UnorderedList>
+                            </VStack>
+                          )}
+                          <Text
+                            title={ticket.description.info}
+                            color="dark"
+                            fontSize={["12px", "14px"]}
+                            lineHeight="20px"
+                          >
+                            {ticket.description.info}
+                          </Text>
+                        </VStack>
                       </Collapse>
                       <Text
                         as="button"
@@ -223,14 +306,40 @@ const EventTickets = () => {
                       </Text>
                     </>
                   ) : (
-                    <Text
-                      title={ticket.descrpition}
-                      color="dark"
-                      fontSize={["12px", "14px"]}
-                      lineHeight="20px"
-                    >
-                      {ticket.description}
-                    </Text>
+                    <VStack align="flex-start" spacing="10px">
+                      {ticket.description.perks && (
+                        <VStack align="flex-start" spacing="0">
+                          <Heading
+                            color="dark"
+                            fontSize={["14px", "20px"]}
+                            lineHeight="28px"
+                          >
+                            Perks
+                          </Heading>
+                          <UnorderedList py="0">
+                            {ticket.description.perks.map((perk, i) => (
+                              <ListItem key={i}>
+                                <Text
+                                  color="dark"
+                                  fontSize={["12px", "14px"]}
+                                  lineHeight="20px"
+                                >
+                                  {perk}
+                                </Text>
+                              </ListItem>
+                            ))}
+                          </UnorderedList>
+                        </VStack>
+                      )}
+                      <Text
+                        title={ticket.description.info}
+                        color="dark"
+                        fontSize={["12px", "14px"]}
+                        lineHeight="20px"
+                      >
+                        {ticket.description.info}
+                      </Text>
+                    </VStack>
                   )}
                 </Box>
               </VStack>

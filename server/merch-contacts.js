@@ -1,30 +1,14 @@
 import axios from "axios";
 import { baseURL } from "./base";
 
-export async function newOrder(
-  referenceNumber,
-  attendeeName,
-  email,
-  fees,
-  quantity,
-  subTotal,
-  ticketType,
-  ticketPrice
-) {
+export async function contacts(firstName, lastName, email, phone, type) {
   try {
-    const response = await axios.post(`${baseURL}/orders`, {
-      referenceNumber,
-      orders: [
-        {
-          attendeeName,
-          email,
-          fees,
-          quantity,
-          subTotal,
-          ticketType,
-          ticketPrice,
-        },
-      ],
+    const response = await axios.post(`${baseURL}/contacts`, {
+      firstName,
+      lastName,
+      email,
+      phone,
+      type,
     });
     return {
       success: true,

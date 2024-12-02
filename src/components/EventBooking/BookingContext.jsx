@@ -40,10 +40,44 @@ const BookingContext = ({ children }) => {
     </Icon>
   );
 
+  const [purchaseType, setPurchaseType] = useState(() => {
+    const storedValue = localStorage.getItem("purchaseType");
+    return storedValue ? JSON.parse(storedValue) : null;
+  });
+
+  useEffect(() => {
+    if (purchaseType !== null) {
+      localStorage.setItem("purchaseType", JSON.stringify(purchaseType));
+    }
+  }, [purchaseType]);
+
+  const clearPurchaseType = () => {
+    localStorage.removeItem("purchaseType");
+    setPurchaseType(null); // Reset the state to null
+  };
+
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
 
-  const [ticketType, setTicketType] = useState(event ? event.tickets : []);
+  const [ticketType, setTicketType] = useState(
+    event
+      ? purchaseType === "children"
+        ? event.tickets.children
+        : event.tickets.adult
+      : []
+  );
+
+  useEffect(() => {
+    if (event) {
+      setTicketType(
+        purchaseType === "children"
+          ? event.tickets.children
+          : event.tickets.adult
+      );
+    } else {
+      setTicketType([]); // Clear tickets if no event or purchaseType
+    }
+  }, [purchaseType, event]);
 
   // Initialize ticket counts from localStorage if available
   const [ticketCounts, setTicketCounts] = useState(() => {
@@ -165,6 +199,8 @@ const BookingContext = ({ children }) => {
         value={{
           currentStep,
           setStep,
+          purchaseType,
+          setPurchaseType,
           ticketType,
           setTicketType,
           ticketCounts,
@@ -180,6 +216,7 @@ const BookingContext = ({ children }) => {
           handleContactDataChange,
           saveToLocalStorage,
           handleBlur,
+          clearPurchaseType,
           clearContactData,
           assignMultiple,
           setAssignMultiple,

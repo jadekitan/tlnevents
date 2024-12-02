@@ -18,6 +18,8 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  AvatarGroup,
+  Avatar
 } from "@chakra-ui/react";
 import { eventsData } from "../../server/eventsData";
 import { format, parseISO } from "date-fns";
@@ -94,14 +96,12 @@ const EventDetails = () => {
   // Manually format times using UTC hours and minutes to avoid timezone shifts
   const startTimeWithMeridiem = `${String(
     startDate.getUTCHours() % 12 || 12
-  ).padStart(2, "0")}:${String(startDate.getUTCMinutes()).padStart(2, "0")} ${
-    startDate.getUTCHours() >= 12 ? "PM" : "AM"
-  }`;
+  ).padStart(2, "0")}:${String(startDate.getUTCMinutes()).padStart(2, "0")} ${startDate.getUTCHours() >= 12 ? "PM" : "AM"
+    }`;
   const endTimeWithMeridiem = `${String(
     endDate.getUTCHours() % 12 || 12
-  ).padStart(2, "0")}:${String(endDate.getUTCMinutes()).padStart(2, "0")} ${
-    endDate.getUTCHours() >= 12 ? "PM" : "AM"
-  }`;
+  ).padStart(2, "0")}:${String(endDate.getUTCMinutes()).padStart(2, "0")} ${endDate.getUTCHours() >= 12 ? "PM" : "AM"
+    }`;
 
   // 3. Format in (Wed, August 21st 7:00 PM) with meridiem, UTC-based
   const startFormattedDate = `${format(startDate, "EEE")}, ${format(
@@ -242,14 +242,14 @@ END:VCALENDAR
           <Breadcrumb fontWeight="500" color="Dark">
             <BreadcrumbItem>
               <BreadcrumbLink href="/">
-                <Text color="neutral.500" fontSize={["14px", "16px"]}>
+                <Text color="neutral.500" fontSize={["14px", "16px", "16px"]}>
                   Home
                 </Text>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbItem isCurrentPage>
               <BreadcrumbLink href="/discover">
-                <Text color="dark" fontSize={["14px", "16px"]}>
+                <Text color="dark" fontSize={["14px", "16px", "16px"]}>
                   {event.name}
                 </Text>
               </BreadcrumbLink>
@@ -259,13 +259,13 @@ END:VCALENDAR
             w="100%"
             h="100%"
             position="relative"
-            flexDir={["column", "column", "column", "row"]}
+            flexDir={["column", "column", "column", "column", "row"]}
             justify="flex-start"
             align="flex-start"
             spacing="40px"
           >
             <VStack
-              display={["none", "none", "none", "flex"]}
+              display={["none", "none", "none", "none", "flex"]}
               position="sticky"
               top="20px"
               w="35%"
@@ -354,9 +354,9 @@ END:VCALENDAR
               </Box>
             </VStack>
             <Box
-              display={["block", "block", "block", "none"]}
-              w={["100%", "100%", "70%", "70%", "100%"]}
-              h={["400px", "384px", "400px", "384px", "384px"]}
+              display={["block", "block", "block", "block", "none"]}
+              w={["100%", "100%", "100%", "70%", "100%"]}
+              h={["425px", "384px", "775px", "600px", "384px"]}
             >
               <Image
                 src={event.image}
@@ -368,20 +368,20 @@ END:VCALENDAR
               />
             </Box>
             <VStack
-              w={["100%", "100%", "100%", "65%"]}
+              w={["100%", "100%", "100%", "100%", "65%"]}
               h="100%"
               align="flex-start"
               spacing="50px"
-              pb="120px"
+              pb="80px"
             >
               <VStack w="100%" align="flex-start" spacing={["10px", "20px"]}>
-                <Heading color="dark" fontSize={["28px", "32px"]}>
+                <Heading color="dark" fontSize={["28px", "32px", "36px", "32px"]}>
                   {event.name}
                 </Heading>
-                <Text color="primary.500" fontSize={["14px", "16px"]}>
+                <Text color="primary.500" fontSize={["14px", "16px", "20px", "16px"]}>
                   {startFormattedDate}
                 </Text>
-                <Text color="dark" fontSize={["18px", "20px"]} fontWeight="600">
+                <Text color="dark" fontSize={["18px", "20px", "24px", "20px"]} fontWeight="600">
                   {event.venue.name}, {event.venue.state}, {event.venue.country}
                 </Text>
               </VStack>
@@ -394,6 +394,99 @@ END:VCALENDAR
                   {event.about.description}
                 </Text>
               </VStack>
+              {/* {event.merch && (
+                <Flex w="100%" justify="space-between" align="center" key={category}>
+                  <VStack
+                    w="100%"
+                    justify="flex-start"
+                    align="flex-start"
+                    spacing={["18px", "20px"]}
+                  >
+
+                    <Heading color="neutral.500" fontSize={["24px", "28px"]}>
+                      Merch
+                    </Heading>
+                    {Object.keys(event.merch.tees).map((category) => {
+                      // Validate the category exists
+                      if (!event.merch[category]) {
+                        console.warn(`Category "${category}" is invalid or undefined.`);
+                        return null;
+                      }
+
+                      // Get all items in the current category
+                      const items = Object.values(event.merch[category]);
+
+                      // Skip rendering if no items exist
+                      if (!items.length) {
+                        console.warn(`No items found in category "${category}".`);
+                        return null;
+                      }
+
+                      // Pick a random item
+                      const randomItem = items[Math.floor(Math.random() * items.length)];
+
+                      // Ensure randomItem exists
+                      if (!randomItem) {
+                        console.warn(`Random item is undefined for category "${category}".`);
+                        return null;
+                      }
+
+                      return (
+                        <Stack
+                          key={category}
+                          w="100%"
+                          flexDir={["column", "row"]}
+                          overflow="hidden"
+                          align={["flex-start", "center"]}
+                          gap="20px"
+                        >
+                          <Avatar
+                            size="md"
+                            border="none"
+                            src={randomItem.image || "fallback-image.jpg"}
+                            alt={randomItem.name || "Unnamed Item"}
+                          />
+                          <Heading
+                            color="white"
+                            fontFamily="outfit"
+                            fontSize="16px"
+                            whiteSpace="nowrap"
+                            overflow="hidden"
+                            textOverflow="ellipsis"
+                          >
+                            {randomItem.name || "Unnamed Item"}
+                          </Heading>
+                        </Stack>
+                      );
+                    })}
+
+
+
+
+
+                    <Link to={`/${event.id}/merch/${category}/${randomItem.id}`}>
+                      <Button
+                        bg="primary-color900"
+                        color="white"
+                        _hover={{ bg: "primary-color500" }}
+                        rounded="8px"
+                      >
+                        <Text
+                          fontFamily="outfit"
+                          fontSize="14px"
+                          fontWeight="600"
+                          lineHeight="20px"
+                        >
+                          View Details
+                        </Text>
+                      </Button>
+                    </Link>
+
+
+                  </VStack>
+                </Flex>)} */}
+
+
               <Box w="100%" h="1px" bg="primary.500"></Box>
               <VStack w="100%" align="flex-start" spacing="20px">
                 <Heading color="neutral.500" fontSize={["24px", "28px"]}>
@@ -577,27 +670,27 @@ END:VCALENDAR
               </Flex>
             </VStack>
           </Stack>
+
           <Box
-            display={["block", "block", "block", "none"]}
+            display={["block", "block", "block", "block", "none"]}
             position="fixed"
-            bottom="0px"
+            bottom="0"
             left="0"
+            bg="#fff"
+            boxShadow="xs"
             w="100%"
-            bg="primary.500"
-            borderTopRadius="8px"
-            p="20px"
+            p={["10px", "20px", "40px"]}
           >
-            <VStack w="100%" justify="center" align="center">
-              <Link to={`/${event.id}/checkout`}>
-                <Button size="lg" bg="secondary.500" color="dark">
-                  Get Ticket
-                </Button>
-              </Link>
-            </VStack>
+            <Link to={`/${event.id}/checkout`}>
+              <Button w="100%" h={["40px", "50px"]} bg="primary.500" rounded="8px">
+                <Text fontSize={["12px", "14px", "20px"]}>Get Ticket</Text>
+              </Button>
+            </Link>
           </Box>
+
         </VStack>
-      </VStack>
-    </VStack>
+      </VStack >
+    </VStack >
   );
 };
 

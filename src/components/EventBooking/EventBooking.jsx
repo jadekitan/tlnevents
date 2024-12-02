@@ -16,20 +16,26 @@ import {
   Text,
   Button,
   useToast,
+  useDisclosure,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
+import PurchaseType from "./PurchaseType";
 import EventTickets from "./EventTickets";
 import EventContact from "./EventContact";
 import { IoClose } from "react-icons/io5";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const EventBooking = () => {
-  const steps = [{ title: "Tickets" }, { title: "Contact" }];
+  const steps = [{ title: "Type" }, { title: "Tickets" }, { title: "Contact" }];
 
   const {
     currentStep,
     setStep,
+    purchaseType,
     ticketType,
     ticketCounts,
     feePercentage,
@@ -39,6 +45,10 @@ const EventBooking = () => {
     isDisable,
     setIsDisable,
     assignMultiple,
+    clearPurchaseType,
+    clearContactData,
+    clearTicketCounts,
+    clearAssignMultiple,
   } = useContext(multiBookingContext);
   {
     multiBookingContext;
@@ -72,6 +82,13 @@ const EventBooking = () => {
       element.scrollIntoView({ behavior: "smooth" });
     }
   }
+
+  const clearData = () => {
+    clearPurchaseType();
+    clearContactData();
+    clearTicketCounts();
+    clearAssignMultiple();
+  };
 
   const toast = useToast();
 
@@ -108,7 +125,6 @@ const EventBooking = () => {
         // Redirect on successful payment verification
         window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}&email=${email}&guest=${assignMultiple}`;
         setStep(1);
-
         setIsDisable(false);
         setIsSubmitting(false);
       },
@@ -133,8 +149,10 @@ const EventBooking = () => {
   const showStep = (step) => {
     switch (step) {
       case 1:
-        return <EventTickets />;
+        return <PurchaseType />;
       case 2:
+        return <EventTickets />;
+      case 3:
         return (
           <EventContact handleNextStep={handleNextStep} formRef={formRef} /> // Pass formRef and handleNextStep
         );
@@ -161,7 +179,7 @@ const EventBooking = () => {
         title: "Select A Ticket",
         description: "Please select at least one ticket to continue.",
         status: "info",
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
       });
     }
@@ -169,13 +187,46 @@ const EventBooking = () => {
 
   const ContinueStep = () => {
     if (currentStep === 1) {
-      handleContinue();
+      if (purchaseType) {
+        setStep(2);
+        window.location.href = `/${event.id}/checkout?type=${purchaseType}`;
+      } else {
+        toast({
+          position: "top",
+          title: "Select A Purchase Type",
+          description: "Please select a purchase type to continue.",
+          status: "info",
+          duration: 3000,
+          isClosable: true,
+        }); // show alert if continue is clicked without selection
+      }
     }
     if (currentStep === 2) {
+      handleContinue();
+    }
+    if (currentStep === 3) {
       if (formRef.current) {
         formRef.current.handleSubmit(); // Trigger form submission
         // scrollToSection("stepper");
       }
+    }
+  };
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+
+  const handleCancel = () => {
+    const hasSelectedTickets = ticketType.some(
+      (ticket) => ticketCounts[ticket.id] > 0
+    );
+    if (purchaseType) {
+      onOpen();
+    } else if (hasSelectedTickets) {
+      onOpen();
+    } else {
+      setStep(1);
+      window.location.href = `/${event.id}`;
+      clearData();
     }
   };
 
@@ -199,7 +250,7 @@ const EventBooking = () => {
       >
         {/* <Header /> */}
         <VStack w="100%" align="flex-start" spacing="40px">
-          <Box w="100%" display={currentStep === 3 ? "none" : "block"}>
+          <Box w="100%">
             <Flex w="100%" align="center" gap="40px">
               <Flex w="100%" justify="space-between" align="center">
                 <Heading
@@ -207,12 +258,58 @@ const EventBooking = () => {
                   fontSize={["18px", "22px"]}
                   lineHeight="28px"
                 >
-                  Check Out
+                  Checkout
                 </Heading>
 
-                <Link to={`/${event.url}`}>
-                  <IoClose color="dark" className=" w-6 h-6" />
-                </Link>
+                <IoClose
+                  color="dark"
+                  className=" w-6 h-6"
+                  onClick={handleCancel}
+                />
+
+                <AlertDialog
+                  motionPreset="slideInBottom"
+                  leastDestructiveRef={cancelRef}
+                  onClose={onClose}
+                  isOpen={isOpen}
+                  isCentered
+                >
+                  <AlertDialogOverlay />
+
+                  <AlertDialogContent
+                    borderRadius={["16px", "8px"]}
+                    marginBottom={["0px", "auto"]}
+                  >
+                    <VStack align="center" spacing="20px" padding="30px 15px">
+                      <Heading color="dark" fontSize="18px" lineHeight="28px">
+                        Release Tickets
+                      </Heading>
+                      <Text textAlign="center">
+                        Are you sure you want to cancel? This will cancel the
+                        order and release your tickets?
+                      </Text>
+                      <Flex width="100%" justify="space-between">
+                        <Button width="50%" ref={cancelRef} onClick={onClose}>
+                          Cancel
+                        </Button>
+
+                        <Button
+                          width="50%"
+                          bg="primary.500"
+                          color="dark"
+                          ml={3}
+                          onClick={() => {
+                            window.location.href = `/${event.id}`;
+                            setStep(1);
+                            clearData();
+                          }}
+                        >
+                          Release Ticket
+                        </Button>
+                      </Flex>
+                    </VStack>
+                  </AlertDialogContent>
+                </AlertDialog>
               </Flex>
             </Flex>
           </Box>
@@ -227,12 +324,7 @@ const EventBooking = () => {
               align="flex-start"
               spacing="20px"
             >
-              <Box
-                id="stepper"
-                position="relative"
-                width={["100%", "85%"]}
-                display={currentStep === 3 ? "none" : "block"}
-              >
+              <Box id="stepper" position="relative" width={["100%", "85%"]}>
                 <Stepper index={currentStep} size="sm" gap="0">
                   {steps.map((step, index) => (
                     <Step key={index} gap="10px">
@@ -305,15 +397,13 @@ const EventBooking = () => {
           align="flex-start"
         >
           <Box
-            w={currentStep === 3 ? "100%" : ["100%", "100%", "100%", "544px"]}
+            w={["100%", "100%", "100%", "544px"]}
             pb={["100px", "100px", "100px", 0]}
           >
             {showStep(currentStep)}
           </Box>
           <VStack
-            display={
-              currentStep === 3 ? "none" : ["none", "none", "none", "flex"]
-            }
+            display={["none", "none", "none", "flex"]}
             position="sticky"
             top="20px"
             w="450px"
@@ -335,7 +425,37 @@ const EventBooking = () => {
                 <Heading color="dark" fontSize="22px" lineHeight="28px">
                   {event.name}
                 </Heading>
-                {Object.values(ticketCounts).some((count) => count > 0) ? (
+                {currentStep === 1 ? (
+                  purchaseType ? (
+                    <Button
+                      type="submit"
+                      w="100%"
+                      bg="primary.500"
+                      rounded="8px"
+                      _hover={{ bg: "primary.400" }}
+                      _active={{ bg: "secondary.500" }}
+                      _focus={{ bg: "secondary.500" }}
+                      onClick={ContinueStep}
+                      isDisabled={isDisable}
+                      isLoading={isSubmitting}
+                      loadingText="Checkout"
+                      spinnerPlacement="end"
+                    >
+                      <Text
+                        color="dark"
+                        fontSize="14px"
+                        fontWeight="600"
+                        lineHeight="20px"
+                      >
+                        Continue
+                      </Text>
+                    </Button>
+                  ) : (
+                    <Text color="dark" fontSize="16px" lineHeight="24px">
+                      Please, choose a purchase type to continue
+                    </Text>
+                  )
+                ) : Object.values(ticketCounts).some((count) => count > 0) ? (
                   <VStack
                     width="100%"
                     justify="flex-start"
@@ -468,7 +588,81 @@ const EventBooking = () => {
             px="20px"
             rounded="8px"
           >
-            {Object.values(ticketCounts).some((count) => count >= 0) ? (
+            {currentStep === 1 ? (
+              purchaseType ? (
+                <Flex
+                  h="100%"
+                  py="14px"
+                  px="20px"
+                  rounded="8px"
+                  bg="primary.500"
+                  justify="space-between"
+                  align="center"
+                >
+                  <Heading color="dark" fontSize="24px" lineHeight="32px">
+                    ₦ 0
+                  </Heading>
+                  <Button
+                    w="122px"
+                    rounded="8px"
+                    bg="secondary.500"
+                    _hover={{ bg: "primary.400" }}
+                    _active={{ bg: "secondary.500" }}
+                    _focus={{ bg: "secondary.500" }}
+                    onClick={ContinueStep}
+                    isDisabled={isDisable}
+                    isLoading={isSubmitting}
+                    loadingText="Checkout"
+                    spinnerPlacement="end"
+                  >
+                    <Text
+                      color="dark"
+                      fontSize="14px"
+                      fontWeight="600"
+                      lineHeight="20px"
+                    >
+                      {currentStep === steps.length ? "Checkout" : "Continue"}
+                    </Text>
+                  </Button>
+                </Flex>
+              ) : (
+                <Flex
+                  h="100%"
+                  py="14px"
+                  px="20px"
+                  rounded="8px"
+                  bg="primary.500"
+                  justify="space-between"
+                  align="center"
+                >
+                  <Heading color="dark" fontSize="24px" lineHeight="32px">
+                    ₦ 0
+                  </Heading>
+                  <Button
+                    w="122px"
+                    rounded="8px"
+                    bg="secondary.500"
+                    _hover={{ bg: "primary.400" }}
+                    _active={{ bg: "secondary.500" }}
+                    _focus={{ bg: "secondary.500" }}
+                    onClick={ContinueStep}
+                    isDisabled={isDisable}
+                    isLoading={isSubmitting}
+                    loadingText="Checkout"
+                    spinnerPlacement="end"
+                  >
+                    <Text
+                      color="dark"
+                      fontSize="14px"
+                      fontWeight="600"
+                      lineHeight="20px"
+                    >
+                      {currentStep === steps.length ? "Checkout" : "Continue"}
+                    </Text>
+                  </Button>
+                </Flex>
+              )
+            ) : Object.values(ticketCounts).some((count) => count >= 0) ? (
               <Flex
                 h="100%"
                 py="14px"
@@ -500,7 +694,7 @@ const EventBooking = () => {
                     fontWeight="600"
                     lineHeight="20px"
                   >
-                    {currentStep === steps.length - 1 ? "Continue" : "Checkout"}
+                    {currentStep === steps.length ? "Checkout" : "Continue"}
                   </Text>
                 </Button>
               </Flex>

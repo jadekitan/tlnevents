@@ -14,11 +14,16 @@ import {
   FormLabel,
   Checkbox,
   useToast,
+  useDisclosure,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useFormik } from "formik";
 import { multiBookingContext } from "./BookingContext";
 import { debounce } from "lodash";
+import { contacts } from "../../../server/contacts";
 
 const EventContact = ({ handleNextStep, formRef }) => {
   const {
@@ -37,7 +42,38 @@ const EventContact = ({ handleNextStep, formRef }) => {
     ticketCounts,
     assignMultiple,
     setAssignMultiple,
+    clearPurchaseType,
+    clearContactData,
+    clearTicketCounts,
+    clearAssignMultiple,
   } = useContext(multiBookingContext);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+
+  const clearData = () => {
+    clearPurchaseType();
+    clearContactData();
+    clearTicketCounts();
+    clearAssignMultiple();
+  };
+
+  const handleArrow = () => {
+    const hasSelectedTickets = ticketType.some(
+      (ticket) => ticketCounts[ticket.id] > 0
+    );
+
+    if (currentStep === 3) {
+      if (hasSelectedTickets) {
+        onOpen();
+      } else {
+        setStep(currentStep - 1);
+        clearData();
+      }
+    } else {
+      onOpen();
+    }
+  };
 
   // List of country codes
   const countryCodes = [
@@ -71,80 +107,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
     if (!country) return false;
     return phoneLength >= country.minLength && phoneLength <= country.maxLength;
   };
-
-  const debouncedValidate = useCallback(
-    debounce((values) => {
-      const errors = {};
-
-      // Basic field validation
-      if (!values.firstName?.trim()) {
-        errors.firstName = "First name is required";
-      }
-      if (!values.lastName?.trim()) {
-        errors.lastName = "Last name is required";
-      }
-      if (!values.email?.trim()) {
-        errors.email = "Email is required";
-      } else if (
-        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-      ) {
-        errors.email = "Invalid email address";
-      }
-      if (!values.phone?.trim()) {
-        errors.phone = "Phone number is required";
-      } else if (!validatePhoneNumber(values.phone, values.countryCode)) {
-        errors.phone = "Invalid phone number";
-      }
-
-      // Only validate attendeeAddresses if assignMultiple is true
-      if (assignMultiple) {
-        const attendeeErrors = {};
-        let hasAttendeeErrors = false;
-
-        // Iterate through all ticket types
-        Object.keys(ticketCounts).forEach((ticketId) => {
-          const ticketQuantity = ticketCounts[ticketId];
-          if (ticketQuantity > 0) {
-            const ticketErrors = [];
-
-            // Validate each attendee for this ticket type
-            for (let i = 0; i < ticketQuantity; i++) {
-              const attendee = values.attendeeAddresses?.[ticketId]?.[i] || {};
-              const attendeeError = {};
-
-              if (!attendee.firstName?.trim()) {
-                attendeeError.firstName = "First name is required";
-                hasAttendeeErrors = true;
-              }
-              if (!attendee.email?.trim()) {
-                attendeeError.email = "Email is required";
-                hasAttendeeErrors = true;
-              } else if (
-                !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(attendee.email)
-              ) {
-                attendeeError.email = "Invalid email address";
-                hasAttendeeErrors = true;
-              }
-
-              if (Object.keys(attendeeError).length > 0) {
-                ticketErrors[i] = attendeeError;
-              }
-            }
-
-            if (ticketErrors.length > 0) {
-              attendeeErrors[ticketId] = ticketErrors;
-            }
-          }
-        });
-
-        if (hasAttendeeErrors) {
-          errors.attendeeAddresses = attendeeErrors;
-        }
-      }
-
-      return errors;
-    }, 300)
-  );
 
   const validate = (values) => {
     const errors = {};
@@ -225,37 +187,31 @@ const EventContact = ({ handleNextStep, formRef }) => {
     validate,
     onSubmit: async (values, { setSubmitting }) => {
       setIsSubmitting(true);
+      setSubmitting(true);
       setIsDisable(true);
-      const errors = validate(values);
-      if (Object.keys(errors).length > 0) {
-        formik.setErrors(errors);
-
-        setIsSubmitting(false);
-        setIsDisable(false);
-        return;
-      }
-
       try {
-        const response = await fetch(
-          "https://tlnevents.com/server/contacts.php",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(values),
-          }
-        );
-        const result = await response.json();
-        if (result.success) {
-          // Successfully saved contact and attendees
-        } else {
-          console.error("Error:", result.message);
-        }
-      } catch (error) {
-        console.error("Unexpected error:", error);
-      } finally {
-        setSubmitting(false);
-      }
+        // Flatten all attendee addresses
+        const allAttendees = Object.values(contactData.attendeeAddresses || {}).flat();
 
+        // Validate inputs
+        const errors = validate(values);
+        if (Object.keys(errors).length > 0) {
+          formik.setErrors(errors);
+          setIsSubmitting(false);
+          setSubmitting(false);
+          setIsDisable(false);
+          return;
+        }
+
+        contacts(
+          contactData.firstName,
+          contactData.lastName,
+          contactData.email,
+          contactData.phone,
+          allAttendees,
+          "Ticket"
+        );
+      } catch (error) { }
       handleNextStep(); // Advance to the next step if everything is valid
     },
   });
@@ -333,35 +289,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
     });
   };
 
-  // Copy from previous attendee
-  const handleCopyFromPrevious = useCallback(
-    (ticketId, currentIndex) => {
-      if (currentIndex > 0) {
-        const previousAttendee =
-          contactData.attendeeAddresses[ticketId][currentIndex - 1];
-        handleAttendeeChange(
-          ticketId,
-          currentIndex,
-          "firstName",
-          previousAttendee.firstName
-        );
-        handleAttendeeChange(
-          ticketId,
-          currentIndex,
-          "lastName",
-          previousAttendee.lastName
-        );
-        handleAttendeeChange(
-          ticketId,
-          currentIndex,
-          "email",
-          previousAttendee.email
-        );
-      }
-    },
-    [contactData.attendeeAddresses, handleAttendeeChange]
-  );
-
   // Inside your component:
   const toast = useToast();
 
@@ -432,20 +359,57 @@ const EventContact = ({ handleNextStep, formRef }) => {
       <Flex justify="flex-start" align="center" gap={["10px", "20px"]}>
         <Box
           as="button"
+          type="button"
           p="3px"
           bg="primary.500"
           rounded="6px"
-          onClick={() => {
-            if (currentStep === 1) {
-              console.log("Back to event page");
-            }
-            if (currentStep > 1) {
-              setStep(currentStep - 1);
-            }
-          }}
+          onClick={handleArrow}
         >
           <LeftArrow />
         </Box>
+        <AlertDialog
+          motionPreset="slideInBottom"
+          leastDestructiveRef={cancelRef}
+          onClose={onClose}
+          isOpen={isOpen}
+          isCentered
+        >
+          <AlertDialogOverlay />
+
+          <AlertDialogContent
+            borderRadius={["16px", "8px"]}
+            marginBottom={["0px", "auto"]}
+          >
+            <VStack align="center" spacing="20px" padding="30px 15px">
+              <Heading color="dark" fontSize="18px" lineHeight="28px">
+                Release Tickets
+              </Heading>
+              <Text textAlign="center">
+                Are you sure you want to cancel? This will cancel the order and
+                release your tickets?
+              </Text>
+              <Flex width="100%" justify="space-between">
+                <Button width="50%" ref={cancelRef} onClick={onClose}>
+                  Cancel
+                </Button>
+
+                <Button
+                  type="button"
+                  width="50%"
+                  bg="primary.500"
+                  color="dark"
+                  ml={3}
+                  onClick={() => {
+                    setStep(currentStep - 2);
+                    clearData();
+                  }}
+                >
+                  Release Ticket
+                </Button>
+              </Flex>
+            </VStack>
+          </AlertDialogContent>
+        </AlertDialog>
         <Heading color="dark" fontSize={["18px", "22px"]} lineHeight="28px">
           Contact Information
         </Heading>
@@ -599,46 +563,46 @@ const EventContact = ({ handleNextStep, formRef }) => {
       </VStack>
       {Object.values(ticketCounts).reduce((total, count) => total + count, 0) >=
         1 && (
-        <VStack
-          justify="flex-start"
-          align="flex-start"
-          spacing={["10px", "20px"]}
-        >
-          <Heading color="dark" fontSize={["16px", "20px"]} lineHeight="28px">
-            Assign tickets to multiple attendees?
-          </Heading>
-          <Flex justify="flex-start" align="center" gap="10px">
-            <Text color="dark" fontSize="14px">
-              No
-            </Text>
-            <FormControl>
-              <Switch
-                size="lg"
-                id="multiple-attendees"
-                isChecked={assignMultiple}
-                onChange={(e) => setAssignMultiple(e.target.checked)}
-                sx={{
-                  ".chakra-switch__track": {
-                    backgroundColor: "neutral.500", // unselected state track color
-                  },
-                  ".chakra-switch__thumb": {
-                    backgroundColor: "dark", // unselected state thumb color
-                  },
-                  "&[data-checked] .chakra-switch__track": {
-                    backgroundColor: "neutral.500", // selected state track color
-                  },
-                  "&[data-checked] .chakra-switch__thumb": {
-                    backgroundColor: "primary.500", // selected state thumb color
-                  },
-                }}
-              />
-            </FormControl>
-            <Text color="dark" fontSize="14px">
-              Yes
-            </Text>
-          </Flex>
-        </VStack>
-      )}
+          <VStack
+            justify="flex-start"
+            align="flex-start"
+            spacing={["10px", "20px"]}
+          >
+            <Heading color="dark" fontSize={["16px", "20px"]} lineHeight="28px">
+              Assign tickets to multiple attendees?
+            </Heading>
+            <Flex justify="flex-start" align="center" gap="10px">
+              <Text color="dark" fontSize="14px">
+                No
+              </Text>
+              <FormControl>
+                <Switch
+                  size="lg"
+                  id="multiple-attendees"
+                  isChecked={assignMultiple}
+                  onChange={(e) => setAssignMultiple(e.target.checked)}
+                  sx={{
+                    ".chakra-switch__track": {
+                      backgroundColor: "neutral.500", // unselected state track color
+                    },
+                    ".chakra-switch__thumb": {
+                      backgroundColor: "dark", // unselected state thumb color
+                    },
+                    "&[data-checked] .chakra-switch__track": {
+                      backgroundColor: "neutral.500", // selected state track color
+                    },
+                    "&[data-checked] .chakra-switch__thumb": {
+                      backgroundColor: "primary.500", // selected state thumb color
+                    },
+                  }}
+                />
+              </FormControl>
+              <Text color="dark" fontSize="14px">
+                Yes
+              </Text>
+            </Flex>
+          </VStack>
+        )}
 
       {assignMultiple && (
         <VStack w="100%" align="flex-start" spacing="40px">
@@ -673,9 +637,8 @@ const EventContact = ({ handleNextStep, formRef }) => {
                       type="text"
                       id={`attendee-firstname-${ticketId}-${i}`}
                       name={`attendeeAddresses[${ticketId}][${i}].firstName`}
-                      placeholder={`First Name (${
-                        ticketType[ticketId - 1]?.name || "Unknown"
-                      })`}
+                      placeholder={`First Name (${ticketType[ticketId - 1]?.name || "Unknown"
+                        })`}
                       value={
                         formik.values.attendeeAddresses?.[ticketId]?.[i]
                           ?.firstName || ""
@@ -709,9 +672,8 @@ const EventContact = ({ handleNextStep, formRef }) => {
                       type="text"
                       id={`attendee-lastname-${ticketId}-${i}`}
                       name={`attendeeAddresses[${ticketId}][${i}].lastName`}
-                      placeholder={`Last Name (${
-                        ticketType[ticketId - 1]?.name || "Unknown"
-                      })`}
+                      placeholder={`Last Name (${ticketType[ticketId - 1]?.name || "Unknown"
+                        })`}
                       value={
                         formik.values.attendeeAddresses?.[ticketId]?.[i]
                           ?.lastName || ""
@@ -743,9 +705,8 @@ const EventContact = ({ handleNextStep, formRef }) => {
                       type="email"
                       id={`attendee-email-${ticketId}-${i}`}
                       name={`attendeeAddresses[${ticketId}][${i}].email`}
-                      placeholder={`Email Address (${
-                        ticketType[ticketId - 1]?.name || "Unknown"
-                      })`}
+                      placeholder={`Email Address (${ticketType[ticketId - 1]?.name || "Unknown"
+                        })`}
                       value={
                         formik.values.attendeeAddresses?.[ticketId]?.[i]
                           ?.email || ""
