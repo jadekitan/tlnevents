@@ -108,80 +108,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
     return phoneLength >= country.minLength && phoneLength <= country.maxLength;
   };
 
-  const debouncedValidate = useCallback(
-    debounce((values) => {
-      const errors = {};
-
-      // Basic field validation
-      if (!values.firstName?.trim()) {
-        errors.firstName = "First name is required";
-      }
-      if (!values.lastName?.trim()) {
-        errors.lastName = "Last name is required";
-      }
-      if (!values.email?.trim()) {
-        errors.email = "Email is required";
-      } else if (
-        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-      ) {
-        errors.email = "Invalid email address";
-      }
-      if (!values.phone?.trim()) {
-        errors.phone = "Phone number is required";
-      } else if (!validatePhoneNumber(values.phone, values.countryCode)) {
-        errors.phone = "Invalid phone number";
-      }
-
-      // Only validate attendeeAddresses if assignMultiple is true
-      if (assignMultiple) {
-        const attendeeErrors = {};
-        let hasAttendeeErrors = false;
-
-        // Iterate through all ticket types
-        Object.keys(ticketCounts).forEach((ticketId) => {
-          const ticketQuantity = ticketCounts[ticketId];
-          if (ticketQuantity > 0) {
-            const ticketErrors = [];
-
-            // Validate each attendee for this ticket type
-            for (let i = 0; i < ticketQuantity; i++) {
-              const attendee = values.attendeeAddresses?.[ticketId]?.[i] || {};
-              const attendeeError = {};
-
-              if (!attendee.firstName?.trim()) {
-                attendeeError.firstName = "First name is required";
-                hasAttendeeErrors = true;
-              }
-              if (!attendee.email?.trim()) {
-                attendeeError.email = "Email is required";
-                hasAttendeeErrors = true;
-              } else if (
-                !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(attendee.email)
-              ) {
-                attendeeError.email = "Invalid email address";
-                hasAttendeeErrors = true;
-              }
-
-              if (Object.keys(attendeeError).length > 0) {
-                ticketErrors[i] = attendeeError;
-              }
-            }
-
-            if (ticketErrors.length > 0) {
-              attendeeErrors[ticketId] = ticketErrors;
-            }
-          }
-        });
-
-        if (hasAttendeeErrors) {
-          errors.attendeeAddresses = attendeeErrors;
-        }
-      }
-
-      return errors;
-    }, 300)
-  );
-
   const validate = (values) => {
     const errors = {};
 
@@ -362,35 +288,6 @@ const EventContact = ({ handleNextStep, formRef }) => {
       return { ...prevData, attendeeAddresses: updatedAddresses };
     });
   };
-
-  // Copy from previous attendee
-  const handleCopyFromPrevious = useCallback(
-    (ticketId, currentIndex) => {
-      if (currentIndex > 0) {
-        const previousAttendee =
-          contactData.attendeeAddresses[ticketId][currentIndex - 1];
-        handleAttendeeChange(
-          ticketId,
-          currentIndex,
-          "firstName",
-          previousAttendee.firstName
-        );
-        handleAttendeeChange(
-          ticketId,
-          currentIndex,
-          "lastName",
-          previousAttendee.lastName
-        );
-        handleAttendeeChange(
-          ticketId,
-          currentIndex,
-          "email",
-          previousAttendee.email
-        );
-      }
-    },
-    [contactData.attendeeAddresses, handleAttendeeChange]
-  );
 
   // Inside your component:
   const toast = useToast();

@@ -61,7 +61,7 @@ const Experiences = () => {
         </Text>
       </VStack>
 
-      <Box w={["100%", "100%", "100%", "70%"]} className="glide">
+      <Box w={["100%", "100%", "100%", "80%", "80%"]} className="glide">
         {/* The Carousel */}
         <div className="glide__track" data-glide-el="track">
           <ul className="glide__slides">
@@ -70,7 +70,7 @@ const Experiences = () => {
                 <Skeleton isLoaded rounded="8px">
                   <Image
                     w="100%"
-                    h={["30vh", "50vh", "50vh", "75vh"]}
+                    h={["30vh", "50vh", "45vh", "70vh", "75vh"]}
                     bg="gray.500"
                     rounded={["6px", "8px"]}
                     src={image}

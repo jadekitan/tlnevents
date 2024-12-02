@@ -113,7 +113,7 @@ const Testimonials = () => {
       >
         The next experience is the best of all
       </Heading>
-      <Box position="relative" w="100%" h={["92vh", "90vh", "90vh", "90vh"]}>
+      <Box position="relative" w="100%" h={["92vh", "90vh", "90vh", "90vh", "90vh"]}>
         <Flex
           position="absolute"
           top="50%"
@@ -142,8 +142,8 @@ const Testimonials = () => {
             spacing="40px"
           >
             <Box
-              w={["100%", "100%", "100%", "40%"]}
-              h={["40vh", "50vh", "50vh", "75vh"]}
+              w={["100%", "100%", "100%", "50%", "40%"]}
+              h={["40vh", "50vh", "50vh", "75vh", "75vh"]}
             >
               <Image
                 w="100%"
