@@ -358,13 +358,18 @@ const PaymentSuccess = () => {
                 </Table>
               </TableContainer>
             </Box>
-            <Flex>
+            <VStack>
               <Link to={`/${event.id}`}>
                 <Button bg="primary.500" _hover={{ bg: "primary.400" }}>
                   Back to Event
                 </Button>
               </Link>
-            </Flex>
+              <Link to={`/${event.id}`}>
+                <Text color="dark" fontSize={["14px", "16px"]}>
+                  Shop Merch
+                </Text>
+              </Link>
+            </VStack>
           </VStack>
         </VStack>
       </VStack>

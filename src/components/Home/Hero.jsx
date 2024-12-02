@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 import { Link } from "react-router-dom";
+import { RiArrowRightDoubleFill } from "react-icons/ri";
 
 // Define the keyframes for the animation
 const fadeAndScale = keyframes`
@@ -100,7 +101,7 @@ const Hero = () => {
             </Button>
           </Link>
           <Link
-            to={`/${eventData.url}/merch`}
+            to={`/${eventData.url}/checkout`}
             _hover={{ textDecoration: "none" }}
             target="_blank"
           >
@@ -110,7 +111,7 @@ const Hero = () => {
               _hover={{ bg: "primary.400" }}
               color="dark"
             >
-              Get Merch
+              Buy Tickets
             </Button>
           </Link>
         </Flex>
@@ -130,6 +131,23 @@ const Hero = () => {
             {eventData.venue}
           </Text>
         </VStack>
+        <Link
+          to={`/${eventData.url}/merch`}
+          _hover={{ textDecoration: "none" }}
+          target="_blank"
+        >
+          <Button rightIcon={<RiArrowRightDoubleFill />}
+            size="lg"
+            h="35px"
+
+            bg="white"
+            _hover={{ bg: "primary.400" }}
+            color="dark"
+            fontSize={["14px", " 16px"]}
+          >
+            Buy Merch
+          </Button>
+        </Link>
       </VStack>
     </Box>
   );
