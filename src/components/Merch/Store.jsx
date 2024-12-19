@@ -246,7 +246,7 @@ const Store = () => {
               ))}
             </Grid>
           </VStack>
-          <VStack w="100%" align="flex-start" spacing="50px">
+          {/* <VStack w="100%" align="flex-start" spacing="50px">
             <Heading color="dark" fontSize={["28px", "32px"]}>
               Bucket Hats
             </Heading>
@@ -355,7 +355,7 @@ const Store = () => {
                 </Link>
               ))}
             </Grid>
-          </VStack>
+          </VStack> */}
         </VStack>
       </VStack>
     </>
