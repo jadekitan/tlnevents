@@ -12,14 +12,20 @@ import {
   Image,
   Button,
   Heading,
-  useToast,
   AspectRatio,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
   AvatarGroup,
-  Avatar
+  Avatar,
+  Drawer,
+  DrawerHeader,
+  DrawerBody,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { eventsData } from "../../server/eventsData";
 import { format, parseISO } from "date-fns";
@@ -29,13 +35,16 @@ import { FaXTwitter } from "react-icons/fa6";
 import { FaFacebookF } from "react-icons/fa6";
 import { FaTiktok } from "react-icons/fa6";
 import { IoLogoLinkedin } from "react-icons/io5";
-import { ChevronDownIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { FcGoogle } from "react-icons/fc";
 import Outlook from "../../src/assets/icons/outlook.svg";
 import Download from "../../src/assets/icons/download.svg";
 import { Link, useParams } from "react-router-dom";
 
 const EventDetails = () => {
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [placement, setPlacement] = React.useState('right')
+
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
 
@@ -237,6 +246,34 @@ END:VCALENDAR
               alt="The Lemonade Logo"
             ></Image>
           </Link>
+          <Button display={["block", "block", "block", "none"]} bg="transparent" p="0" _hover={{ bg: "transparent" }} onClick={onOpen}><HamburgerIcon fontSize="20px" color="dark" /></Button>
+          <Drawer placement={placement} onClose={onClose} isOpen={isOpen} size={"full"}>
+            <DrawerOverlay />
+            <DrawerContent bg="rgba(0,0,0,0.8)">
+              <DrawerCloseButton color="white" fontSize="20px" />
+              <DrawerHeader ><Flex justify="center" align="center">
+                <Link to="/">
+                  <Image
+                    w={["120px", "150px"]}
+                    src="https://tlnevents.com/logo-white.png"
+                    alt="The Lemonade Logo"
+                    className={`duration-1000 ease-in-out `}
+                  />
+                </Link>
+              </Flex></DrawerHeader>
+              <DrawerBody>
+
+                <VStack h="80vh" justify="center" align="center" spacing="30px">
+
+                  <Link to={`/${event.url}/checkout`} target="_blank"><Text color="white" fontSize="30px" fontWeight="bold">Tickets</Text></Link>
+                  <Link to={`/${event.url}/merch`} target="_blank"><Text color="white" fontSize="30px" fontWeight="bold">Merch</Text></Link>
+                  <Link to={`/${event.url}`} target="_blank"><Text color="white" fontSize="30px" fontWeight="bold">Event</Text></Link>
+                  <Link as="button" onClick={() => { scrollToSection("experiences"); onClose() }}><Text color="white" fontSize="30px" fontWeight="bold">Experience</Text></Link>
+                  <Link as="button" onClick={() => { scrollToSection("about"); onClose() }}><Text color="white" fontSize="30px" fontWeight="bold">About</Text></Link>
+                </VStack>
+              </DrawerBody>
+            </DrawerContent>
+          </Drawer>
         </Flex>
         <VStack w="100%" h="100%" align="flex-start" spacing="20px">
           <Breadcrumb fontWeight="500" color="Dark">
@@ -683,7 +720,7 @@ END:VCALENDAR
           >
             <Link to={`/${event.id}/checkout`}>
               <Button w="100%" h={["40px", "50px"]} bg="primary.500" rounded="8px">
-                <Text fontSize={["12px", "14px", "20px"]}>Get Ticket</Text>
+                <Text fontSize={["14px", "16px", "20px"]}>Get Ticket</Text>
               </Button>
             </Link>
           </Box>

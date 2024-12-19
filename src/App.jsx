@@ -10,6 +10,8 @@ import Cart from "./components/Merch/Cart.jsx";
 import CheckoutForm from "./components/Merch/CheckoutForm.jsx";
 import Store from "./components/Merch/Store.jsx";
 import ProductDetails from "./components/Merch/ProductDetails.jsx";
+import Dashboard from "./components/Overview/Dashboard.jsx"
+
 
 function App() {
   return (
@@ -73,7 +75,17 @@ function App() {
           </CartProvider>
         }
       />
+      <Route
+        path="manage/:eventId"
+        element={
+          <Dashboard />
+        }
+      />
     </Routes>
+
+
+
+
   );
 }
 
