@@ -682,8 +682,8 @@ END:VCALENDAR
             p={["10px", "20px", "40px"]}
           >
             <Link to={`/${event.id}/checkout`}>
-              <Button w="100%" h={["40px", "50px"]} bg="primary.500" rounded="8px">
-                <Text fontSize={["12px", "14px", "20px"]}>Get Ticket</Text>
+              <Button w="100%" h={["45px", "50px"]} bg="primary.500" rounded="8px">
+                <Text fontSize={["18px", "20px", "22px"]}>Get Ticket</Text>
               </Button>
             </Link>
           </Box>
