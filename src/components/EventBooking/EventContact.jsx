@@ -63,7 +63,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
       (ticket) => ticketCounts[ticket.id] > 0
     );
 
-    if (currentStep === 3) {
+    if (currentStep === 2) {
       if (hasSelectedTickets) {
         onOpen();
       } else {
@@ -400,7 +400,7 @@ const EventContact = ({ handleNextStep, formRef }) => {
                   color="dark"
                   ml={3}
                   onClick={() => {
-                    setStep(currentStep - 2);
+                    setStep(currentStep - 1);
                     clearData();
                   }}
                 >
