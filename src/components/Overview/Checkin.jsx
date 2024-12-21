@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Flex,
   VStack,
   Box,
   Text,
@@ -20,545 +20,377 @@ import {
   Td,
   TableContainer,
   Select,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  useToast,
+  Flex,
+  InputGroup,
+  Input,
+  InputLeftElement,
+  IconButton,
 } from "@chakra-ui/react";
-import { DownloadIcon, ArrowLeftIcon, ArrowRightIcon } from "@chakra-ui/icons";
-import { IoTicketOutline } from "react-icons/io5";
-import { Link, useParams } from "react-router-dom";
+import {
+  DownloadIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ChevronRightIcon,
+  Search2Icon,
+  CheckIcon,
+
+} from "@chakra-ui/icons";
+import { IoCheckmarkDoneSharp } from "react-icons/io5";
+import { useParams } from "react-router-dom";
 import { getAllOrders } from "../../../server/allOrder";
 import { eventsData } from "../../../server/eventsData";
-import * as XLSX from "xlsx";
+import axios from 'axios';
+
+
+class TrieNode {
+  constructor() {
+    this.children = {};
+    this.orderIds = new Set();
+    this.isEndOfWord = false;
+  }
+}
+
+// Trie class for efficient search
+class SearchTrie {
+  constructor() {
+    this.root = new TrieNode();
+  }
+
+  insert(word, orderId) {
+    let node = this.root;
+    for (const char of word.toLowerCase()) {
+      if (!node.children[char]) {
+        node.children[char] = new TrieNode();
+      }
+      node = node.children[char];
+      node.orderIds.add(orderId);
+    }
+    node.isEndOfWord = true;
+  }
+
+  search(prefix) {
+    let node = this.root;
+    for (const char of prefix.toLowerCase()) {
+      if (!node.children[char]) {
+        return new Set();
+      }
+      node = node.children[char];
+    }
+    return node.orderIds;
+  }
+}
+
+const createFastSearchIndex = (orders) => {
+  const trie = new SearchTrie();
+  const dateIndex = new Map();
+
+  orders.forEach(order => {
+    trie.insert(order.orderId, order.orderId);
+    order.attendeeName.split(' ').forEach(word => {
+      trie.insert(word, order.orderId);
+    });
+    order.email.split(/[@.]/).forEach(part => {
+      trie.insert(part, order.orderId);
+    });
+    const date = new Date(order.createdAt).toLocaleDateString();
+    if (!dateIndex.has(date)) {
+      dateIndex.set(date, new Set());
+    }
+    dateIndex.get(date).add(order.orderId);
+  });
+
+  return { trie, dateIndex };
+};
+
+const fastSearch = (searchTerm, { trie, dateIndex }, allOrders) => {
+  if (!searchTerm) return allOrders;
+  const matchingIds = trie.search(searchTerm);
+
+  if (/\d/.test(searchTerm)) {
+    dateIndex.forEach((orderIds, dateStr) => {
+      if (dateStr.toLowerCase().includes(searchTerm)) {
+        orderIds.forEach(id => matchingIds.add(id));
+      }
+    });
+  }
+  return allOrders.filter(order => matchingIds.has(order.orderId));
+};
 
 const Checkin = () => {
   const { eventId } = useParams();
   const event = eventsData[eventId];
-  const toast = useToast();
-
-  // Prepare categories and ticket types (same as before)
-  const prepareCategories = () => {
-    const categoriesObj = {
-      all: Object.values(event.tickets).flat(),
-    };
-
-    Object.keys(event.tickets).forEach((category) => {
-      const categoryTickets = event.tickets[category];
-
-      categoriesObj[category] =
-        categoryTickets.length > 1
-          ? [
-            {
-              id: "all",
-              name: "All",
-              price: 0,
-              quantity: categoryTickets.reduce(
-                (acc, ticket) => acc + ticket.quantity,
-                0
-              ),
-            },
-            ...categoryTickets,
-          ]
-          : categoryTickets;
-    });
-
-    return categoriesObj;
-  };
-
-  const categoriesData = prepareCategories();
-  const categories = Object.keys(categoriesData);
-
-  // State management
-  const [mainTabIndex, setMainTabIndex] = useState(0);
-  const [nestedTabIndexes, setNestedTabIndexes] = useState({});
-
-  // Initialize nested tab indexes
-  useEffect(() => {
-    const initialNestedIndexes = categories.reduce((acc, category) => {
-      const ticketTypes = categoriesData[category].map((ticket) => ticket.name);
-      acc[category] = {
-        currentTypeIndex: 0,
-        ticketTypes: ticketTypes,
-      };
-      return acc;
-    }, {});
-    setNestedTabIndexes(initialNestedIndexes);
-  }, []);
-
-  // State for orders and loading
+  const [activeTab, setActiveTab] = useState(0);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [expandedRow, setExpandedRow] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [searchIndex, setSearchIndex] = useState(null);
+  const searchTimeoutRef = useRef(null);
 
-  // Fetch orders
+  const tickets = event.tickets;
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true);
-      setError(null);
+    if (orders.length > 0) {
+      setSearchIndex(createFastSearchIndex(orders));
+    }
+  }, [orders]);
 
-      try {
-        const result = await getAllOrders({});
-        if (result.success) {
-          setOrders(result.data);
-        } else {
-          setError(result.message || "Failed to fetch orders");
-        }
-      } catch (err) {
-        setError("Failed to fetch orders. Please try again later.");
-      } finally {
-        setLoading(false);
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearchTerm(value);
+    }, 300);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
       }
     };
-
-    fetchOrders();
   }, []);
 
-  if (loading)
-    return (
-      <VStack w="100%" h="80vh" justify="center" align="center">
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="primary.500"
-          size="xl"
-        />
-      </VStack>
-    );
-  if (error) return <div>{error}</div>;
-
-  // Export functionality
-  const exportToExcel = (data, fileName) => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-    XLSX.writeFile(workbook, `${fileName}.xlsx`);
-
-    toast({
-      title: "Export Successful",
-      description: "The data has been exported to Excel.",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-  };
-
-  return (
-    <VStack w="100%" h="100%" justify="flex-start" align="flex-start">
-      <Tabs
-        w="100%"
-        variant="enclosed"
-        p="none"
-        index={mainTabIndex}
-        onChange={(index) => setMainTabIndex(index)}
-      >
-        {/* Main Category Tabs */}
-        <TabList pl="60px" borderBottom="none">
-          {categories.map((category) => (
-            <Tab
-              key={category}
-              variant="enclosed"
-              sx={{
-                color: "neutral.500",
-                borderColor: "transparent",
-                borderBottom: "none",
-                _selected: {
-                  color: "dark",
-                  borderColor: "inherit",
-                },
-              }}
-            >
-              <Text>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </Text>
-            </Tab>
-          ))}
-        </TabList>
-
-        <TabPanels pb="none">
-          {categories.map((category) => (
-            <TabPanel key={category} pt="2px" pb="0">
-              {category === "all" ? (
-                <CategoryDetailsPanel
-                  category={category}
-                  ticketTypeName={null}
-                  orders={orders}
-                  event={event}
-                  categoriesData={categoriesData}
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
-                  itemsPerPage={itemsPerPage}
-                  setItemsPerPage={setItemsPerPage}
-                  exportToExcel={exportToExcel}
-                />
-              ) : // Only render nested tabs if there's more than one ticket type
-                categoriesData[category].length > 1 ? (
-                  <Tabs
-                    p="none"
-                    index={nestedTabIndexes[category]?.currentTypeIndex || 0}
-                    onChange={(index) => {
-                      setNestedTabIndexes((prev) => ({
-                        ...prev,
-                        [category]: {
-                          ...prev[category],
-                          currentTypeIndex: index,
-                        },
-                      }));
-                    }}
-                  >
-                    {/* Nested Ticket Type Tabs */}
-                    <TabList pl="40px" borderBottom="none">
-                      {(nestedTabIndexes[category]?.ticketTypes || []).map(
-                        (typeName) => (
-                          <Tab key={typeName}>{typeName}</Tab>
-                        )
-                      )}
-                    </TabList>
-
-                    <TabPanels p="0">
-                      {(nestedTabIndexes[category]?.ticketTypes || []).map(
-                        (typeName) => (
-                          <TabPanel key={typeName} p="0">
-                            <CategoryDetailsPanel
-                              category={category}
-                              ticketTypeName={typeName}
-                              orders={orders}
-                              event={event}
-                              categoriesData={categoriesData}
-                              currentPage={currentPage}
-                              setCurrentPage={setCurrentPage}
-                              itemsPerPage={itemsPerPage}
-                              setItemsPerPage={setItemsPerPage}
-                              exportToExcel={exportToExcel}
-                            />
-                          </TabPanel>
-                        )
-                      )}
-                    </TabPanels>
-                  </Tabs>
-                ) : (
-                  // If only one ticket type, render it directly
-                  <CategoryDetailsPanel
-                    category={category}
-                    ticketTypeName={categoriesData[category][0].name}
-                    orders={orders}
-                    event={event}
-                    categoriesData={categoriesData}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    itemsPerPage={itemsPerPage}
-                    setItemsPerPage={setItemsPerPage}
-                    exportToExcel={exportToExcel}
-                  />
-                )}
-            </TabPanel>
-          ))}
-        </TabPanels>
-      </Tabs>
-    </VStack>
-  );
-};
-
-// Separate component to render category details
-const CategoryDetailsPanel = ({
-  category,
-  ticketTypeName,
-  orders,
-  event,
-  categoriesData,
-  currentPage,
-  setCurrentPage,
-  itemsPerPage,
-  setItemsPerPage,
-  exportToExcel,
-}) => {
-  // Filter orders based on category and ticket type
-  const filteredOrders = orders.filter((order) => {
-    const categoryMatch =
-      category === "all" ||
-      order.ticketType?.toLowerCase().includes(category.toLowerCase());
-    const ticketTypeMatch =
-      !ticketTypeName ||
-      ticketTypeName === "All" ||
-      order.ticketType === ticketTypeName;
-
-    return categoryMatch && ticketTypeMatch;
-  });
-
-  // Calculate ticket type quantity summary
-  const ticketTypeSummary = categoriesData[category]
-    .filter(
-      (ticket) =>
-        !ticketTypeName ||
-        ticketTypeName === "All" ||
-        ticket.name === ticketTypeName
-    )
-    .map((ticket) => ({
-      name: ticket.name,
-      totalQuantity: filteredOrders
-        .filter((order) => order.ticketType === ticket.name)
-        .reduce((sum, order) => sum + order.quantity, 0),
-    }));
-
-  // Pagination calculations
-  const totalItems = orders.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = orders.slice(indexOfFirstItem, indexOfLastItem);
-
-  // Pagination handlers
-  const handlePageChange = (direction) => {
-    if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage((prev) => prev + 1);
-    } else if (direction === "prev" && currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
+  const filteredOrders = useMemo(() => {
+    if (!searchIndex) return orders;
+    const search = debouncedSearchTerm.toLowerCase().trim();
+    if (!search) {
+      return activeTab === 0
+        ? orders
+        : orders.filter(order => order.ticketType === tickets[activeTab - 1].name);
     }
-  };
+    const filtered = fastSearch(search, searchIndex, orders);
+    return activeTab === 0
+      ? filtered
+      : filtered.filter(order => order.ticketType === tickets[activeTab - 1].name);
+  }, [debouncedSearchTerm, orders, activeTab, tickets, searchIndex]);
 
-  const jumpToPage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+  const paginatedOrders = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredOrders.slice(start, start + itemsPerPage);
+  }, [filteredOrders, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await getAllOrders({});
+      if (result.success) {
+        setOrders(result.data);
+      } else {
+        setError("Failed to fetch orders");
+      }
+    } catch (err) {
+      setError("Failed to fetch orders");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  // Export handler
-  const handleExport = () => {
-    const exportData = currentItems.map((order) => ({
-      "Ticket Name": order.ticketType,
-      Quantity: order.quantity,
-      "Attendee Name": order.attendeeName,
-      "Order ID": order.orderId,
-      Date: formatCreatedAt(order.createdAt),
-    }));
-    exportToExcel(exportData, `${category}_${ticketTypeName || "all"}_orders`);
-  };
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
-  // Date formatting utility
-  const formatCreatedAt = (dateString) => {
-    const date = new Date(dateString);
+  const formatCreatedAt = useCallback((createdAt) => {
+    const date = new Date(createdAt);
     const options = {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "numeric",
-      minute: "2-digit",
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: 'numeric',
+      minute: '2-digit',
       hour12: true,
     };
-    const formattedDate = new Intl.DateTimeFormat("en-US", options).format(
-      date
-    );
-    const [month, day, year] = formattedDate.split(", ")[0].split("/");
-    const time = formattedDate.split(", ")[1];
+    const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+    const [month, day, year] = formattedDate.split(', ')[0].split('/');
+    const time = formattedDate.split(', ')[1];
     return `${year}-${month}-${day} ${time}`;
+  }, []);
+
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
   };
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  if (loading) return (
+    <VStack w="100%" h="80vh" justify="center" align="center">
+      <Spinner thickness='4px' speed='0.65s' emptyColor='gray.200' color='primary.500' size='xl' />
+    </VStack>
+  );
+  if (error) return <Text color="red.500">{error}</Text>;
+
+  const handleCheckIn = async (orderId) => {
+    try {
+      // Show loading spinner on the button
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.orderId === orderId ? { ...order, isUpdating: true } : order
+        )
+      );
+
+      const response = await axios.put('/api/orders', {
+        orderId,
+        checkedIn: true,
+      });
+
+      if (response.data.message) {
+        // Update the order's status in the local state
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.orderId === orderId ? { ...order, checkedIn: true, isUpdating: false } : order
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error checking in order:', error);
+      // Reset loading state if there's an error
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.orderId === orderId ? { ...order, isUpdating: false } : order
+        )
+      );
+    }
+  };
+
+
   return (
-    <Box
-      w="100%"
-      h="100%"
-      bg="dark"
-      overflowY="hidden"
-      borderTopRadius="20px"
-      py="40px"
-      px="20px"
-    >
-      <VStack w="100%" justify="center" align="flex-start" spacing="50px">
-        {/* Summary Boxes for Ticket Type Quantities */}
-        <Flex w="100%" justify="space-between" align="center">
-          {ticketTypeSummary.map((ticket, index) => (
-            <Box
-              key={index}
-              w="350px"
-              h="100%"
+    <Box w="100%" h="100%" bg="dark" overflowY="hidden" borderTopRadius="20px" py="40px" px="20px">
+      <VStack w="100%" spacing="30px">
+        {/* <InputGroup>
+          <InputLeftElement>
+            <Search2Icon />
+          </InputLeftElement>
+          <Input
+            placeholder="Search by order ID, name, email, or date"
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+        </InputGroup> */}
+
+        <Flex justify="space-between" w="100%" align="center">
+          <Heading color="white" size="lg">Check In</Heading>
+
+          <InputGroup w="60%">
+            <InputLeftElement>
+              <Search2Icon color='gray.300' />
+            </InputLeftElement>
+            <Input
+              variant="filled"
               bg="neutral.500"
-              p="20px"
-              rounded="8px"
-            >
+              _active={{ borderColor: "neutral.500" }}
+              _focus={{ borderColor: "neutral.500" }}
+              color="white"
+              placeholder="Search by order ID, name, email, or date"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </InputGroup>
 
-              <Flex justify="flex-start" align="center" gap="8px">
-                <Box bg="dark" rounded="4px" py="10px" px="20px">
-                  <VStack justify="center" align="center" spacing="0">
-                    <Text color="white" fontSize="16px">{ticket.totalQuantity.toLocaleString()}</Text>
-                    <Box color="white">
-                      <IoTicketOutline />
-                    </Box>
-                  </VStack>
-                </Box>
-                <Text color="white">{ticket.name}</Text>
-              </Flex>
-
-
-            </Box>
-          ))}
         </Flex>
 
-        {/* Orders Table */}
-        <VStack w="100%" spacing="40px">
-          <Flex w="100%" justify="space-between" align="center">
-            <Heading color="white" fontSize="28px">
-              Checked In
-            </Heading>
-            <Flex align="center" gap="10px">
-              <Flex align="center" justify="flex-start" gap="0">
-                <Text color="neutral.500" fontSize="14px">Items per page:</Text>
-                <Select
-                  w="68px"
-                  h="100%"
-                  color="white"
-                  bg="transparent"
-                  border="none"
-                  _hover={{ border: "none" }}
-                  _active={{ border: "none" }}
-                  _focus={{ border: "none" }}
-                  fontSize="12px"
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(parseInt(e.target.value));
-                    setCurrentPage(1);
-                  }}
+        <TableContainer w="100%">
+          <Table>
+            <Thead>
+              <Tr bg="white">
+                <Th fontSize="12px" fontWeight="600" color="dark">Order ID</Th>
+                <Th fontSize="12px" fontWeight="600" color="dark">Attendee Name</Th>
+                <Th fontSize="12px" fontWeight="600" color="dark">Ticket Type</Th>
+                <Th fontSize="12px" fontWeight="600" color="dark">Quantity</Th>
+                <Th fontSize="12px" fontWeight="600" color="dark">Date</Th>
+                <Th fontSize="12px" fontWeight="600" color="dark">Status</Th>
+              </Tr>
+            </Thead>
 
-                >
-                  {[10, 25, 50, 100].map((num) => (
-                    <option
-                      key={num}
-                      value={num}
-                      style={{ backgroundColor: "black" }}
-                      paddingInlineEnd="0"
-                      paddingInlineStart="0"
+            <Tbody>
+              {paginatedOrders.map(order => (
+                <Tr key={order.orderId}>
+                  <Td><Text color="white" fontSize="12px">{order.orderId}</Text></Td>
+                  <Td><Text color="white" fontSize="12px">{order.attendeeName}</Text></Td>
+                  <Td><Text color="white" fontSize="12px">{order.ticketType}</Text></Td>
+                  <Td isNumeric><Text color="white" fontSize="12px">{order.quantity}</Text></Td>
+                  <Td><Text color="white" fontSize="12px">{formatCreatedAt(order.createdAt)}</Text></Td>
 
-                    >
-                      {num}
-                    </option>
-                  ))}
-                </Select>
-              </Flex>
-              <Button
-                rightIcon={<DownloadIcon />}
-                h="35px"
-                bg="neutral.500"
-                color="white"
-                fontSize="14px"
-                _hover={{ bg: "rgb(200,200,200)", color: "dark" }}
-                onClick={handleExport}
-              >
-                Export
-              </Button>
-            </Flex>
-          </Flex>
+                  <Td>
+                    {order.checkedIn ? (
+                      <CheckIcon color="green.500" />
+                    ) : (
+                      <Button
+                        bg={"neutral.500"}
+                        h="25px"
+                        color="dark"
+                        onClick={() => handleCheckIn(order.orderId)}
+                        isLoading={order.isUpdating}
+                        _hover={{
+                          bg: "gray.200"
+                        }}
+                      >
+                        <Text fontSize="12px" color="dark">Check In</Text>
+                      </Button>
 
-          <TableContainer w="100%">
-            <Table w="100%" variant="simple">
-              <Thead>
-                <Tr bg="white">
-                  {[
-                    "Ticket Name",
-                    "Quantity",
-                    "Attendee Name",
-                    "Order ID",
-                    "Date",
-                  ].map((header) => (
-                    <Th
-                      key={header}
-                      border="1px"
-                      borderColor="transparent"
-                      isNumeric={["Quantity", "Price"].includes(header)}
-                    >
-                      <Text fontSize="12px" fontWeight="600" color="dark">
-                        {header}
-                      </Text>
-                    </Th>
-                  ))}
+                    )}
+                  </Td>
+
                 </Tr>
-              </Thead>
-              <Tbody w="100%">
-                <Accordion w="100%" allowToggle>
-                  {currentItems.map((order, index) => (
-                    <AccordionItem w="100%" key={index} border="none">
-                      <Tr as={AccordionButton}>
-                        <Td>
-                          <Text color="white" fontSize="12px">
-                            {order.ticketType}
-                          </Text>
-                        </Td>
-                        <Td isNumeric>
-                          <Text color="white" fontSize="12px">
-                            {order.quantity}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <Text color="white" fontSize="12px">
-                            {order.attendeeName}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <Text color="white" fontSize="12px">
-                            {order.orderId}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <Text color="white" fontSize="12px">
-                            {formatCreatedAt(order.createdAt)}
-                          </Text>
-                        </Td>
-                      </Tr>
-                      <AccordionPanel pb={4}>
-                        <VStack align="start" spacing={2}>
-                          <Text>Additional Order Details:</Text>
-                          <Text>Email: {order.email || "N/A"}</Text>
-                          <Text>Phone: {order.phone || "N/A"}</Text>
-                          {/* Add more details as needed */}
-                        </VStack>
-                      </AccordionPanel>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </Tbody>
-            </Table>
-          </TableContainer>
+              ))}
+            </Tbody>
+          </Table>
+        </TableContainer>
 
-          {/* Pagination Controls */}
-          <Flex w="100%" justify="center" align="center" gap="50px">
-
-
-            <ArrowLeftIcon as="button" color="white" disabled={currentPage === 1}
-              onClick={() => handlePageChange("prev")} />
-
-            <Flex justify="center" gap="5px">
-              {[...Array(totalPages)].map((_, i) => (
+        <Flex justify="center" gap={4} w="100%">
+          <Button
+            bg="transparent"
+            _hover={{ bg: "transparent" }}
+            focus={{ bg: "transparent" }}
+            active={{ bg: "transparent" }}
+            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+          >
+            <ArrowLeftIcon color="white" />
+          </Button>
+          <Flex gap={2}>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <motion.div
+                key={i + 1}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Button
-                  key={i + 1}
-                  size="sm"
-                  onClick={() => jumpToPage(i + 1)}
-                  bg="none"
+                  bg="transparent"
+                  _hover={{ bg: "transparent" }}
+                  focus={{ bg: "transparent" }}
+                  active={{ bg: "transparent" }}
                   color={currentPage === i + 1 ? "white" : "neutral.500"}
+                  onClick={() => handlePageChange(i + 1)}
                 >
                   {i + 1}
                 </Button>
-              ))}
-            </Flex>
-            <ArrowRightIcon as="button" color="white" disabled={currentPage === totalPages}
-              onClick={() => handlePageChange("next")} />
-
-
-
-
-
-
-            {/* <Text>
-              Page {currentPage} of {totalPages}
-            </Text> */}
-
-
-
+              </motion.div>
+            ))}
           </Flex>
-        </VStack>
+          <Button
+            bg="transparent"
+            _hover={{ bg: "transparent" }}
+            focus={{ bg: "transparent" }}
+            active={{ bg: "transparent" }}
+            onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+          >
+            <ArrowRightIcon color="white" />
+          </Button>
+        </Flex>
       </VStack>
     </Box>
   );

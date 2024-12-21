@@ -30,7 +30,7 @@ import { IoClose } from "react-icons/io5";
 import { useParams } from "react-router-dom";
 
 const EventBooking = () => {
-  const steps = [{ title: "Type" }, { title: "Tickets" }, { title: "Contact" }];
+  const steps = [{ title: "Tickets" }, { title: "Contact" }];
 
   const {
     currentStep,
@@ -149,10 +149,8 @@ const EventBooking = () => {
   const showStep = (step) => {
     switch (step) {
       case 1:
-        return <PurchaseType />;
-      case 2:
         return <EventTickets />;
-      case 3:
+      case 2:
         return (
           <EventContact handleNextStep={handleNextStep} formRef={formRef} /> // Pass formRef and handleNextStep
         );
@@ -187,24 +185,9 @@ const EventBooking = () => {
 
   const ContinueStep = () => {
     if (currentStep === 1) {
-      if (purchaseType) {
-        setStep(2);
-        window.location.href = `/${event.id}/checkout?type=${purchaseType}`;
-      } else {
-        toast({
-          position: "top",
-          title: "Select A Purchase Type",
-          description: "Please select a purchase type to continue.",
-          status: "info",
-          duration: 3000,
-          isClosable: true,
-        }); // show alert if continue is clicked without selection
-      }
-    }
-    if (currentStep === 2) {
       handleContinue();
     }
-    if (currentStep === 3) {
+    if (currentStep === 2) {
       if (formRef.current) {
         formRef.current.handleSubmit(); // Trigger form submission
         // scrollToSection("stepper");
@@ -219,9 +202,7 @@ const EventBooking = () => {
     const hasSelectedTickets = ticketType.some(
       (ticket) => ticketCounts[ticket.id] > 0
     );
-    if (purchaseType) {
-      onOpen();
-    } else if (hasSelectedTickets) {
+    if (hasSelectedTickets) {
       onOpen();
     } else {
       setStep(1);
@@ -425,156 +406,125 @@ const EventBooking = () => {
                 <Heading color="dark" fontSize="22px" lineHeight="28px">
                   {event.name}
                 </Heading>
-                {currentStep === 1 ? (
-                  purchaseType ? (
-                    <Button
-                      type="submit"
-                      w="100%"
-                      bg="primary.500"
-                      rounded="8px"
-                      _hover={{ bg: "primary.400" }}
-                      _active={{ bg: "secondary.500" }}
-                      _focus={{ bg: "secondary.500" }}
-                      onClick={ContinueStep}
-                      isDisabled={isDisable}
-                      isLoading={isSubmitting}
-                      loadingText="Checkout"
-                      spinnerPlacement="end"
+                {
+                  Object.values(ticketCounts).some((count) => count > 0) ? (
+                    <VStack
+                      width="100%"
+                      justify="flex-start"
+                      align="start"
+                      spacing="30px"
                     >
-                      <Text
-                        color="dark"
-                        fontSize="14px"
-                        fontWeight="600"
-                        lineHeight="20px"
+                      <VStack
+                        w="100%"
+                        justify="flex-start"
+                        align="start"
+                        spacing="20px"
                       >
-                        Continue
-                      </Text>
-                    </Button>
+                        {ticketType.map((ticket) =>
+                          ticketCounts[ticket.id] > 0 ? (
+                            <Flex
+                              key={ticket.id}
+                              w="100%"
+                              justify="space-between"
+                              align="flex-start"
+                            >
+                              <Text
+                                color="dark"
+                                fontSize="16px"
+                                lineHeight="24px"
+                              >
+                                {`${ticketCounts[ticket.id]} x ${ticket.name}`}
+                              </Text>
+
+                              {ticket.price === 0 ? (
+                                <Heading
+                                  color="dark"
+                                  fontSize="16px"
+                                  lineHeight="24px"
+                                >
+                                  Free🎉
+                                </Heading>
+                              ) : (
+                                <Heading
+                                  color="dark"
+                                  fontSize="16px"
+                                  lineHeight="24px"
+                                >
+                                  ₦{" "}
+                                  {(
+                                    (ticketCounts[ticket.id] / ticket.step) *
+                                    ticket.price
+                                  ).toLocaleString()}
+                                </Heading>
+                              )}
+                            </Flex>
+                          ) : null
+                        )}
+                      </VStack>
+                      <Box w="100%" h="1px" bg="primary.500"></Box>
+                      <VStack
+                        w="100%"
+                        justify="flex-start"
+                        align="start"
+                        spacing="20px"
+                      >
+                        <Flex w="100%" justify="space-between" align="flex-start">
+                          <Text color="dark" fontSize="16px" lineHeight="24px">
+                            Subtotal
+                          </Text>
+                          <Heading color="dark" fontSize="16px" lineHeight="24px">
+                            ₦ {subtotal.toLocaleString()}
+                          </Heading>
+                        </Flex>
+                        <Flex w="100%" justify="space-between" align="flex-start">
+                          <Text color="dark" fontSize="16px" lineHeight="24px">
+                            Fees
+                          </Text>
+                          <Heading color="dark" fontSize="16px" lineHeight="24px">
+                            ₦ {subtotal > 0 ? fees.toLocaleString() : 0}
+                          </Heading>
+                        </Flex>
+                      </VStack>
+                      <Box w="100%" h="1px" bg="primary.500"></Box>
+                      <Flex w="100%" justify="space-between" align="flex-start">
+                        <Text color="dark" fontSize="16px" lineHeight="24px">
+                          Total
+                        </Text>
+                        <Heading color="dark" fontSize="16px" lineHeight="24px">
+                          ₦ {total.toLocaleString()}
+                        </Heading>
+                      </Flex>
+
+                      {/* Continue Button */}
+                      <Button
+                        type="submit"
+                        w="100%"
+                        bg="primary.500"
+                        rounded="8px"
+                        _hover={{ bg: "primary.400" }}
+                        _active={{ bg: "secondary.500" }}
+                        _focus={{ bg: "secondary.500" }}
+                        onClick={ContinueStep}
+                        isDisabled={isDisable}
+                        isLoading={isSubmitting}
+                        loadingText="Checkout"
+                        spinnerPlacement="end"
+                      >
+                        <Text
+                          color="dark"
+                          fontSize="14px"
+                          fontWeight="600"
+                          lineHeight="20px"
+                        >
+                          {currentStep === steps.length ? "Checkout" : "Continue"}
+                        </Text>
+                      </Button>
+                    </VStack>
                   ) : (
                     <Text color="dark" fontSize="16px" lineHeight="24px">
-                      Please, choose a purchase type to continue
+                      Please, choose a ticket type to continue
                     </Text>
-                  )
-                ) : Object.values(ticketCounts).some((count) => count > 0) ? (
-                  <VStack
-                    width="100%"
-                    justify="flex-start"
-                    align="start"
-                    spacing="30px"
-                  >
-                    <VStack
-                      w="100%"
-                      justify="flex-start"
-                      align="start"
-                      spacing="20px"
-                    >
-                      {ticketType.map((ticket) =>
-                        ticketCounts[ticket.id] > 0 ? (
-                          <Flex
-                            key={ticket.id}
-                            w="100%"
-                            justify="space-between"
-                            align="flex-start"
-                          >
-                            <Text
-                              color="dark"
-                              fontSize="16px"
-                              lineHeight="24px"
-                            >
-                              {`${ticketCounts[ticket.id]} x ${ticket.name}`}
-                            </Text>
-
-                            {ticket.price === 0 ? (
-                              <Heading
-                                color="dark"
-                                fontSize="16px"
-                                lineHeight="24px"
-                              >
-                                Free🎉
-                              </Heading>
-                            ) : (
-                              <Heading
-                                color="dark"
-                                fontSize="16px"
-                                lineHeight="24px"
-                              >
-                                ₦{" "}
-                                {(
-                                  (ticketCounts[ticket.id] / ticket.step) *
-                                  ticket.price
-                                ).toLocaleString()}
-                              </Heading>
-                            )}
-                          </Flex>
-                        ) : null
-                      )}
-                    </VStack>
-                    <Box w="100%" h="1px" bg="primary.500"></Box>
-                    <VStack
-                      w="100%"
-                      justify="flex-start"
-                      align="start"
-                      spacing="20px"
-                    >
-                      <Flex w="100%" justify="space-between" align="flex-start">
-                        <Text color="dark" fontSize="16px" lineHeight="24px">
-                          Subtotal
-                        </Text>
-                        <Heading color="dark" fontSize="16px" lineHeight="24px">
-                          ₦ {subtotal.toLocaleString()}
-                        </Heading>
-                      </Flex>
-                      <Flex w="100%" justify="space-between" align="flex-start">
-                        <Text color="dark" fontSize="16px" lineHeight="24px">
-                          Fees
-                        </Text>
-                        <Heading color="dark" fontSize="16px" lineHeight="24px">
-                          ₦ {subtotal > 0 ? fees.toLocaleString() : 0}
-                        </Heading>
-                      </Flex>
-                    </VStack>
-                    <Box w="100%" h="1px" bg="primary.500"></Box>
-                    <Flex w="100%" justify="space-between" align="flex-start">
-                      <Text color="dark" fontSize="16px" lineHeight="24px">
-                        Total
-                      </Text>
-                      <Heading color="dark" fontSize="16px" lineHeight="24px">
-                        ₦ {total.toLocaleString()}
-                      </Heading>
-                    </Flex>
-
-                    {/* Continue Button */}
-                    <Button
-                      type="submit"
-                      w="100%"
-                      bg="primary.500"
-                      rounded="8px"
-                      _hover={{ bg: "primary.400" }}
-                      _active={{ bg: "secondary.500" }}
-                      _focus={{ bg: "secondary.500" }}
-                      onClick={ContinueStep}
-                      isDisabled={isDisable}
-                      isLoading={isSubmitting}
-                      loadingText="Checkout"
-                      spinnerPlacement="end"
-                    >
-                      <Text
-                        color="dark"
-                        fontSize="14px"
-                        fontWeight="600"
-                        lineHeight="20px"
-                      >
-                        {currentStep === steps.length - 1
-                          ? "Continue"
-                          : "Checkout"}
-                      </Text>
-                    </Button>
-                  </VStack>
-                ) : (
-                  <Text color="dark" fontSize="16px" lineHeight="24px">
-                    Please, choose a ticket type to continue
-                  </Text>
-                )}
+                  )}
               </VStack>
             </Box>
           </VStack>
@@ -588,81 +538,7 @@ const EventBooking = () => {
             px="20px"
             rounded="8px"
           >
-            {currentStep === 1 ? (
-              purchaseType ? (
-                <Flex
-                  h="100%"
-                  py="14px"
-                  px="20px"
-                  rounded="8px"
-                  bg="primary.500"
-                  justify="space-between"
-                  align="center"
-                >
-                  <Heading color="dark" fontSize="24px" lineHeight="32px">
-                    ₦ 0
-                  </Heading>
-                  <Button
-                    w="122px"
-                    rounded="8px"
-                    bg="secondary.500"
-                    _hover={{ bg: "primary.400" }}
-                    _active={{ bg: "secondary.500" }}
-                    _focus={{ bg: "secondary.500" }}
-                    onClick={ContinueStep}
-                    isDisabled={isDisable}
-                    isLoading={isSubmitting}
-                    loadingText="Checkout"
-                    spinnerPlacement="end"
-                  >
-                    <Text
-                      color="dark"
-                      fontSize="14px"
-                      fontWeight="600"
-                      lineHeight="20px"
-                    >
-                      {currentStep === steps.length ? "Checkout" : "Continue"}
-                    </Text>
-                  </Button>
-                </Flex>
-              ) : (
-                <Flex
-                  h="100%"
-                  py="14px"
-                  px="20px"
-                  rounded="8px"
-                  bg="primary.500"
-                  justify="space-between"
-                  align="center"
-                >
-                  <Heading color="dark" fontSize="24px" lineHeight="32px">
-                    ₦ 0
-                  </Heading>
-                  <Button
-                    w="122px"
-                    rounded="8px"
-                    bg="secondary.500"
-                    _hover={{ bg: "primary.400" }}
-                    _active={{ bg: "secondary.500" }}
-                    _focus={{ bg: "secondary.500" }}
-                    onClick={ContinueStep}
-                    isDisabled={isDisable}
-                    isLoading={isSubmitting}
-                    loadingText="Checkout"
-                    spinnerPlacement="end"
-                  >
-                    <Text
-                      color="dark"
-                      fontSize="14px"
-                      fontWeight="600"
-                      lineHeight="20px"
-                    >
-                      {currentStep === steps.length ? "Checkout" : "Continue"}
-                    </Text>
-                  </Button>
-                </Flex>
-              )
-            ) : Object.values(ticketCounts).some((count) => count >= 0) ? (
+            {Object.values(ticketCounts).some((count) => count >= 0) ? (
               <Flex
                 h="100%"
                 py="14px"

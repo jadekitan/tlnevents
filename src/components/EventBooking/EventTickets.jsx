@@ -19,6 +19,8 @@ import {
   UnorderedList,
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
+import { eventsData } from "../../../server/eventsData";
+import { useParams } from "react-router-dom"
 
 const EventTickets = () => {
   const {
@@ -33,6 +35,9 @@ const EventTickets = () => {
     clearTicketCounts,
     clearAssignMultiple,
   } = useContext(multiBookingContext);
+
+  const { eventId } = useParams(); // Get the event ID from the URL
+  const event = eventsData[eventId]; // Lookup event from local data
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = React.useRef();
@@ -134,6 +139,20 @@ const EventTickets = () => {
     }));
   };
 
+  const handleArrow = () => {
+    const hasSelectedTickets = ticketType.some(
+      (ticket) => ticketCounts[ticket.id] > 0
+    );
+    if (hasSelectedTickets) {
+      onOpen();
+    } else {
+      setStep(1);
+      window.location.href = `/${event.id}`;
+      clearData();
+    }
+  };
+
+
   return (
     <VStack w="100%" align="flex-start" spacing={["20px", "40px"]}>
       <Flex justify="flex-start" align="center" gap={["10px", "20px"]}>
@@ -142,7 +161,7 @@ const EventTickets = () => {
           p="3px"
           bg="primary.500"
           rounded="6px"
-          onClick={onOpen}
+          onClick={handleArrow}
         >
           <LeftArrow />
         </Box>
@@ -179,6 +198,7 @@ const EventTickets = () => {
                   color="dark"
                   ml={3}
                   onClick={() => {
+                    window.location.href = `/${event.id}`;
                     setStep(1);
                     clearData();
                   }}
@@ -189,6 +209,7 @@ const EventTickets = () => {
             </VStack>
           </AlertDialogContent>
         </AlertDialog>
+
         <Heading color="dark" fontSize={["18px", "22px"]} lineHeight="28px">
           Ticket Types
         </Heading>
@@ -230,9 +251,9 @@ const EventTickets = () => {
                   {ticket.price === 0
                     ? "Free 🎉"
                     : `₦ ${(
-                        ticket.price +
-                        ((ticket.price * feePercentage) / 100 + fixAmount)
-                      ).toLocaleString()}`}
+                      ticket.price +
+                      ((ticket.price * feePercentage) / 100 + fixAmount)
+                    ).toLocaleString()}`}
                 </Text>
                 {ticket.price === 0 ? null : (
                   <Text
@@ -246,7 +267,7 @@ const EventTickets = () => {
                       (ticket.price * feePercentage) / 100 +
                       fixAmount
                     ).toLocaleString()}{" "}
-                     fee
+                    fee
                   </Text>
                 )}
               </Flex>

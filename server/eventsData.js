@@ -25,57 +25,53 @@ export const eventsData = {
 
     categories: "Party",
     price: 5000,
-    tickets: {
-      children: [
-        {
-          id: 1,
-          name: "Playground Children Regular Pass",
-          price: 5000,
-          quantity: 100,
-          maxQuantity: 5,
-          step: 1,
-          description: {
-            info: "Give your little ones an unforgettable experience filled with excitement and joy! With the Playground Children Early Bird Pass, they'll enjoy access to exclusive goodies and activities tailored just for them",
-            perks: [
-              "Regular Entry",
-              "Free Popcorn & Candy Floss",
-              "Access to Select Games & Activities",
-            ],
-          },
+    tickets: [
+      {
+        id: 1,
+        name: "Playground Adult Early Bird Pass",
+        price: 5000,
+        quantity: 200,
+        maxQuantity: 5,
+        step: 1,
+        description: {
+          info: "This Entry Ticket grants you full access to the entire experience, designed to keep you entertained, engaged, and immersed in the lively atmosphere!",
+          perks: ["Regular Entry"],
         },
-        {
-          id: 2,
-          name: "Playground Children Premium Pass",
-          price: 15000,
-          quantity: 100,
-          maxQuantity: 5,
-          step: 1,
-          description: {
-            info: "Elevate your little ones' adventure with the Playground Children Premium Pass! Make their day extraordinary with premium goodies and expanded activities tailored for a memorable experience.",
-            perks: [
-              "Priority Entry",
-              "Free Popcorn & Candy Floss,",
-              "All-Access Games & Activities",
-              "A Special Gift from Santa",
-            ],
-          },
+      },
+      {
+        id: 2,
+        name: "Playground Children Premium Pass",
+        price: 15000,
+        quantity: 100,
+        maxQuantity: 5,
+        step: 1,
+        description: {
+          info: "Elevate your little ones' adventure with the Playground Children Premium Pass! Make their day extraordinary with premium goodies and expanded activities tailored for a memorable experience.",
+          perks: [
+            "Priority Entry",
+            "Free Popcorn & Candy Floss,",
+            "All-Access Games & Activities",
+            "A Special Gift from Santa",
+          ],
         },
-      ],
-      adult: [
-        {
-          id: 1,
-          name: "Playground Adult Early Bird Pass",
-          price: 5000,
-          quantity: 100,
-          maxQuantity: 5,
-          step: 1,
-          description: {
-            info: "This Entry Ticket grants you full access to the entire experience, designed to keep you entertained, engaged, and immersed in the lively atmosphere!",
-            perks: ["Regular Entry"],
-          },
+      },
+      {
+        id: 3,
+        name: "Playground Children Regular Pass",
+        price: 5000,
+        quantity: 100,
+        maxQuantity: 5,
+        step: 1,
+        description: {
+          info: "Give your little ones an unforgettable experience filled with excitement and joy! With the Playground Children Early Bird Pass, they'll enjoy access to exclusive goodies and activities tailored just for them",
+          perks: [
+            "Regular Entry",
+            "Free Popcorn & Candy Floss",
+            "Access to Select Games & Activities",
+          ],
         },
-      ],
-    },
+      },
+    ],
     merch: {
       tees: {
         "lemonade-tee": {
@@ -190,95 +186,6 @@ export const eventsData = {
           colors: ["Cream & Blue", "Cream & Green"],
           image:
             "https://tlnevents.com/assets/merch/crop-tops/ringer-baby-crop-top(cream & green-front).jpg",
-          hasFrontView: true,
-          hasBackView: false,
-        },
-      },
-      "bucket-hats": {
-        "fisherman-bucket-hat": {
-          id: "fisherman-bucket-hat",
-          name: "Fisherman Bucket Hat",
-          price: 23000,
-          description: {
-            head: "Relaxed yet trendy, this hat is a festival staple.",
-            color: "White, Black, and Pink for versatile styling",
-            size: "One size fits all.",
-            footer:
-              "Its lightweight fabric ensures comfort while protecting you from the sun.",
-          },
-          colors: ["White", "Pink"],
-          image:
-            "https://tlnevents.com/assets/merch/bucket-hats/fisherman-bucket-hat(pink-front).jpg",
-          hasFrontView: true,
-          hasBackView: false,
-        },
-        "denim-bucket-hat": {
-          id: "denim-bucket-hat",
-          name: " Denim Bucket Hat",
-          price: 23000,
-          description: {
-            head: "Add an edge to your look with this denim-inspired classic.",
-            color: "Available in Grey, Orange, and Black.",
-            size: "One size fits all.",
-            footer:
-              "Pair it with casual outfits for a modern, street-style vibe.",
-          },
-          colors: ["Grey"],
-          image:
-            "https://tlnevents.com/assets/merch/bucket-hats/denim-bucket-hat(grey-front).jpg",
-          hasFrontView: true,
-          hasBackView: false,
-        },
-      },
-      caps: {
-        "3d-panel": {
-          id: "3d-panel",
-          name: "3D panel",
-          price: 20000,
-          description: {
-            head: "A bold and modern option that stands out with its detailed 3D panels.",
-            color: "Sleek Black, vibrant Yellow, and clean White.",
-            size: "One size fits all.",
-            footer: "This cap adds a sporty edge to your ensemble.",
-          },
-          colors: ["Black", "Yellow", "White"],
-          image:
-            "https://tlnevents.com/assets/merch/caps/3d-panel(black-front).jpg",
-          hasFrontView: true,
-          hasBackView: false,
-        },
-        "2tone-daddy-hat": {
-          id: "2tone-daddy-hat",
-          name: "2tone Daddy Hat",
-          price: 20000,
-          description: {
-            head: "Classic and cool, this two-tone design brings subtle sophistication to your outfit.",
-            color:
-              "Creative combinations like Chocolate and Cream, Black and White, and Cream and Green.",
-            size: "One size fits all.",
-            footer:
-              "Designed for ultimate comfort and style, this cap suits any occasion.",
-          },
-          colors: ["Chocolate & Cream", "White & Black", "Cream & Green"],
-          image:
-            "https://tlnevents.com/assets/merch/caps/2tone-daddy-hat(cream & green-front).jpg",
-          hasFrontView: true,
-          hasBackView: false,
-        },
-        "draw-string-daddy-hat": {
-          id: "draw-string-daddy-hat",
-          name: "Draw String Daddy Hat",
-          price: 20000,
-          description: {
-            head: "A unique twist on traditional caps, featuring a drawstring design for a custom fit.",
-            color: "Warm tones like Cream, Chocolate, and Wine.",
-            size: "One size fits all.",
-            footer:
-              "With a perfect blend of style and practicality, it’s a standout accessory for fans of the Lemonade Playground Experience.",
-          },
-          colors: ["green", "wine"],
-          image:
-            "https://tlnevents.com/assets/merch/caps/draw-string-daddy-hat(green-front).jpg",
           hasFrontView: true,
           hasBackView: false,
         },

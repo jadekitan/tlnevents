@@ -60,24 +60,19 @@ const BookingContext = ({ children }) => {
   const event = eventsData[eventId]; // Lookup event from local data
 
   const [ticketType, setTicketType] = useState(
-    event
-      ? purchaseType === "children"
-        ? event.tickets.children
-        : event.tickets.adult
-      : []
+    event ? event.tickets : []
   );
 
   useEffect(() => {
     if (event) {
       setTicketType(
-        purchaseType === "children"
-          ? event.tickets.children
-          : event.tickets.adult
+
+        event.tickets
       );
     } else {
       setTicketType([]); // Clear tickets if no event or purchaseType
     }
-  }, [purchaseType, event]);
+  }, [event]);
 
   // Initialize ticket counts from localStorage if available
   const [ticketCounts, setTicketCounts] = useState(() => {
@@ -119,21 +114,21 @@ const BookingContext = ({ children }) => {
     return storedContactData
       ? JSON.parse(storedContactData)
       : {
-          firstName: "",
-          lastName: "",
-          email: "",
-          phone: "",
-          countryCode: "+234",
-          attendeeAddresses: ticketType.reduce((acc, ticket) => {
-            const count = ticketCounts[ticket.id] || 0;
-            acc[ticket.id] = Array.from({ length: count }).map(() => ({
-              firstName: "",
-              lastName: "",
-              email: "",
-            }));
-            return acc;
-          }, {}),
-        };
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        countryCode: "+234",
+        attendeeAddresses: ticketType.reduce((acc, ticket) => {
+          const count = ticketCounts[ticket.id] || 0;
+          acc[ticket.id] = Array.from({ length: count }).map(() => ({
+            firstName: "",
+            lastName: "",
+            email: "",
+          }));
+          return acc;
+        }, {}),
+      };
   });
 
   // Debounced localStorage save

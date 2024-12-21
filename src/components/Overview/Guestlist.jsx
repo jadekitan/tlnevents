@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Flex,
   VStack,
   Box,
   Text,
@@ -20,560 +20,382 @@ import {
   Td,
   TableContainer,
   Select,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  useToast,
+  Flex
 } from "@chakra-ui/react";
-import { DownloadIcon, ArrowLeftIcon, ArrowRightIcon } from "@chakra-ui/icons";
+import { DownloadIcon, ArrowLeftIcon, ArrowRightIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { IoTicketOutline } from "react-icons/io5";
-import { Link, useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getAllOrders } from "../../../server/allOrder";
-import { eventsData } from "../../../server/eventsData";
 import * as XLSX from "xlsx";
+import { eventsData } from "../../../server/eventsData";
+import { debounce } from "lodash";
 
 const Guestlist = () => {
   const { eventId } = useParams();
   const event = eventsData[eventId];
-  const toast = useToast();
-
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const category = searchParams.get('category') || 'all';
-  const nestedTab = searchParams.get('nestedTab') || null;
-
-  useEffect(() => {
-    // Fetch and filter guest list based on category and nested tab
-    const fetchFilteredGuests = async () => {
-      // Use `category` and `nestedTab` to filter data from your server or state
-    };
-    fetchFilteredGuests();
-  }, [category, nestedTab]);
-
-  // Prepare categories and ticket types (same as before)
-  const prepareCategories = () => {
-    const categoriesObj = {
-      all: Object.values(event.tickets).flat(),
-    };
-
-    Object.keys(event.tickets).forEach((category) => {
-      const categoryTickets = event.tickets[category];
-
-      categoriesObj[category] =
-        categoryTickets.length > 1
-          ? [
-            {
-              id: "all",
-              name: "All",
-              price: 0,
-              quantity: categoryTickets.reduce(
-                (acc, ticket) => acc + ticket.quantity,
-                0
-              ),
-            },
-            ...categoryTickets,
-          ]
-          : categoryTickets;
-    });
-
-    return categoriesObj;
-  };
-
-  const categoriesData = prepareCategories();
-  const categories = Object.keys(categoriesData);
-
-  // State management
-  const [mainTabIndex, setMainTabIndex] = useState(0);
-  const [nestedTabIndexes, setNestedTabIndexes] = useState({});
-
-  // Initialize nested tab indexes
-  useEffect(() => {
-    const initialNestedIndexes = categories.reduce((acc, category) => {
-      const ticketTypes = categoriesData[category].map((ticket) => ticket.name);
-      acc[category] = {
-        currentTypeIndex: 0,
-        ticketTypes: ticketTypes,
-      };
-      return acc;
-    }, {});
-    setNestedTabIndexes(initialNestedIndexes);
-  }, []);
-
-  // State for orders and loading
+  const [activeTab, setActiveTab] = useState(0);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [expandedRow, setExpandedRow] = useState(null);
 
-  // Fetch orders
-  useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true);
-      setError(null);
+  const tickets = event.tickets;
 
-      try {
-        const result = await getAllOrders({});
-        if (result.success) {
-          setOrders(result.data);
-        } else {
-          setError(result.message || "Failed to fetch orders");
-        }
-      } catch (err) {
-        setError("Failed to fetch orders. Please try again later.");
-      } finally {
-        setLoading(false);
+  // Memoized tabs data
+  const tabsData = useMemo(() => [
+    { name: "All", id: "all" },
+    ...tickets.map(ticket => ({
+      name: ticket.name,
+      id: ticket.id
+    }))
+  ], [tickets]);
+
+  // Memoized ticket quantities
+  const ticketQuantities = useMemo(() => {
+    return tickets.map(ticket => ({
+      ...ticket,
+      quantity: orders.reduce((sum, order) =>
+        order.ticketType === ticket.name ? sum + order.quantity : sum, 0
+      )
+    }));
+  }, [tickets, orders]);
+
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await getAllOrders({});
+      if (result.success) {
+        setOrders(result.data);
+      } else {
+        setError("Failed to fetch orders");
       }
-    };
-
-    fetchOrders();
+    } catch (err) {
+      setError("Failed to fetch orders");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  if (loading)
-    return (
-      <VStack w="100%" h="80vh" justify="center" align="center">
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="primary.500"
-          size="xl"
-        />
-      </VStack>
-    );
-  if (error) return <div>{error}</div>;
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
-  // Export functionality
-  const exportToExcel = (data, fileName) => {
+  // Memoized filtered orders
+  const filteredOrders = useMemo(() => {
+    if (activeTab === 0) return orders;
+    const selectedTicket = tickets[activeTab - 1];
+    return orders.filter(order => order.ticketType === selectedTicket.name);
+  }, [orders, activeTab, tickets]);
+
+  // Memoized paginated orders
+  const paginatedOrders = useMemo(() => {
+    return filteredOrders.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [filteredOrders, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+
+  const formatCreatedAt = useCallback((createdAt) => {
+    const date = new Date(createdAt);
+    const options = {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    };
+    const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+    const [month, day, year] = formattedDate.split(', ')[0].split('/');
+    const time = formattedDate.split(', ')[1];
+    return `${year}-${month}-${day} ${time}`;
+  }, []);
+
+  const handlePageChange = useCallback((newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const totalTicketsQuantity = useMemo(() => {
+    return tickets.reduce((sum, ticket) => sum + ticket.quantity, 0);
+  }, [tickets]);
+
+  // Generate pagination options
+  const paginationOptions = useMemo(() => {
+    const options = [10];  // Start with 10
+    let current = 25;
+
+    // Add intermediate options (25, 50, 100, etc.) if they're less than total
+    while (current <= totalTicketsQuantity && current <= 100) {
+      options.push(current);
+      current = current * 2;
+    }
+
+    // Add the total quantity as the last option if it's greater than the last standard option
+    if (totalTicketsQuantity > options[options.length - 1]) {
+      options.push(totalTicketsQuantity);
+    }
+
+    return options;
+  }, [totalTicketsQuantity]);
+
+  // Updated items per page change handler
+  const handleItemsPerPageChange = useCallback((e) => {
+    const newValue = Number(e.target.value);
+    setItemsPerPage(newValue);
+    setCurrentPage(1); // Reset to first page when changing items per page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const handleTabChange = useCallback((index) => {
+    // Immediate update for active tab to ensure instant UI feedback
+    setActiveTab(index);
+
+    // Non-critical updates performed synchronously, no debounce
+    setCurrentPage(1);
+    setExpandedRow(null);
+  }, []);
+
+
+
+  const exportToExcel = useCallback((data, tabName) => {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    XLSX.writeFile(workbook, `${tabName}-orders.xlsx`);
+  }, []);
 
-    XLSX.writeFile(workbook, `${fileName}.xlsx`);
-
-    toast({
-      title: "Export Successful",
-      description: "The data has been exported to Excel.",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-  };
+  if (loading) return (
+    <VStack w="100%" h="80vh" justify="center" align="center">
+      <Spinner thickness='4px' speed='0.65s' emptyColor='gray.200' color='primary.500' size='xl' />
+    </VStack>
+  );
+  if (error) return <Text color="red.500">{error}</Text>;
 
   return (
     <VStack w="100%" h="100%" justify="flex-start" align="flex-start">
-      <Tabs
-        w="100%"
-        variant="enclosed"
-        p="none"
-        index={mainTabIndex}
-        onChange={(index) => setMainTabIndex(index)}
-      >
-        {/* Main Category Tabs */}
+      <Tabs w="100%" variant="enclosed" p="none" index={activeTab} onChange={handleTabChange}>
         <TabList pl="60px" borderBottom="none">
-          {categories.map((category) => (
+          {tabsData.map((tab) => (
             <Tab
-              key={category}
-              variant="enclosed"
+              key={tab.id}
+              variant='enclosed'
               sx={{
                 color: "neutral.500",
                 borderColor: "transparent",
-                borderBottom: "none",
-                _selected: {
+                borderBottom: 'none',
+                transition: "all 0.2s",
+                "_selected": {
                   color: "dark",
                   borderColor: "inherit",
-                },
+                }
               }}
             >
-              <Text>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </Text>
+              {tab.name}
             </Tab>
           ))}
         </TabList>
 
         <TabPanels pb="none">
-          {categories.map((category) => (
-            <TabPanel key={category} pt="2px" pb="0">
-              {category === "all" ? (
-                <CategoryDetailsPanel
-                  category={category}
-                  ticketTypeName={null}
-                  orders={orders}
-                  event={event}
-                  categoriesData={categoriesData}
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
-                  itemsPerPage={itemsPerPage}
-                  setItemsPerPage={setItemsPerPage}
-                  exportToExcel={exportToExcel}
-                />
-              ) : // Only render nested tabs if there's more than one ticket type
-                categoriesData[category].length > 1 ? (
-                  <Tabs
-                    p="none"
-                    index={nestedTabIndexes[category]?.currentTypeIndex || 0}
-                    onChange={(index) => {
-                      setNestedTabIndexes((prev) => ({
-                        ...prev,
-                        [category]: {
-                          ...prev[category],
-                          currentTypeIndex: index,
-                        },
-                      }));
-                    }}
-                  >
-                    {/* Nested Ticket Type Tabs */}
-                    <TabList pl="40px" borderBottom="none">
-                      {(nestedTabIndexes[category]?.ticketTypes || []).map(
-                        (typeName) => (
-                          <Tab key={typeName}>{typeName}</Tab>
-                        )
-                      )}
-                    </TabList>
+          {tabsData.map((tab) => (
+            <TabPanel key={tab.id} pt="2px" pb="0">
+              <Box w="100%" h="100%" bg="dark" overflowY="hidden" borderTopRadius="20px" py="40px" px="20px">
+                <VStack w="100%" justify="center" align="flex-start" spacing="60px">
+                  {/* Ticket Summary */}
+                  <Flex w="100%" justify="space-between">
+                    {ticketQuantities.map((ticket) => (
+                      <motion.div
+                        key={ticket.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ width: "32%" }}
+                      >
+                        <Box bg="neutral.500" p={4} borderRadius="md" w="100%">
+                          <Flex align="center" gap={2}>
+                            <Box bg="dark" p="8px" borderRadius="4px">
+                              <VStack spacing={1}>
+                                <Text color="white">{ticket.quantity}</Text>
+                                <IoTicketOutline color="white" />
+                              </VStack>
+                            </Box>
+                            <Text color="white" fontSize="sm">{ticket.name}</Text>
+                          </Flex>
+                        </Box>
+                      </motion.div>
+                    ))}
+                  </Flex>
 
-                    <TabPanels p="0">
-                      {(nestedTabIndexes[category]?.ticketTypes || []).map(
-                        (typeName) => (
-                          <TabPanel key={typeName} p="0">
-                            <CategoryDetailsPanel
-                              category={category}
-                              ticketTypeName={typeName}
-                              orders={orders}
-                              event={event}
-                              categoriesData={categoriesData}
-                              currentPage={currentPage}
-                              setCurrentPage={setCurrentPage}
-                              itemsPerPage={itemsPerPage}
-                              setItemsPerPage={setItemsPerPage}
-                              exportToExcel={exportToExcel}
-                            />
-                          </TabPanel>
-                        )
-                      )}
-                    </TabPanels>
-                  </Tabs>
-                ) : (
-                  // If only one ticket type, render it directly
-                  <CategoryDetailsPanel
-                    category={category}
-                    ticketTypeName={categoriesData[category][0].name}
-                    orders={orders}
-                    event={event}
-                    categoriesData={categoriesData}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    itemsPerPage={itemsPerPage}
-                    setItemsPerPage={setItemsPerPage}
-                    exportToExcel={exportToExcel}
-                  />
-                )}
+                  <VStack w="100%" spacing="30px">
+                    {/* Table Header */}
+                    <Flex justify="space-between" w="100%" align="center">
+                      <Heading color="white" size="lg">Guest List</Heading>
+                      <Flex gap={4} align="center">
+                        <Flex align={"center"} gap="12px">
+                          <Text color="white">Items per page:</Text>
+                          <Select
+                            variant="unstyled"
+                            border="none"
+                            p="0"
+                            h="100%"
+                            value={itemsPerPage}
+                            onChange={handleItemsPerPageChange}
+                            w="75px"
+                            sx={{
+                              color: 'white',
+                              _hover: { border: 'none' },
+                              _active: { border: 'none' },
+                              _focus: { border: 'none' },
+                              // Change the icon color
+                              "& svg": {
+                                color: "white",
+                              },
+                            }}
+                          >
+                            {paginationOptions.map((num) => (
+                              <option
+                                style={{
+                                  backgroundColor: 'dark', // Background for the option
+                                  color: 'white',          // Text color for the option
+                                  padding: '20px',            // Remove padding from options
+                                }}
+                                key={num}
+                                value={num}
+                              >
+                                {num === totalTicketsQuantity ? `All (${num})` : num}
+                              </option>
+                            ))}
+                          </Select>
+
+                        </Flex>
+                        <Button
+                          rightIcon={<DownloadIcon />}
+                          h="35px"
+                          bg="neutral.500"
+                          color="white"
+                          fontSize="12px"
+                          _hover={{ bg: "rgb(200,200,200)", color: "dark" }}
+                          onClick={() => exportToExcel(filteredOrders, tab.name)}
+                        >
+                          Export
+                        </Button>
+                      </Flex>
+                    </Flex>
+
+                    {/* Orders Table */}
+                    <TableContainer w="100%" overflowX="hidden">
+                      <Table w="100%" variant="simple">
+                        <Thead w="100%">
+                          <Tr bg="white">
+                            <Th fontSize="12px" fontWeight="600" color="dark">Order ID</Th>
+                            <Th fontSize="12px" fontWeight="600" color="dark">Attendee Name</Th>
+                            <Th fontSize="12px" fontWeight="600" color="dark">Ticket Name</Th>
+                            <Th fontSize="12px" fontWeight="600" color="dark">Quantity</Th>
+                            <Th fontSize="12px" fontWeight="600" color="dark">Date</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody w="100%">
+                          {paginatedOrders.map((order, idx) => (
+                            <React.Fragment key={idx}>
+                              <Tr position="relative" overflowX="none">
+                                <Td><Text color="white" fontSize="12px">{order.orderId}</Text></Td>
+                                <Td><Text color="white" fontSize="12px">{order.attendeeName}</Text></Td>
+                                <Td><Text color="white" fontSize="12px">{order.ticketType}</Text></Td>
+                                <Td><Text color="white" fontSize="12px">{order.quantity}</Text></Td>
+                                <Td><Text color="white" fontSize="12px">{formatCreatedAt(order.createdAt)}</Text></Td>
+                                <Box
+                                  position="absolute"
+                                  top="11px"
+                                  right="-3px"
+                                  as={motion.button}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => setExpandedRow(idx === expandedRow ? null : idx)}
+                                >
+                                  <motion.div
+                                    animate={{ rotate: expandedRow === idx ? 90 : 0 }}
+                                    transition={{ duration: 0.3 }}
+                                  >
+                                    <ChevronRightIcon color="neutral.500" fontSize="25px" />
+                                  </motion.div>
+                                </Box>
+                              </Tr>
+                              <AnimatePresence>
+                                {expandedRow === idx && (
+                                  <motion.tr
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                  >
+                                    <Td colSpan={6} bg="gray.800">
+                                      <VStack align="start" spacing={2} color="white" p={4}>
+                                        <Text>Email: {order.email}</Text>
+                                        <Text>Phone: {order.phone}</Text>
+                                      </VStack>
+                                    </Td>
+                                  </motion.tr>
+                                )}
+                              </AnimatePresence>
+                            </React.Fragment>
+                          ))}
+                        </Tbody>
+                      </Table>
+                    </TableContainer>
+                  </VStack>
+
+                  {/* Pagination */}
+                  <Flex justify="center" gap={4} w="100%">
+                    <Button
+                      bg="transparent"
+                      _hover={{ bg: "transparent" }}
+                      focus={{ bg: "transparent" }}
+                      active={{ bg: "transparent" }}
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ArrowLeftIcon color="white" />
+                    </Button>
+                    <Flex gap={2}>
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <motion.div
+                          key={i + 1}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            bg="transparent"
+                            _hover={{ bg: "transparent" }}
+                            focus={{ bg: "transparent" }}
+                            active={{ bg: "transparent" }}
+                            color={currentPage === i + 1 ? "white" : "neutral.500"}
+                            onClick={() => handlePageChange(i + 1)}
+                          >
+                            {i + 1}
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </Flex>
+                    <Button
+                      bg="transparent"
+                      _hover={{ bg: "transparent" }}
+                      focus={{ bg: "transparent" }}
+                      active={{ bg: "transparent" }}
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ArrowRightIcon color="white" />
+                    </Button>
+                  </Flex>
+                </VStack>
+              </Box>
             </TabPanel>
           ))}
         </TabPanels>
       </Tabs>
     </VStack>
-  );
-};
-
-// Separate component to render category details
-const CategoryDetailsPanel = ({
-  category,
-  ticketTypeName,
-  orders,
-  event,
-  categoriesData,
-  currentPage,
-  setCurrentPage,
-  itemsPerPage,
-  setItemsPerPage,
-  exportToExcel,
-}) => {
-  // Filter orders based on category and ticket type
-  const filteredOrders = orders.filter((order) => {
-    const categoryMatch =
-      category === "all" ||
-      order.ticketType?.toLowerCase().includes(category.toLowerCase());
-    const ticketTypeMatch =
-      !ticketTypeName ||
-      ticketTypeName === "All" ||
-      order.ticketType === ticketTypeName;
-
-    return categoryMatch && ticketTypeMatch;
-  });
-
-  // Calculate ticket type quantity summary
-  const ticketTypeSummary = categoriesData[category]
-    .filter(
-      (ticket) =>
-        !ticketTypeName ||
-        ticketTypeName === "All" ||
-        ticket.name === ticketTypeName
-    )
-    .map((ticket) => ({
-      name: ticket.name,
-      totalQuantity: filteredOrders
-        .filter((order) => order.ticketType === ticket.name)
-        .reduce((sum, order) => sum + order.quantity, 0),
-    }));
-
-  // Pagination calculations
-  const totalItems = orders.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = orders.slice(indexOfFirstItem, indexOfLastItem);
-
-  // Pagination handlers
-  const handlePageChange = (direction) => {
-    if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage((prev) => prev + 1);
-    } else if (direction === "prev" && currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
-  };
-
-  const jumpToPage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  // Export handler
-  const handleExport = () => {
-    const exportData = currentItems.map((order) => ({
-      "Ticket Name": order.ticketType,
-      Quantity: order.quantity,
-      "Attendee Name": order.attendeeName,
-      "Order ID": order.orderId,
-      Date: formatCreatedAt(order.createdAt),
-    }));
-    exportToExcel(exportData, `${category}_${ticketTypeName || "all"}_orders`);
-  };
-
-  // Date formatting utility
-  const formatCreatedAt = (dateString) => {
-    const date = new Date(dateString);
-    const options = {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    };
-    const formattedDate = new Intl.DateTimeFormat("en-US", options).format(
-      date
-    );
-    const [month, day, year] = formattedDate.split(", ")[0].split("/");
-    const time = formattedDate.split(", ")[1];
-    return `${year}-${month}-${day} ${time}`;
-  };
-
-  return (
-    <Box
-      w="100%"
-      h="100%"
-      bg="dark"
-      overflowY="hidden"
-      borderTopRadius="20px"
-      py="40px"
-      px="20px"
-    >
-      <VStack w="100%" justify="center" align="flex-start" spacing="50px">
-        {/* Summary Boxes for Ticket Type Quantities */}
-        <Flex w="100%" justify="space-between" align="center">
-          {ticketTypeSummary.map((ticket, index) => (
-            <Box
-              key={index}
-              w="350px"
-              h="100%"
-              bg="neutral.500"
-              p="20px"
-              rounded="8px"
-            >
-
-              <Flex justify="flex-start" align="center" gap="8px">
-                <Box bg="dark" rounded="4px" py="10px" px="20px">
-                  <VStack justify="center" align="center" spacing="0">
-                    <Text color="white" fontSize="16px">{ticket.totalQuantity.toLocaleString()}</Text>
-                    <Box color="white">
-                      <IoTicketOutline />
-                    </Box>
-                  </VStack>
-                </Box>
-                <Text color="white">{ticket.name}</Text>
-              </Flex>
-
-
-            </Box>
-          ))}
-        </Flex>
-
-        {/* Orders Table */}
-        <VStack w="100%" spacing="40px">
-          <Flex w="100%" justify="space-between" align="center">
-            <Heading color="white" fontSize="28px">
-              Guest List
-            </Heading>
-            <Flex align="center" gap="10px">
-              <Flex align="center" justify="flex-start" gap="0">
-                <Text color="neutral.500" fontSize="14px">Items per page:</Text>
-                <Select
-                  w="68px"
-                  h="100%"
-                  color="white"
-                  bg="transparent"
-                  border="none"
-                  _hover={{ border: "none" }}
-                  _active={{ border: "none" }}
-                  _focus={{ border: "none" }}
-                  fontSize="12px"
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(parseInt(e.target.value));
-                    setCurrentPage(1);
-                  }}
-
-                >
-                  {[10, 25, 50, 100].map((num) => (
-                    <option
-                      key={num}
-                      value={num}
-                      style={{ backgroundColor: "black" }}
-                      paddingInlineEnd="0"
-                      paddingInlineStart="0"
-
-                    >
-                      {num}
-                    </option>
-                  ))}
-                </Select>
-              </Flex>
-              <Button
-                rightIcon={<DownloadIcon />}
-                h="35px"
-                bg="neutral.500"
-                color="white"
-                fontSize="14px"
-                _hover={{ bg: "rgb(200,200,200)", color: "dark" }}
-                onClick={handleExport}
-              >
-                Export
-              </Button>
-            </Flex>
-          </Flex>
-
-          <TableContainer w="100%">
-            <Table w="100%" variant="simple">
-              <Thead>
-                <Tr bg="white">
-                  {[
-                    "Ticket Name",
-                    "Quantity",
-                    "Attendee Name",
-                    "Order ID",
-                    "Date",
-                  ].map((header) => (
-                    <Th
-                      key={header}
-                      border="1px"
-                      borderColor="transparent"
-                      isNumeric={["Quantity", "Price"].includes(header)}
-                    >
-                      <Text fontSize="12px" fontWeight="600" color="dark">
-                        {header}
-                      </Text>
-                    </Th>
-                  ))}
-                </Tr>
-              </Thead>
-              <Tbody w="100%">
-                <Accordion w="100%" allowToggle>
-                  {currentItems.map((order, index) => (
-                    <AccordionItem w="100%" key={index} border="none">
-                      <Tr as={AccordionButton}>
-                        <Td>
-                          <Text color="white" fontSize="12px">
-                            {order.ticketType}
-                          </Text>
-                        </Td>
-                        <Td isNumeric>
-                          <Text color="white" fontSize="12px">
-                            {order.quantity}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <Text color="white" fontSize="12px">
-                            {order.attendeeName}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <Text color="white" fontSize="12px">
-                            {order.orderId}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <Text color="white" fontSize="12px">
-                            {formatCreatedAt(order.createdAt)}
-                          </Text>
-                        </Td>
-                      </Tr>
-                      <AccordionPanel pb={4}>
-                        <VStack align="start" spacing={2}>
-                          <Text>Additional Order Details:</Text>
-                          <Text>Email: {order.email || "N/A"}</Text>
-                          <Text>Phone: {order.phone || "N/A"}</Text>
-                          {/* Add more details as needed */}
-                        </VStack>
-                      </AccordionPanel>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </Tbody>
-            </Table>
-          </TableContainer>
-
-          {/* Pagination Controls */}
-          <Flex w="100%" justify="center" align="center" gap="50px">
-
-
-            <ArrowLeftIcon as="button" color="white" disabled={currentPage === 1}
-              onClick={() => handlePageChange("prev")} />
-
-            <Flex justify="center" gap="5px">
-              {[...Array(totalPages)].map((_, i) => (
-                <Button
-                  key={i + 1}
-                  size="sm"
-                  onClick={() => jumpToPage(i + 1)}
-                  bg="none"
-                  color={currentPage === i + 1 ? "white" : "neutral.500"}
-                >
-                  {i + 1}
-                </Button>
-              ))}
-            </Flex>
-            <ArrowRightIcon as="button" color="white" disabled={currentPage === totalPages}
-              onClick={() => handlePageChange("next")} />
-
-
-
-
-
-
-            {/* <Text>
-              Page {currentPage} of {totalPages}
-            </Text> */}
-
-
-
-          </Flex>
-        </VStack>
-      </VStack>
-    </Box>
   );
 };
 
