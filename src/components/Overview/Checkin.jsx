@@ -5,11 +5,6 @@ import {
   Box,
   Text,
   Heading,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
   Button,
   Table,
   Thead,
@@ -19,20 +14,17 @@ import {
   Th,
   Td,
   TableContainer,
-  Select,
   Flex,
   InputGroup,
   Input,
   InputLeftElement,
-  IconButton,
 } from "@chakra-ui/react";
 import {
-  DownloadIcon,
+
   ArrowLeftIcon,
   ArrowRightIcon,
-  ChevronRightIcon,
+
   Search2Icon,
-  CheckIcon,
 
 } from "@chakra-ui/icons";
 import { IoCheckmarkDoneSharp } from "react-icons/io5";
@@ -235,34 +227,51 @@ const Checkin = () => {
 
   const handleCheckIn = async (orderId) => {
     try {
-      // Show loading spinner on the button
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.orderId === orderId ? { ...order, isUpdating: true } : order
+      // Optimistically update UI state
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.orderId === orderId
+            ? { ...order, isUpdating: true }
+            : order
         )
       );
 
-      const response = await axios.put('/api/orders', {
+      // Note: There seems to be a duplicate 'api' in the URL path
+      const response = await axios.put('https://tln-411s.onrender.com/api/orders', {
         orderId,
         checkedIn: true,
       });
 
-      if (response.data.message) {
-        // Update the order's status in the local state
-        setOrders((prevOrders) =>
-          prevOrders.map((order) =>
-            order.orderId === orderId ? { ...order, checkedIn: true, isUpdating: false } : order
-          )
-        );
+      // Consider handling non-200 responses explicitly
+      if (!response.data.message) {
+        throw new Error('Invalid server response');
       }
-    } catch (error) {
-      console.error('Error checking in order:', error);
-      // Reset loading state if there's an error
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.orderId === orderId ? { ...order, isUpdating: false } : order
+
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.orderId === orderId
+            ? { ...order, checkedIn: true, isUpdating: false }
+            : order
         )
       );
+
+      // Add success feedback
+      toast?.success('Order checked in successfully');
+
+    } catch (error) {
+      console.error('Error checking in order:', error);
+
+      // Reset loading state
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.orderId === orderId
+            ? { ...order, isUpdating: false }
+            : order
+        )
+      );
+
+      // Add error feedback
+      toast?.error('Failed to check in order');
     }
   };
 
@@ -326,7 +335,7 @@ const Checkin = () => {
 
                   <Td>
                     {order.checkedIn ? (
-                      <CheckIcon color="green.500" />
+                      <Box color="primary.500"><IoCheckmarkDoneSharp /></Box>
                     ) : (
                       <Button
                         bg={"neutral.500"}

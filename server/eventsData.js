@@ -29,8 +29,8 @@ export const eventsData = {
       {
         id: 1,
         name: "Playground Adult Early Bird Pass",
-        price: 5000,
-        quantity: 200,
+        price: 10000,
+        quantity: 500,
         maxQuantity: 5,
         step: 1,
         description: {
