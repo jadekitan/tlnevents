@@ -188,7 +188,7 @@ const Overview = () => {
       totalTicketsSold: filteredOrders.reduce((acc, order) => acc + order.quantity, 0),
       totalRevenue: filteredOrders.reduce((acc, order) => acc + order.total, 0),
       ticketsAvailable: calculateTicketsAvailable(ticketType),
-      totalCheckedIn: filteredOrders.filter(order => order.checkIn).length
+      totalCheckedIn: filteredOrders.filter(order => order.checkedIn).length
     };
   }, [orders, calculateTicketsAvailable]);
 
