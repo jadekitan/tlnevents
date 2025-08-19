@@ -26,11 +26,11 @@ const fadeAndScale = keyframes`
 
 const Hero = () => {
   const eventData = {
-    url: "lpe",
-    image: "https://tlnevents.com/assets/lpe.webp",
-    name: "Lemonade Playground Experience",
-    date: "22 December",
-    venue: "Muri Okuola Park, Vicotria Island, Lagos",
+    url: "silent-disco",
+    image: "https://tlnevents.com/assets/silent-disco.png",
+    name: "Jay's Silent Disco",
+    date: "31 August",
+    venue: "65 Queens St, Alagomeji-Yaba, Lagos",
   };
   return (
     <Box
@@ -49,7 +49,7 @@ const Hero = () => {
         autoPlay
         playsInline
         preload="auto"
-        poster="https://tlnevents.com/assets/gallery/Fk shot it-244.jpg"
+        poster="https://tlnevents.com/assets/silent-disco-fallback.webp"
         width="100%"
         height="100%"
         objectFit="cover"
@@ -58,7 +58,10 @@ const Hero = () => {
         left="0"
         zIndex="-1"
       >
-        <source src="https://tlnevents.com/assets/lpe.mp4" type="video/mp4" />
+        <source
+          src="https://tlnevents.com/assets/silent-disco.mp4"
+          type="video/mp4"
+        />
         Your browser does not support the video tag.
       </Box>
       <VStack
@@ -76,7 +79,7 @@ const Hero = () => {
           src={eventData.image}
           alt={`${eventData.name} Logo`}
           sx={{
-            width: ["350px", "380px", "420px", "440px"],
+            width: ["340px", "380px", "420px", "440px"],
             height: "auto",
             opacity: 1,
             transition: "transform 1s",
@@ -131,15 +134,15 @@ const Hero = () => {
             {eventData.venue}
           </Text>
         </VStack>
-        <Link
+        {/* <Link
           to={`/${eventData.url}/merch`}
           _hover={{ textDecoration: "none" }}
           target="_blank"
         >
-          <Button rightIcon={<RiArrowRightDoubleFill />}
+          <Button
+            rightIcon={<RiArrowRightDoubleFill />}
             size="lg"
             h="35px"
-
             bg="white"
             _hover={{ bg: "primary.400" }}
             color="dark"
@@ -147,7 +150,7 @@ const Hero = () => {
           >
             Buy Merch
           </Button>
-        </Link>
+        </Link> */}
       </VStack>
     </Box>
   );

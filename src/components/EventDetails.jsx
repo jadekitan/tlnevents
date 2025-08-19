@@ -42,8 +42,8 @@ import Download from "../../src/assets/icons/download.svg";
 import { Link, useParams } from "react-router-dom";
 
 const EventDetails = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [placement, setPlacement] = React.useState('right')
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [placement, setPlacement] = React.useState("right");
 
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
@@ -105,12 +105,14 @@ const EventDetails = () => {
   // Manually format times using UTC hours and minutes to avoid timezone shifts
   const startTimeWithMeridiem = `${String(
     startDate.getUTCHours() % 12 || 12
-  ).padStart(2, "0")}:${String(startDate.getUTCMinutes()).padStart(2, "0")} ${startDate.getUTCHours() >= 12 ? "PM" : "AM"
-    }`;
+  ).padStart(2, "0")}:${String(startDate.getUTCMinutes()).padStart(2, "0")} ${
+    startDate.getUTCHours() >= 12 ? "PM" : "AM"
+  }`;
   const endTimeWithMeridiem = `${String(
     endDate.getUTCHours() % 12 || 12
-  ).padStart(2, "0")}:${String(endDate.getUTCMinutes()).padStart(2, "0")} ${endDate.getUTCHours() >= 12 ? "PM" : "AM"
-    }`;
+  ).padStart(2, "0")}:${String(endDate.getUTCMinutes()).padStart(2, "0")} ${
+    endDate.getUTCHours() >= 12 ? "PM" : "AM"
+  }`;
 
   // 3. Format in (Wed, August 21st 7:00 PM) with meridiem, UTC-based
   const startFormattedDate = `${format(startDate, "EEE")}, ${format(
@@ -246,30 +248,75 @@ END:VCALENDAR
               alt="The Lemonade Logo"
             ></Image>
           </Link>
-          <Button display={["block", "block", "block", "none"]} bg="transparent" p="0" _hover={{ bg: "transparent" }} onClick={onOpen}><HamburgerIcon fontSize="20px" color="dark" /></Button>
-          <Drawer placement={placement} onClose={onClose} isOpen={isOpen} size={"full"}>
+          <Button
+            display={["block", "block", "block", "none"]}
+            bg="transparent"
+            p="0"
+            _hover={{ bg: "transparent" }}
+            onClick={onOpen}
+          >
+            <HamburgerIcon fontSize="20px" color="dark" />
+          </Button>
+          <Drawer
+            placement={placement}
+            onClose={onClose}
+            isOpen={isOpen}
+            size={"full"}
+          >
             <DrawerOverlay />
             <DrawerContent bg="rgba(0,0,0,0.8)">
               <DrawerCloseButton color="white" fontSize="20px" />
-              <DrawerHeader ><Flex justify="center" align="center">
-                <Link to="/">
-                  <Image
-                    w={["120px", "150px"]}
-                    src="https://tlnevents.com/logo-white.png"
-                    alt="The Lemonade Logo"
-                    className={`duration-1000 ease-in-out `}
-                  />
-                </Link>
-              </Flex></DrawerHeader>
+              <DrawerHeader>
+                <Flex justify="center" align="center">
+                  <Link to="/">
+                    <Image
+                      w={["120px", "150px"]}
+                      src="https://tlnevents.com/logo-white.png"
+                      alt="The Lemonade Logo"
+                      className={`duration-1000 ease-in-out `}
+                    />
+                  </Link>
+                </Flex>
+              </DrawerHeader>
               <DrawerBody>
-
                 <VStack h="80vh" justify="center" align="center" spacing="30px">
-
-                  <Link to={`/${event.url}/checkout`} target="_blank"><Text color="white" fontSize="30px" fontWeight="bold">Tickets</Text></Link>
-                  <Link to={`/${event.url}/merch`} target="_blank"><Text color="white" fontSize="30px" fontWeight="bold">Merch</Text></Link>
-                  <Link to={`/${event.url}`} target="_blank"><Text color="white" fontSize="30px" fontWeight="bold">Event</Text></Link>
-                  <Link as="button" onClick={() => { scrollToSection("experiences"); onClose() }}><Text color="white" fontSize="30px" fontWeight="bold">Experience</Text></Link>
-                  <Link as="button" onClick={() => { scrollToSection("about"); onClose() }}><Text color="white" fontSize="30px" fontWeight="bold">About</Text></Link>
+                  <Link to={`/${event.url}/checkout`} target="_blank">
+                    <Text color="white" fontSize="30px" fontWeight="bold">
+                      Tickets
+                    </Text>
+                  </Link>
+                  <Link to={`/${event.url}/merch`} target="_blank">
+                    <Text color="white" fontSize="30px" fontWeight="bold">
+                      Merch
+                    </Text>
+                  </Link>
+                  <Link to={`/${event.url}`} target="_blank">
+                    <Text color="white" fontSize="30px" fontWeight="bold">
+                      Event
+                    </Text>
+                  </Link>
+                  <Link
+                    as="button"
+                    onClick={() => {
+                      scrollToSection("experiences");
+                      onClose();
+                    }}
+                  >
+                    <Text color="white" fontSize="30px" fontWeight="bold">
+                      Experience
+                    </Text>
+                  </Link>
+                  <Link
+                    as="button"
+                    onClick={() => {
+                      scrollToSection("about");
+                      onClose();
+                    }}
+                  >
+                    <Text color="white" fontSize="30px" fontWeight="bold">
+                      About
+                    </Text>
+                  </Link>
                 </VStack>
               </DrawerBody>
             </DrawerContent>
@@ -412,13 +459,23 @@ END:VCALENDAR
               pb="80px"
             >
               <VStack w="100%" align="flex-start" spacing={["10px", "20px"]}>
-                <Heading color="dark" fontSize={["28px", "32px", "36px", "32px"]}>
+                <Heading
+                  color="dark"
+                  fontSize={["28px", "32px", "36px", "32px"]}
+                >
                   {event.name}
                 </Heading>
-                <Text color="primary.500" fontSize={["14px", "16px", "20px", "16px"]}>
+                <Text
+                  color="primary.500"
+                  fontSize={["14px", "16px", "20px", "16px"]}
+                >
                   {startFormattedDate}
                 </Text>
-                <Text color="dark" fontSize={["18px", "20px", "24px", "20px"]} fontWeight="600">
+                <Text
+                  color="dark"
+                  fontSize={["18px", "20px", "24px", "20px"]}
+                  fontWeight="600"
+                >
                   {event.venue.name}, {event.venue.state}, {event.venue.country}
                 </Text>
               </VStack>
@@ -523,7 +580,6 @@ END:VCALENDAR
                   </VStack>
                 </Flex>)} */}
 
-
               <Box w="100%" h="1px" bg="primary.500"></Box>
               <VStack w="100%" align="flex-start" spacing="20px">
                 <Heading color="neutral.500" fontSize={["24px", "28px"]}>
@@ -615,7 +671,7 @@ END:VCALENDAR
                   <Box w="100%" h="100%" bg="gary.500">
                     <AspectRatio bg="gary.500" ratio={16 / 9}>
                       <iframe
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.6583901574636!2d3.4225135739922647!3d6.437900693553329!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103bf536b15c7885%3A0xbcaea69ba1f12984!2sMuri%20Okunola%20Park!5e0!3m2!1sen!2sng!4v1729628140373!5m2!1sen!2sng"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.152150741183!2d3.378674140517502!3d6.502415094889078!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8c601fb92825%3A0x79aeab96370cd448!2s65%20Queen%20St%2C%20Alagomeji-Yaba%2C%20Lagos%20100001%2C%20Lagos!5e0!3m2!1sen!2sng!4v1755554574183!5m2!1sen!2sng"
                         allowFullScreen=""
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
@@ -719,15 +775,19 @@ END:VCALENDAR
             p={["10px", "20px", "40px"]}
           >
             <Link to={`/${event.id}/checkout`}>
-              <Button w="100%" h={["45px", "50px"]} bg="primary.500" rounded="8px">
+              <Button
+                w="100%"
+                h={["45px", "50px"]}
+                bg="primary.500"
+                rounded="8px"
+              >
                 <Text fontSize={["18px", "20px", "22px"]}>Get Ticket</Text>
               </Button>
             </Link>
           </Box>
-
         </VStack>
-      </VStack >
-    </VStack >
+      </VStack>
+    </VStack>
   );
 };
 

@@ -364,11 +364,11 @@ const PaymentSuccess = () => {
                   Back to Event
                 </Button>
               </Link>
-              <Link to={`/${event.id}`}>
+              {/* <Link to={`/${event.id}`}>
                 <Text color="dark" fontSize={["14px", "16px"]}>
                   Shop Merch
                 </Text>
-              </Link>
+              </Link> */}
             </VStack>
           </VStack>
         </VStack>

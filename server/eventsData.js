@@ -234,4 +234,212 @@ export const eventsData = {
       },
     },
   },
+  "silent-disco": {
+    id: "silent-disco",
+    url: "silent-disco",
+    image: "https://tlnevents.com/assets/events-banner/silent-disco.webp",
+    name: "Jay's Silent Disco",
+
+    venue: {
+      name: "Lemonade Studios",
+      address: "65 Queen St, Alagomeji-Yaba, Lagos 100001, Lagos",
+      city: "Alagomeji-Yaba",
+      state: "Lagos",
+      country: "Nigeria",
+      zip: "100001",
+      latitude: "6.5149",
+      longitude: "3.3785",
+    },
+
+    date: {
+      iso: "2025-08-31T16:00:00Z/2025-08-31T22:00:00Z",
+      startDate: "2025-08-31T16:00:00Z",
+      endDate: "2025-08-31T22:00:00Z",
+      outlookStartDate: "2025-08-31T16:00:00Z",
+      outlookEndDate: "2025-08-31T22:00:00Z",
+      timeZone: "WAT",
+    },
+
+    categories: ["Party"],
+    price: 5000,
+
+    tickets: [
+      {
+        id: 1,
+        name: "General",
+        price: 5000,
+        quantity: 100,
+        maxQuantity: 5,
+        step: 1,
+        description: {
+          info: "This Entry Ticket grants you full access to the entire experience, designed to keep you entertained, engaged, and immersed in the lively atmosphere!",
+          perks: ["Regular Entry"],
+        },
+      },
+    ],
+
+    merch: {
+      tees: {
+        "lemonade-tee": {
+          id: "lemonade-tee",
+          name: "Lemonade Tee",
+          price: 35000,
+          description: {
+            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
+            color:
+              "Available in Black, White, and Pink, perfect for versatile styling.",
+            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
+            footer:
+              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
+          },
+          sizes: ["M", "L", "XL", "XXL"],
+          colors: ["Black", "White", "Pink"],
+          image:
+            "https://tlnevents.com/assets/merch/tees/lemonade-tee(black-back).jpg",
+          hasFrontView: true,
+          hasBackView: true,
+        },
+
+        "playground-vibes-tee": {
+          id: "playground-vibes-tee",
+          name: "Playground Vibes Tee",
+          price: 35000,
+          description: {
+            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
+            color:
+              "Available in Black, White, and Pink, perfect for versatile styling.",
+            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
+            footer:
+              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
+          },
+          sizes: ["M", "L", "XL", "XXL"],
+          colors: ["Black", "White", "Pink"],
+          image:
+            "https://tlnevents.com/assets/merch/tees/playground-vibes-tee(pink-back).jpg",
+          hasFrontView: true,
+          hasBackView: true,
+        },
+
+        "rewind-repeat-tee": {
+          id: "rewind-repeat-tee",
+          name: "Rewind Repeat Tee",
+          price: 35000,
+          description: {
+            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
+            color:
+              "Available in Black, White, and Pink, perfect for versatile styling.",
+            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
+            footer:
+              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
+          },
+          sizes: ["M", "L", "XL", "XXL"],
+          colors: ["Black", "White", "Pink"],
+          image:
+            "https://tlnevents.com/assets/merch/tees/rewind-repeat-tee(white-back).jpg",
+          hasFrontView: false,
+          hasBackView: true,
+        },
+      },
+
+      "crop-tops": {
+        "wrangler-crop-top": {
+          id: "wrangler-crop-top",
+          name: "Wrangler Crop Top",
+          price: 25000,
+          description: {
+            head: "Bold and striking, this crop top is ideal for making a statement at the event or beyond.",
+            color: "Iconic combinations of Black and White and Red and White.",
+            size: "S, M, L, XL, XXL.",
+            footer:
+              "With a Wrangler-inspired edge, this piece brings an effortlessly cool vibe.",
+          },
+          sizes: ["S", "M", "L", "XL", "XXL"],
+          colors: ["Black", "Red"],
+          image:
+            "https://tlnevents.com/assets/merch/crop-tops/wrangler-crop-top(black-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
+        },
+
+        "washed-crop-top": {
+          id: "washed-crop-top",
+          name: "Washed Crop Top",
+          price: 25000,
+          description: {
+            head: "Effortlessly chic with a touch of vintage, the washed crop top is the perfect balance of comfort and style.",
+            color: "Subtle tones like White, Black, and Pink.",
+            size: "S, M, L, XL, XXL.",
+            footer:
+              "Its washed aesthetic offers a laid-back, retro charm suitable for all-day wear.",
+          },
+          sizes: ["S", "M", "L", "XL", "XXL"],
+          colors: ["White", "Black"],
+          image:
+            "https://tlnevents.com/assets/merch/crop-tops/washed-crop-top(black-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
+        },
+
+        "ringer-baby-crop-top": {
+          id: "ringer-baby-crop-top",
+          name: "Ringer Baby Crop Top",
+          price: 25000,
+          description: {
+            head: "Cute and sporty, the ringer baby crop top is made to elevate your casual style.",
+            color:
+              "Fresh combos like Cream and Blue, Black and White, and Pink and Cream.",
+            size: "S, M, L, XL.",
+            footer:
+              "With ringer-style edges and soft fabric, it’s a playful choice for any Lemonade Playground enthusiast.",
+          },
+          sizes: ["S", "M", "L", "XL"],
+          colors: ["Cream & Blue", "Cream & Green"],
+          image:
+            "https://tlnevents.com/assets/merch/crop-tops/ringer-baby-crop-top(cream&green-front).jpg",
+          hasFrontView: true,
+          hasBackView: false,
+        },
+      },
+    },
+
+    about: {
+      description:
+        "Step into Jay’s Silent Disco – where the beats never stop, but the noise stays personal! Grab your wireless headphones and choose from multiple DJ channels as you dance the night away in Lemonade Studios. It’s not just music, it’s an immersive experience that lets you control your vibe – switch between hip hop, afrobeats, or EDM, and groove with friends under one roof. Whether you’re vibing with the crowd or lost in your own world, Jay’s Silent Disco promises unforgettable energy, laughter, and pure nightlife magic in Lagos.",
+      rating: 18,
+      policy:
+        "Refunds are available if: (1) It’s within 24 hours of purchasing a ticket, or (2) The event is rescheduled or cancelled.",
+    },
+    lineup: {
+      images: [
+        "https://bit.ly/ryan-florence",
+        "https://bit.ly/sage-adebayo",
+        "https://bit.ly/kent-c-dodds",
+      ],
+      names: ["Speed Darlington", "Odumodu"],
+    },
+
+    vendors: {
+      images: [
+        "https://bit.ly/ryan-florence",
+        "https://bit.ly/sage-adebayo",
+        "https://bit.ly/kent-c-dodds",
+      ],
+      brands: ["Celeb Foods", "Tise Spag", "Korede"],
+    },
+
+    organizers: {
+      name: "Mr Adekitan",
+      username: "mr_adekitan",
+      email: "adekitan.babajide@gmail.com",
+      phone: "+234 803 427 0313",
+      socials: {
+        website: "",
+        instagram: "https://instagram.com/mr_adekitan",
+        facebook: "",
+        x: "https://x.com/Mr_Adekitan",
+        tiktok: "https://tiktok.com/@mr_adekitan",
+        linkedin: "https://linkedin.com/in/adekitan-babajide",
+      },
+    },
+  },
 };
