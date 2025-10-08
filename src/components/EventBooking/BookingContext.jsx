@@ -59,16 +59,11 @@ const BookingContext = ({ children }) => {
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
 
-  const [ticketType, setTicketType] = useState(
-    event ? event.tickets : []
-  );
+  const [ticketType, setTicketType] = useState(event ? event.tickets : []);
 
   useEffect(() => {
     if (event) {
-      setTicketType(
-
-        event.tickets
-      );
+      setTicketType(event.tickets);
     } else {
       setTicketType([]); // Clear tickets if no event or purchaseType
     }
@@ -114,21 +109,21 @@ const BookingContext = ({ children }) => {
     return storedContactData
       ? JSON.parse(storedContactData)
       : {
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        countryCode: "+234",
-        attendeeAddresses: ticketType.reduce((acc, ticket) => {
-          const count = ticketCounts[ticket.id] || 0;
-          acc[ticket.id] = Array.from({ length: count }).map(() => ({
-            firstName: "",
-            lastName: "",
-            email: "",
-          }));
-          return acc;
-        }, {}),
-      };
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          countryCode: "+234",
+          attendeeAddresses: ticketType.reduce((acc, ticket) => {
+            const count = ticketCounts[ticket.id] || 0;
+            acc[ticket.id] = Array.from({ length: count }).map(() => ({
+              firstName: "",
+              lastName: "",
+              email: "",
+            }));
+            return acc;
+          }, {}),
+        };
   });
 
   // Debounced localStorage save

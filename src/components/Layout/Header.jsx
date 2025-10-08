@@ -42,7 +42,7 @@ const Header = () => {
     }
   }
   const eventData = {
-    url: "lpe",
+    url: "splash-fest",
   };
   return (
     <Box
@@ -87,7 +87,7 @@ const Header = () => {
               <VStack h="80vh" justify="center" align="center" spacing="30px">
 
                 <Link to={`/${eventData.url}/checkout`} target="_blank"><Text color="white" fontSize="30px" fontWeight="bold">Tickets</Text></Link>
-                <Link to={`/${eventData.url}/merch`} target="_blank"><Text color="white" fontSize="30px" fontWeight="bold">Merch</Text></Link>
+                <Link to={`/lpe/merch`} target="_blank"><Text color="white" fontSize="30px" fontWeight="bold">Merch</Text></Link>
                 <Link to={`/${eventData.url}`} target="_blank"><Text color="white" fontSize="30px" fontWeight="bold">Event</Text></Link>
                 <Link as="button" onClick={() => { scrollToSection("experiences"); onClose() }}><Text color="white" fontSize="30px" fontWeight="bold">Experience</Text></Link>
                 <Link as="button" onClick={() => { scrollToSection("about"); onClose() }}><Text color="white" fontSize="30px" fontWeight="bold">About</Text></Link>
@@ -113,7 +113,7 @@ const Header = () => {
               Tickets
             </Text>
           </Link>
-          <Link to={`/${eventData.url}/merch`} target="_blank">
+          <Link to={`/lpe/merch`} target="_blank">
             <Text
               color={isScrolled ? "dark" : "white"}
               fontSize={

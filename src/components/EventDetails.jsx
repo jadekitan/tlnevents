@@ -671,7 +671,7 @@ END:VCALENDAR
                   <Box w="100%" h="100%" bg="gary.500">
                     <AspectRatio bg="gary.500" ratio={16 / 9}>
                       <iframe
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.152150741183!2d3.378674140517502!3d6.502415094889078!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8c601fb92825%3A0x79aeab96370cd448!2s65%20Queen%20St%2C%20Alagomeji-Yaba%2C%20Lagos%20100001%2C%20Lagos!5e0!3m2!1sen!2sng!4v1755554574183!5m2!1sen!2sng"
+                        src={event.venue.iframe}
                         allowFullScreen=""
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"

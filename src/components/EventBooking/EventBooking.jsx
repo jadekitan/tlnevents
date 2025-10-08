@@ -74,7 +74,7 @@ const EventBooking = () => {
   }, 0);
 
   const subtotal = calculateSubtotal();
-  const total = subtotal + (subtotal > 0 ? fees : 0);
+  const total = Math.ceil(subtotal + (subtotal > 0 ? fees : 0));
 
   function scrollToSection(id) {
     const element = document.getElementById(id);
@@ -406,125 +406,125 @@ const EventBooking = () => {
                 <Heading color="dark" fontSize="22px" lineHeight="28px">
                   {event.name}
                 </Heading>
-                {
-                  Object.values(ticketCounts).some((count) => count > 0) ? (
+                {Object.values(ticketCounts).some((count) => count > 0) ? (
+                  <VStack
+                    width="100%"
+                    justify="flex-start"
+                    align="start"
+                    spacing="30px"
+                  >
                     <VStack
-                      width="100%"
+                      w="100%"
                       justify="flex-start"
                       align="start"
-                      spacing="30px"
+                      spacing="20px"
                     >
-                      <VStack
-                        w="100%"
-                        justify="flex-start"
-                        align="start"
-                        spacing="20px"
-                      >
-                        {ticketType.map((ticket) =>
-                          ticketCounts[ticket.id] > 0 ? (
-                            <Flex
-                              key={ticket.id}
-                              w="100%"
-                              justify="space-between"
-                              align="flex-start"
+                      {ticketType.map((ticket) =>
+                        ticketCounts[ticket.id] > 0 ? (
+                          <Flex
+                            key={ticket.id}
+                            w="100%"
+                            justify="space-between"
+                            align="flex-start"
+                          >
+                            <Text
+                              color="dark"
+                              fontSize="16px"
+                              lineHeight="24px"
                             >
-                              <Text
+                              {`${ticketCounts[ticket.id]} x ${ticket.name}`}
+                            </Text>
+
+                            {ticket.price === 0 ? (
+                              <Heading
                                 color="dark"
                                 fontSize="16px"
                                 lineHeight="24px"
                               >
-                                {`${ticketCounts[ticket.id]} x ${ticket.name}`}
-                              </Text>
-
-                              {ticket.price === 0 ? (
-                                <Heading
-                                  color="dark"
-                                  fontSize="16px"
-                                  lineHeight="24px"
-                                >
-                                  Free🎉
-                                </Heading>
-                              ) : (
-                                <Heading
-                                  color="dark"
-                                  fontSize="16px"
-                                  lineHeight="24px"
-                                >
-                                  ₦{" "}
-                                  {(
-                                    (ticketCounts[ticket.id] / ticket.step) *
-                                    ticket.price
-                                  ).toLocaleString()}
-                                </Heading>
-                              )}
-                            </Flex>
-                          ) : null
-                        )}
-                      </VStack>
-                      <Box w="100%" h="1px" bg="primary.500"></Box>
-                      <VStack
-                        w="100%"
-                        justify="flex-start"
-                        align="start"
-                        spacing="20px"
-                      >
-                        <Flex w="100%" justify="space-between" align="flex-start">
-                          <Text color="dark" fontSize="16px" lineHeight="24px">
-                            Subtotal
-                          </Text>
-                          <Heading color="dark" fontSize="16px" lineHeight="24px">
-                            ₦ {subtotal.toLocaleString()}
-                          </Heading>
-                        </Flex>
-                        <Flex w="100%" justify="space-between" align="flex-start">
-                          <Text color="dark" fontSize="16px" lineHeight="24px">
-                            Fees
-                          </Text>
-                          <Heading color="dark" fontSize="16px" lineHeight="24px">
-                            ₦ {subtotal > 0 ? fees.toLocaleString() : 0}
-                          </Heading>
-                        </Flex>
-                      </VStack>
-                      <Box w="100%" h="1px" bg="primary.500"></Box>
+                                Free🎉
+                              </Heading>
+                            ) : (
+                              <Heading
+                                color="dark"
+                                fontSize="16px"
+                                lineHeight="24px"
+                              >
+                                ₦{" "}
+                                {(
+                                  (ticketCounts[ticket.id] / ticket.step) *
+                                  ticket.price
+                                ).toLocaleString()}
+                              </Heading>
+                            )}
+                          </Flex>
+                        ) : null
+                      )}
+                    </VStack>
+                    <Box w="100%" h="1px" bg="primary.500"></Box>
+                    <VStack
+                      w="100%"
+                      justify="flex-start"
+                      align="start"
+                      spacing="20px"
+                    >
                       <Flex w="100%" justify="space-between" align="flex-start">
                         <Text color="dark" fontSize="16px" lineHeight="24px">
-                          Total
+                          Subtotal
                         </Text>
                         <Heading color="dark" fontSize="16px" lineHeight="24px">
-                          ₦ {total.toLocaleString()}
+                          ₦ {subtotal.toLocaleString()}
                         </Heading>
                       </Flex>
-
-                      {/* Continue Button */}
-                      <Button
-                        type="submit"
-                        w="100%"
-                        bg="primary.500"
-                        rounded="8px"
-                        _hover={{ bg: "primary.400" }}
-                        _active={{ bg: "secondary.500" }}
-                        _focus={{ bg: "secondary.500" }}
-                        onClick={ContinueStep}
-                        isDisabled={isDisable}
-                        isLoading={isSubmitting}
-                        loadingText="Checkout"
-                        spinnerPlacement="end"
-                      >
-                        <Text
-                          color="dark"
-                          fontSize="14px"
-                          fontWeight="600"
-                          lineHeight="20px"
-                        >
-                          {currentStep === steps.length ? "Checkout" : "Continue"}
+                      <Flex w="100%" justify="space-between" align="flex-start">
+                        <Text color="dark" fontSize="16px" lineHeight="24px">
+                          Fees
                         </Text>
-                      </Button>
+                        <Heading color="dark" fontSize="16px" lineHeight="24px">
+                          ₦{" "}
+                          {subtotal > 0 ? Math.ceil(fees).toLocaleString() : 0}
+                        </Heading>
+                      </Flex>
                     </VStack>
-                  ) : (
-                    <Text color="dark" fontSize="16px" lineHeight="24px">
-                      Please, choose a ticket type to continue
-                    </Text>
-                  )}
+                    <Box w="100%" h="1px" bg="primary.500"></Box>
+                    <Flex w="100%" justify="space-between" align="flex-start">
+                      <Text color="dark" fontSize="16px" lineHeight="24px">
+                        Total
+                      </Text>
+                      <Heading color="dark" fontSize="16px" lineHeight="24px">
+                        ₦ {total.toLocaleString()}
+                      </Heading>
+                    </Flex>
+
+                    {/* Continue Button */}
+                    <Button
+                      type="submit"
+                      w="100%"
+                      bg="primary.500"
+                      rounded="8px"
+                      _hover={{ bg: "primary.400" }}
+                      _active={{ bg: "secondary.500" }}
+                      _focus={{ bg: "secondary.500" }}
+                      onClick={ContinueStep}
+                      isDisabled={isDisable}
+                      isLoading={isSubmitting}
+                      loadingText="Checkout"
+                      spinnerPlacement="end"
+                    >
+                      <Text
+                        color="dark"
+                        fontSize="14px"
+                        fontWeight="600"
+                        lineHeight="20px"
+                      >
+                        {currentStep === steps.length ? "Checkout" : "Continue"}
+                      </Text>
+                    </Button>
+                  </VStack>
+                ) : (
+                  <Text color="dark" fontSize="16px" lineHeight="24px">
+                    Please, choose a ticket type to continue
+                  </Text>
+                )}
               </VStack>
             </Box>
           </VStack>

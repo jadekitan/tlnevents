@@ -26,11 +26,11 @@ const fadeAndScale = keyframes`
 
 const Hero = () => {
   const eventData = {
-    url: "silent-disco",
-    image: "https://tlnevents.com/assets/silent-disco.png",
-    name: "Jay's Silent Disco",
-    date: "31 August",
-    venue: "65 Queens St, Alagomeji-Yaba, Lagos",
+    url: "ikoyi-block-party",
+    image: "https://tlnevents.com/assets/ikoyi-block-party.webp",
+    name: "Splash fest",
+    date: "13 December",
+    venue: "Federal Civil Service Club, Ikoyi, Lagos",
   };
   return (
     <Box
@@ -49,7 +49,7 @@ const Hero = () => {
         autoPlay
         playsInline
         preload="auto"
-        poster="https://tlnevents.com/assets/silent-disco-fallback.webp"
+        poster="https://tlnevents.com/assets/ikoyi-block-party-fallback.webp"
         width="100%"
         height="100%"
         objectFit="cover"
@@ -59,7 +59,7 @@ const Hero = () => {
         zIndex="-1"
       >
         <source
-          src="https://tlnevents.com/assets/silent-disco.mp4"
+          src="https://tlnevents.com/assets/ikoyi-block-party.mp4"
           type="video/mp4"
         />
         Your browser does not support the video tag.

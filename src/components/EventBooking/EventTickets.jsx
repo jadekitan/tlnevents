@@ -20,7 +20,7 @@ import {
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router-dom";
 
 const EventTickets = () => {
   const {
@@ -152,7 +152,6 @@ const EventTickets = () => {
     }
   };
 
-
   return (
     <VStack w="100%" align="flex-start" spacing={["20px", "40px"]}>
       <Flex justify="flex-start" align="center" gap={["10px", "20px"]}>
@@ -250,10 +249,10 @@ const EventTickets = () => {
                 >
                   {ticket.price === 0
                     ? "Free 🎉"
-                    : `₦ ${(
-                      ticket.price +
-                      ((ticket.price * feePercentage) / 100 + fixAmount)
-                    ).toLocaleString()}`}
+                    : `₦ ${Math.ceil(
+                        ticket.price +
+                          ((ticket.price * feePercentage) / 100 + fixAmount)
+                      ).toLocaleString()}`}
                 </Text>
                 {ticket.price === 0 ? null : (
                   <Text
@@ -263,9 +262,8 @@ const EventTickets = () => {
                     lineHeight="20px"
                   >
                     includes &#8358;
-                    {(
-                      (ticket.price * feePercentage) / 100 +
-                      fixAmount
+                    {Math.ceil(
+                      (ticket.price * feePercentage) / 100 + fixAmount
                     ).toLocaleString()}{" "}
                     fee
                   </Text>
@@ -282,6 +280,14 @@ const EventTickets = () => {
                         in={showDescription[ticket.id]}
                       >
                         <VStack align="flex-start" spacing="10px">
+                          <Text
+                            title={ticket.description.info}
+                            color="dark"
+                            fontSize={["12px", "14px"]}
+                            lineHeight="20px"
+                          >
+                            {ticket.description.info}
+                          </Text>
                           {ticket.description.perks && (
                             <VStack align="flex-start" spacing="0">
                               <Heading
@@ -306,14 +312,6 @@ const EventTickets = () => {
                               </UnorderedList>
                             </VStack>
                           )}
-                          <Text
-                            title={ticket.description.info}
-                            color="dark"
-                            fontSize={["12px", "14px"]}
-                            lineHeight="20px"
-                          >
-                            {ticket.description.info}
-                          </Text>
                         </VStack>
                       </Collapse>
                       <Text
@@ -328,6 +326,14 @@ const EventTickets = () => {
                     </>
                   ) : (
                     <VStack align="flex-start" spacing="10px">
+                      <Text
+                        title={ticket.description.info}
+                        color="dark"
+                        fontSize={["12px", "14px"]}
+                        lineHeight="20px"
+                      >
+                        {ticket.description.info}
+                      </Text>
                       {ticket.description.perks && (
                         <VStack align="flex-start" spacing="0">
                           <Heading
@@ -352,14 +358,6 @@ const EventTickets = () => {
                           </UnorderedList>
                         </VStack>
                       )}
-                      <Text
-                        title={ticket.description.info}
-                        color="dark"
-                        fontSize={["12px", "14px"]}
-                        lineHeight="20px"
-                      >
-                        {ticket.description.info}
-                      </Text>
                     </VStack>
                   )}
                 </Box>
