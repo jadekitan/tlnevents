@@ -251,10 +251,11 @@ const EventTickets = () => {
                     ? "Free 🎉"
                     : `₦ ${Math.ceil(
                         ticket.price +
-                          ((ticket.price * feePercentage) / 100 + fixAmount)
+                          (ticket.price * feePercentage) / 100 +
+                          (event.percentCharge === 0 ? 0 : fixAmount)
                       ).toLocaleString()}`}
                 </Text>
-                {ticket.price === 0 ? null : (
+                {ticket.price !== 0 && event.percentCharge !== 0 && (
                   <Text
                     as="h5"
                     color="neutral.500"

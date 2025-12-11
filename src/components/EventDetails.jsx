@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import {
   VStack,
@@ -39,14 +39,42 @@ import { ChevronDownIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { FcGoogle } from "react-icons/fc";
 import Outlook from "../../src/assets/icons/outlook.svg";
 import Download from "../../src/assets/icons/download.svg";
-import { Link, useParams } from "react-router-dom";
+import { useSearchParams, Link, useParams } from "react-router-dom";
 
 const EventDetails = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [placement, setPlacement] = React.useState("right");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [affiliateCode, setAffiliateCode] = useState("");
 
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
+
+  useEffect(() => {
+    // Check for referral code in URL parameters
+    const urlCode = searchParams.get("affiliate");
+    const storedReferral = localStorage.getItem("referral_code");
+
+    if (urlCode) {
+      setAffiliateCode(urlCode);
+      localStorage.setItem("referral_code", urlCode);
+
+      // Clean URL (remove ref parameter)
+      searchParams.delete("affiliate");
+      setSearchParams(searchParams, { replace: true });
+    } else if (storedReferral) {
+      setAffiliateCode(storedReferral);
+    }
+  }, [searchParams, setSearchParams]);
+
+  // Generate buy ticket link with referral code
+  const getBuyTicketLink = () => {
+    
+    if (affiliateCode) {
+      return `/${eventId}/checkout?affiliate=${affiliateCode}`;
+    }
+    return `/${eventId}/checkout`;
+  };
 
   useEffect(() => {
     setTimeout(() => {
@@ -426,13 +454,17 @@ END:VCALENDAR
               <Box bg="primary.500" w="100%" h="0.5px"></Box>
 
               <Box display={["none", "none", "none", "block"]} w="100%">
-                <Link to={`/${event.id}/checkout`}>
+                <Link to={getBuyTicketLink()}>
                   <Button
                     w="100%"
                     bg="primary.400"
                     _hover={{ bg: "primary.500" }}
                   >
-                    <Text>Get Tickets</Text>
+                    <Text>
+                      {event.tickets.some((ticket) => ticket.price === 0)
+                        ? "Register"
+                        : "Get Tickets"}
+                    </Text>
                   </Button>
                 </Link>
               </Box>
@@ -774,7 +806,7 @@ END:VCALENDAR
             w="100%"
             p={["10px", "20px", "40px"]}
           >
-            <Link to={`/${event.id}/checkout`}>
+            <Link to={getBuyTicketLink()}>
               <Button
                 w="100%"
                 h={["45px", "50px"]}

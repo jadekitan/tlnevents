@@ -27,7 +27,7 @@ import PurchaseType from "./PurchaseType";
 import EventTickets from "./EventTickets";
 import EventContact from "./EventContact";
 import { IoClose } from "react-icons/io5";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const EventBooking = () => {
   const steps = [{ title: "Tickets" }, { title: "Contact" }];
@@ -50,13 +50,18 @@ const EventBooking = () => {
     clearTicketCounts,
     clearAssignMultiple,
   } = useContext(multiBookingContext);
-  {
-    multiBookingContext;
-  }
 
   useEffect(() => {
     document.title = "Checkout | The Lemonade Network";
   }, []);
+
+  const { eventId } = useParams();
+  const event = eventsData[eventId];
+  const navigate = useNavigate();
+  const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = useRef();
+  const formRef = useRef(null);
 
   // Function to calculate the subtotal
   const calculateSubtotal = () => {
@@ -65,16 +70,31 @@ const EventBooking = () => {
     }, 0);
   };
 
-  // Fees and Total Calculation (fees calculated as price * feePercentage + 100)
-  const fees = ticketType.reduce((acc, ticket) => {
-    const ticketSubtotal =
-      ticketCounts[ticket.id] *
-      (ticket.price * (feePercentage / 100) + 100 / ticket.step);
-    return acc + (ticketSubtotal > 0 ? ticketSubtotal : 0);
-  }, 0);
+  // Fixed fee calculation
+  // Fixed fee calculation - no fees for free tickets
+  const calculateFees = () => {
+    if (event.percentCharge === 0) return 0;
+
+    return ticketType.reduce((acc, ticket) => {
+      if (ticketCounts[ticket.id] === 0 || ticket.price === 0) return acc;
+
+      const ticketFee =
+        ticketCounts[ticket.id] *
+        (ticket.price * (feePercentage / 100) + 100 / ticket.step);
+
+      return acc + ticketFee;
+    }, 0);
+  };
 
   const subtotal = calculateSubtotal();
-  const total = Math.ceil(subtotal + (subtotal > 0 ? fees : 0));
+  const fees = calculateFees();
+ 
+  const total = Math.ceil(subtotal + fees);
+
+  // Check if event has any paid tickets
+  const hasPaidTickets = ticketType.some(
+    (ticket) => ticketCounts[ticket.id] > 0 && ticket.price > 0
+  );
 
   function scrollToSection(id) {
     const element = document.getElementById(id);
@@ -90,25 +110,18 @@ const EventBooking = () => {
     clearAssignMultiple();
   };
 
-  const toast = useToast();
+  const storedCode = localStorage.getItem("referral_code");
 
-  // Handle Paystack Payment with the updated selected tickets
-  const handlePaystackPayment = (
-    firstName,
-    lastName,
-    email,
-    countryCode,
-    phone,
-    total
-  ) => {
+  // Handle Paystack Payment
+  const handlePaystackPayment = () => {
     const handler = window.PaystackPop.setup({
       key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-      name: `${firstName} ${lastName}`,
-      email: email,
-      phone: `${countryCode}${phone}`,
-      amount: total * 100, // Paystack uses Kobo (1 Naira = 100 Kobo)
+      name: `${contactData.firstName} ${contactData.lastName}`,
+      email: contactData.email,
+      phone: `${contactData.countryCode}${contactData.phone}`,
+      amount: total * 100,
       currency: "NGN",
-      ref: `${new Date().getTime()}`, // Unique reference
+      ref: `${new Date().getTime()}`,
       onClose: () => {
         toast({
           position: "top",
@@ -122,8 +135,9 @@ const EventBooking = () => {
         setIsSubmitting(false);
       },
       callback: (response) => {
-        // Redirect on successful payment verification
-        window.location.href = `/${event.id}/checkout/payment-success?reference=${response.reference}&email=${email}&guest=${assignMultiple}`;
+        navigate(
+          `/${event.id}/checkout/payment-success?&affiliate=${storedCode}&reference=${response.reference}&email=${contactData.email}&guest=${assignMultiple}`
+        );
         setStep(1);
         setIsDisable(false);
         setIsSubmitting(false);
@@ -133,18 +147,28 @@ const EventBooking = () => {
     handler.openIframe();
   };
 
-  const handleNextStep = () => {
-    handlePaystackPayment(
-      contactData.firstName,
-      contactData.lastName,
-      contactData.email,
-      contactData.countryCode,
-      contactData.phone,
-      total
-    );
+  // Handle free ticket registration
+  const handleFreeRegistration = () => {
+    setIsSubmitting(true);
+    setIsDisable(true);
+
+    // Simulate processing delay
+    setTimeout(() => {
+      navigate(
+        `/${event.id}/checkout/register-success?&email=${contactData.email}&guest=${assignMultiple}`
+      );
+      setIsSubmitting(false);
+      setIsDisable(false);
+    }, 2000);
   };
 
-  const formRef = useRef(null);
+  const handleNextStep = () => {
+    if (total === 0 && !hasPaidTickets) {
+      handleFreeRegistration();
+    } else {
+      handlePaystackPayment();
+    }
+  };
 
   const showStep = (step) => {
     switch (step) {
@@ -152,17 +176,13 @@ const EventBooking = () => {
         return <EventTickets />;
       case 2:
         return (
-          <EventContact handleNextStep={handleNextStep} formRef={formRef} /> // Pass formRef and handleNextStep
+          <EventContact handleNextStep={handleNextStep} formRef={formRef} />
         );
       default:
         return <EventTickets />;
     }
   };
 
-  const { eventId } = useParams(); // Get the event ID from the URL
-  const event = eventsData[eventId]; // Lookup event from local data
-
-  // Updated handleContinue to allow free ticket selection
   const handleContinue = () => {
     const hasSelectedTickets = ticketType.some(
       (ticket) => ticketCounts[ticket.id] > 0
@@ -186,17 +206,12 @@ const EventBooking = () => {
   const ContinueStep = () => {
     if (currentStep === 1) {
       handleContinue();
-    }
-    if (currentStep === 2) {
+    } else if (currentStep === 2) {
       if (formRef.current) {
-        formRef.current.handleSubmit(); // Trigger form submission
-        // scrollToSection("stepper");
+        formRef.current.handleSubmit();
       }
     }
   };
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const cancelRef = React.useRef();
 
   const handleCancel = () => {
     const hasSelectedTickets = ticketType.some(
@@ -206,7 +221,7 @@ const EventBooking = () => {
       onOpen();
     } else {
       setStep(1);
-      window.location.href = `/${event.id}`;
+      navigate(`/${event.id}`);
       clearData();
     }
   };
@@ -229,7 +244,7 @@ const EventBooking = () => {
         pt={["30px", "24px", "40px", "54px"]}
         pb={["30px", "24px", "40px", "54px"]}
       >
-        {/* <Header /> */}
+        {/* Header Section */}
         <VStack w="100%" align="flex-start" spacing="40px">
           <Box w="100%">
             <Flex w="100%" align="center" gap="40px">
@@ -244,7 +259,7 @@ const EventBooking = () => {
 
                 <IoClose
                   color="dark"
-                  className=" w-6 h-6"
+                  className="w-6 h-6 cursor-pointer"
                   onClick={handleCancel}
                 />
 
@@ -256,7 +271,6 @@ const EventBooking = () => {
                   isCentered
                 >
                   <AlertDialogOverlay />
-
                   <AlertDialogContent
                     borderRadius={["16px", "8px"]}
                     marginBottom={["0px", "auto"]}
@@ -273,14 +287,13 @@ const EventBooking = () => {
                         <Button width="50%" ref={cancelRef} onClick={onClose}>
                           Cancel
                         </Button>
-
                         <Button
                           width="50%"
                           bg="primary.500"
                           color="dark"
                           ml={3}
                           onClick={() => {
-                            window.location.href = `/${event.id}`;
+                            navigate(`/${event.id}`);
                             setStep(1);
                             clearData();
                           }}
@@ -294,6 +307,8 @@ const EventBooking = () => {
               </Flex>
             </Flex>
           </Box>
+
+          {/* Stepper Section */}
           <VStack
             w="100%"
             justify="flex-start"
@@ -345,7 +360,6 @@ const EventBooking = () => {
                           {step.title}
                         </StepTitle>
                       </Box>
-
                       <StepSeparator
                         mx="10px"
                         sx={{
@@ -370,6 +384,8 @@ const EventBooking = () => {
             </VStack>
           </VStack>
         </VStack>
+
+        {/* Main Content */}
         <Stack
           position="relative"
           flexDir={["column", "row"]}
@@ -383,6 +399,8 @@ const EventBooking = () => {
           >
             {showStep(currentStep)}
           </Box>
+
+          {/* Summary Section - Desktop */}
           <VStack
             display={["none", "none", "none", "flex"]}
             position="sticky"
@@ -480,8 +498,7 @@ const EventBooking = () => {
                           Fees
                         </Text>
                         <Heading color="dark" fontSize="16px" lineHeight="24px">
-                          ₦{" "}
-                          {subtotal > 0 ? Math.ceil(fees).toLocaleString() : 0}
+                          ₦ {fees > 0 ? Math.ceil(fees).toLocaleString() : 0}
                         </Heading>
                       </Flex>
                     </VStack>
@@ -507,7 +524,7 @@ const EventBooking = () => {
                       onClick={ContinueStep}
                       isDisabled={isDisable}
                       isLoading={isSubmitting}
-                      loadingText="Checkout"
+                      loadingText="Processing..."
                       spinnerPlacement="end"
                     >
                       <Text
@@ -528,6 +545,8 @@ const EventBooking = () => {
               </VStack>
             </Box>
           </VStack>
+
+          {/* Mobile Bottom Bar */}
           <Box
             display={["block", "block", "block", "none"]}
             w="100%"
@@ -538,7 +557,7 @@ const EventBooking = () => {
             px="20px"
             rounded="8px"
           >
-            {Object.values(ticketCounts).some((count) => count >= 0) ? (
+            {Object.values(ticketCounts).some((count) => count > 0) ? (
               <Flex
                 h="100%"
                 py="14px"
@@ -561,7 +580,7 @@ const EventBooking = () => {
                   onClick={ContinueStep}
                   isDisabled={isDisable}
                   isLoading={isSubmitting}
-                  loadingText="Checkout"
+                  loadingText="Processing..."
                   spinnerPlacement="end"
                 >
                   <Text

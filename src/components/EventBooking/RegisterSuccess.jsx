@@ -21,20 +21,19 @@ import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
 import { useLocation, Link, useParams } from "react-router-dom";
 import axios from "axios";
-import { order } from "../../../server/order";
+import { order } from "../../../server/free-order";
 
-const PaymentSuccess = () => {
+const RegisterSuccess = () => {
   useEffect(() => {
     document.title = "Payment Successful | The Lemonade Network";
   }, []);
 
   const {
     contactData,
+    clearAssignMultiple,
     ticketCounts,
-    feePercentage,
     clearContactData,
     clearTicketCounts,
-    clearAssignMultiple,
     ticketType,
   } = useContext(multiBookingContext);
 
@@ -42,7 +41,6 @@ const PaymentSuccess = () => {
 
   // Extract the reference from the URL query params
   const query = new URLSearchParams(location.search);
-  const referenceNumber = query.get("reference");
   const email = query.get("email");
   const guest = query.get("guest");
   const affiliateCode = query.get("affiliate");
@@ -53,13 +51,12 @@ const PaymentSuccess = () => {
 
   // Debug affiliate code on component mount
   useEffect(() => {
-    console.log("🔍 DEBUG - Current affiliateCode:", affiliateCode);
+    // Check if affiliate code passes validation
     const isValidAffiliate =
       affiliateCode &&
       affiliateCode !== "null" &&
       affiliateCode !== "undefined" &&
       affiliateCode.trim() !== "";
-    console.log("🔍 DEBUG - Is valid affiliate code:", isValidAffiliate);
   }, [affiliateCode, query]);
 
   const clearData = () => {
@@ -69,11 +66,8 @@ const PaymentSuccess = () => {
     localStorage.removeItem("referral_code");
   };
 
-  const hasExtractedData = useRef(false);
+  const hasExtractedData = useRef(false); // Ensure extraction only happens once
 
-  // ---------------------------------------------------------
-  // UPDATED LOGIC STARTS HERE
-  // ---------------------------------------------------------
   useEffect(() => {
     const extractOrderData = () => {
       const data = [];
@@ -107,62 +101,47 @@ const PaymentSuccess = () => {
       const extractedData = extractOrderData();
       setOrderData(extractedData);
 
-      // 1. Prepare Affiliate Code
-      // Default to "" so it is always sent as a string, never undefined
-      let refCode = "";
-      if (
-        affiliateCode &&
-        affiliateCode !== "null" &&
-        affiliateCode !== "undefined" &&
-        affiliateCode.trim() !== ""
-      ) {
-        refCode = affiliateCode;
-      }
-
-      // 2. Prepare Reference Number
-      let refNumber = null;
-      if (referenceNumber) {
-        const parsedRef = Number.parseInt(referenceNumber);
-        refNumber = isNaN(parsedRef) ? null : parsedRef;
-      }
-
-      // 3. Construct the Final Payload using PascalCase
-      const finalPayload = {
-        eventName: event.name, // Capitalized
-        referenceNumber: refNumber, // Capitalized
-        affiliateCode: refCode, // Capitalized & ensures "" is sent
-        orders: extractedData.map((item) => ({
-          attendeeName: item.attendeeName,
-          email: item.email,
-          fees: Number(item.fees),
-          quantity: Number(item.quantity),
-          subTotal: Number(item.subTotal),
-          ticketPrice: Number(item.ticketPrice),
-          ticketType: item.ticketType,
-        })),
+      const isValidAffiliateCode = (code) => {
+        return (
+          code && code !== "null" && code !== "undefined" && code.trim() !== ""
+        );
       };
 
-      console.log("🚀 Sending Payload:", finalPayload);
+      // Then use it consistently
+      const refCode = isValidAffiliateCode(affiliateCode)
+        ? affiliateCode
+        : null;
 
-      try {
-        await order(finalPayload);
-      } catch (error) {
-        console.error("❌ Error submitting order:", error.message);
-        console.error("📋 Error details:", error.response?.data || error);
+      for (const item of extractedData) {
+        try {
+          const data = await order(
+            item.attendeeName,
+            item.email,
+            Number.parseInt(item.fees),
+            Number.parseInt(item.quantity),
+            Number.parseInt(item.subTotal),
+            item.ticketType,
+            Number.parseInt(item.ticketPrice),
+            event.name,
+            isValidAffiliateCode(affiliateCode) ? affiliateCode : undefined
+          );
+        } catch (error) {
+          console.error("Error submitting order:", error.message);
+        }
       }
 
       clearData();
     };
 
+    // Add a small delay to ensure all debug info is logged first
     const timer = setTimeout(() => {
       handleOrderData();
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [affiliateCode, referenceNumber, event.name]);
-  // ---------------------------------------------------------
-  // END UPDATED LOGIC
-  // ---------------------------------------------------------
+  }, [affiliateCode, event.name]); // Empty dependency array ensures this runs only on component mount
+
+  // const [ticketType] = useState(event ? event.tickets : []);
 
   // Helper function to generate a unique order ID per email
   function generateUniqueOrderId(email) {
@@ -211,7 +190,7 @@ const PaymentSuccess = () => {
           />
           <VStack w="100%" spacing="20px">
             <Heading color="dark" fontSize="32px">
-              Payment Succesful !
+              Registration Succesful !
             </Heading>
             <VStack w="100%" textAlign="center" spacing="10px">
               <Text color="dark" fontSize={["12px", "16px"]}>
@@ -261,8 +240,10 @@ const PaymentSuccess = () => {
                         const ticketName = ticketType[ticketId - 1]?.name;
                         const step = ticketType[ticketId - 1]?.step;
 
+                        // Ensure the ticket quantity is valid
                         if (!ticketQuantity || ticketQuantity <= 0) return null;
 
+                        // Group tickets by email, summing quantities, subtotals, fees, and totals
                         const emailGroups = {};
 
                         Array.from({ length: ticketQuantity }).forEach(
@@ -286,17 +267,14 @@ const PaymentSuccess = () => {
                                 subtotal: 0,
                                 fees: 0,
                                 total: 0,
-                                orderId: generateUniqueOrderId(email),
+                                orderId: generateUniqueOrderId(email), // Generate once per unique email
                               };
                             }
 
+                            // Increment values for each email group
                             const quantity = 1;
                             const subtotal = (ticketPrice * quantity) / step;
-                            const fees =
-                              quantity *
-                              (ticketPrice * (feePercentage / 100) +
-                                100 / step);
-                            const total = subtotal + fees;
+                            const fees = 0;
 
                             emailGroups[email].quantity += quantity;
                             emailGroups[email].subtotal += subtotal;
@@ -305,6 +283,7 @@ const PaymentSuccess = () => {
                           }
                         );
 
+                        // Render each unique email group
                         return Object.values(emailGroups).map(
                           (group, index) => (
                             <Tr key={index}>
@@ -330,8 +309,10 @@ const PaymentSuccess = () => {
                         const ticketName = ticketType[ticketId - 1]?.name;
                         const step = ticketType[ticketId - 1]?.step;
 
+                        // Ensure the ticket quantity is valid
                         if (!ticketQuantity || ticketQuantity <= 0) return null;
 
+                        // Group tickets by email, summing quantities, subtotals, fees, and totals
                         const emailGroups = {};
 
                         Array.from({ length: ticketQuantity }).forEach(
@@ -347,21 +328,14 @@ const PaymentSuccess = () => {
                                 subtotal: 0,
                                 fees: 0,
                                 total: 0,
-                                orderId: generateUniqueOrderId(email),
+                                orderId: generateUniqueOrderId(email), // Generate once per unique email
                               };
                             }
 
+                            // Increment values for each email group
                             const quantity = 1;
                             const subtotal = (ticketPrice * quantity) / step;
-                            const fees =
-                              event.percentCharge === 0 ||
-                              subtotal === 0 ||
-                              ticketPrice === 0
-                                ? 0
-                                : quantity *
-                                  (ticketPrice * (feePercentage / 100) +
-                                    100 / step);
-
+                            const fees = 0;
                             const total = subtotal + fees;
 
                             emailGroups[email].quantity += quantity;
@@ -371,6 +345,7 @@ const PaymentSuccess = () => {
                           }
                         );
 
+                        // Render each unique email group
                         return Object.values(emailGroups).map(
                           (group, index) => (
                             <Tr key={index}>
@@ -407,6 +382,11 @@ const PaymentSuccess = () => {
                   Back to Event
                 </Button>
               </Link>
+              {/* <Link to={`/${event.id}`}>
+                <Text color="dark" fontSize={["14px", "16px"]}>
+                  Shop Merch
+                </Text>
+              </Link> */}
             </VStack>
           </VStack>
         </VStack>
@@ -415,4 +395,4 @@ const PaymentSuccess = () => {
   );
 };
 
-export default PaymentSuccess;
+export default RegisterSuccess;

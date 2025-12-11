@@ -26,6 +26,7 @@ export const eventsData = {
 
     categories: "Party",
     price: 5000,
+    percentCharge: 5,
     tickets: [
       {
         id: 1,
@@ -238,7 +239,7 @@ export const eventsData = {
   "silent-disco": {
     id: "silent-disco",
     url: "silent-disco",
-    image: "https://tlnevents.com/assets/events-banner/silent-disco.webp",
+    image: "https://tlnevents.com/assets/events-banner/silent-disco-3.webp",
     name: "Jay's Silent Disco",
 
     venue: {
@@ -255,162 +256,47 @@ export const eventsData = {
     },
 
     date: {
-      iso: "2025-08-31T16:00:00Z/2025-08-31T22:00:00Z",
-      startDate: "2025-08-31T16:00:00Z",
-      endDate: "2025-08-31T22:00:00Z",
-      outlookStartDate: "2025-08-31T16:00:00Z",
-      outlookEndDate: "2025-08-31T22:00:00Z",
+      iso: "2025-12-28T16:00:00Z/2025-12-28T22:00:00Z",
+      startDate: "2025-12-28T16:00:00Z",
+      endDate: "2025-12-28T22:00:00Z",
+      outlookStartDate: "2025-10-28T16:00:00Z",
+      outlookEndDate: "2025-10-28T22:00:00Z",
       timeZone: "WAT",
     },
 
     categories: ["Party"],
-    price: 5000,
+    price: 10000,
+    percentCharge: 5,
 
     tickets: [
       {
         id: 1,
-        name: "General",
+        name: "General Admission",
         price: 5000,
-        quantity: 100,
+        quantity: 500,
         maxQuantity: 5,
         step: 1,
         description: {
-          info: "This Entry Ticket grants you full access to the entire experience, designed to keep you entertained, engaged, and immersed in the lively atmosphere!",
-          perks: ["Regular Entry"],
+          info: "Access to The Full House Experience — a silent disco and games-filled entertainment event featuring multiple DJs, side attractions, food, and drinks.",
+          perks: [
+            "Silent Disco Experience",
+            "Access to Side Attractions",
+            "Live DJs: DJ Skit, DJ Princz, DJ Moore",
+            "Free shots (as stated)",
+            "Games + Food + Drinks (paid or free depending on stand)",
+          ],
         },
       },
     ],
 
-    merch: {
-      tees: {
-        "lemonade-tee": {
-          id: "lemonade-tee",
-          name: "Lemonade Tee",
-          price: 35000,
-          description: {
-            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
-            color:
-              "Available in Black, White, and Pink, perfect for versatile styling.",
-            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
-            footer:
-              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
-          },
-          sizes: ["M", "L", "XL", "XXL"],
-          colors: ["Black", "White", "Pink"],
-          image:
-            "https://tlnevents.com/assets/merch/tees/lemonade-tee(black-back).jpg",
-          hasFrontView: true,
-          hasBackView: true,
-        },
-
-        "playground-vibes-tee": {
-          id: "playground-vibes-tee",
-          name: "Playground Vibes Tee",
-          price: 35000,
-          description: {
-            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
-            color:
-              "Available in Black, White, and Pink, perfect for versatile styling.",
-            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
-            footer:
-              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
-          },
-          sizes: ["M", "L", "XL", "XXL"],
-          colors: ["Black", "White", "Pink"],
-          image:
-            "https://tlnevents.com/assets/merch/tees/playground-vibes-tee(pink-back).jpg",
-          hasFrontView: true,
-          hasBackView: true,
-        },
-
-        "rewind-repeat-tee": {
-          id: "rewind-repeat-tee",
-          name: "Rewind Repeat Tee",
-          price: 35000,
-          description: {
-            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
-            color:
-              "Available in Black, White, and Pink, perfect for versatile styling.",
-            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
-            footer:
-              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
-          },
-          sizes: ["M", "L", "XL", "XXL"],
-          colors: ["Black", "White", "Pink"],
-          image:
-            "https://tlnevents.com/assets/merch/tees/rewind-repeat-tee(white-back).jpg",
-          hasFrontView: false,
-          hasBackView: true,
-        },
-      },
-
-      "crop-tops": {
-        "wrangler-crop-top": {
-          id: "wrangler-crop-top",
-          name: "Wrangler Crop Top",
-          price: 25000,
-          description: {
-            head: "Bold and striking, this crop top is ideal for making a statement at the event or beyond.",
-            color: "Iconic combinations of Black and White and Red and White.",
-            size: "S, M, L, XL, XXL.",
-            footer:
-              "With a Wrangler-inspired edge, this piece brings an effortlessly cool vibe.",
-          },
-          sizes: ["S", "M", "L", "XL", "XXL"],
-          colors: ["Black", "Red"],
-          image:
-            "https://tlnevents.com/assets/merch/crop-tops/wrangler-crop-top(black-front).jpg",
-          hasFrontView: true,
-          hasBackView: false,
-        },
-
-        "washed-crop-top": {
-          id: "washed-crop-top",
-          name: "Washed Crop Top",
-          price: 25000,
-          description: {
-            head: "Effortlessly chic with a touch of vintage, the washed crop top is the perfect balance of comfort and style.",
-            color: "Subtle tones like White, Black, and Pink.",
-            size: "S, M, L, XL, XXL.",
-            footer:
-              "Its washed aesthetic offers a laid-back, retro charm suitable for all-day wear.",
-          },
-          sizes: ["S", "M", "L", "XL", "XXL"],
-          colors: ["White", "Black"],
-          image:
-            "https://tlnevents.com/assets/merch/crop-tops/washed-crop-top(black-front).jpg",
-          hasFrontView: true,
-          hasBackView: false,
-        },
-
-        "ringer-baby-crop-top": {
-          id: "ringer-baby-crop-top",
-          name: "Ringer Baby Crop Top",
-          price: 25000,
-          description: {
-            head: "Cute and sporty, the ringer baby crop top is made to elevate your casual style.",
-            color:
-              "Fresh combos like Cream and Blue, Black and White, and Pink and Cream.",
-            size: "S, M, L, XL.",
-            footer:
-              "With ringer-style edges and soft fabric, it’s a playful choice for any Lemonade Playground enthusiast.",
-          },
-          sizes: ["S", "M", "L", "XL"],
-          colors: ["Cream & Blue", "Cream & Green"],
-          image:
-            "https://tlnevents.com/assets/merch/crop-tops/ringer-baby-crop-top(cream&green-front).jpg",
-          hasFrontView: true,
-          hasBackView: false,
-        },
-      },
-    },
+    merch: {},
 
     about: {
       description:
-        "Step into Jay’s Silent Disco – where the beats never stop, but the noise stays personal! Grab your wireless headphones and choose from multiple DJ channels as you dance the night away in Lemonade Studios. It’s not just music, it’s an immersive experience that lets you control your vibe – switch between hip hop, afrobeats, or EDM, and groove with friends under one roof. Whether you’re vibing with the crowd or lost in your own world, Jay’s Silent Disco promises unforgettable energy, laughter, and pure nightlife magic in Lagos.",
+        "The Full House Experience is an exciting blend of nightlife, silent disco, games, and social energy. Hosted in the heart of Yaba, the event brings together music lovers, gamers, and thrill-seekers for a vibrant evening. With free shots, PS5 competitions, snooker, board games, and three energetic DJs, the experience promises unforgettable fun, community vibes, and nonstop entertainment.",
       rating: 18,
       policy:
-        "Refunds are available if: (1) It’s within 24 hours of purchasing a ticket, or (2) The event is rescheduled or cancelled.",
+        "Tickets admit one attendee. Game access is subject to availability. Food and drinks may be purchased separately unless otherwise stated. All activities are subject to venue capacity and real-time safety conditions.",
     },
     lineup: {
       images: [
@@ -475,6 +361,7 @@ export const eventsData = {
 
     categories: ["Festival", "Party", "Entertainment"],
     price: 8000,
+    percentCharge: 5,
 
     tickets: [
       {
@@ -689,6 +576,7 @@ export const eventsData = {
 
     categories: ["Festival", "Party", "Entertainment"],
     price: 3000,
+    percentCharge: 5,
 
     tickets: [
       {
@@ -897,6 +785,503 @@ export const eventsData = {
       name: "DJ Princz Ent",
       username: "dj-princz-ent",
       phone: "08101504456, 08122821178",
+      socials: {
+        website: "",
+        instagram: "",
+        facebook: "",
+        x: "",
+        tiktok: "",
+        linkedin: "",
+      },
+    },
+  },
+  "art-attack": {
+    id: "art-attack",
+    url: "art-attack",
+    image: "https://tlnevents.com/assets/events-banner/art-attack.webp",
+    name: "Art Attack",
+
+    venue: {
+      name: "Lemonade Studios",
+      address: "65 Queen Street, Alagomeji-Yaba, Lagos 100001, Lagos",
+      city: "Alagomeji-Yaba",
+      state: "Lagos",
+      country: "Nigeria",
+      zip: "100001",
+      latitude: "6.5149",
+      longitude: "3.3785",
+      iframe:
+        "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.152150741183!2d3.378674140517502!3d6.502415094889078!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8c601fb92825%3A0x79aeab96370cd448!2s65%20Queen%20St%2C%20Alagomeji-Yaba%2C%20Lagos%20100001%2C%20Lagos!5e0!3m2!1sen!2sng!4v1755554574183!5m2!1sen!2sng",
+    },
+
+    date: {
+      iso: "2025-11-29T12:00:00Z/2025-11-29T22:00:00Z",
+      startDate: "2025-11-29T12:00:00Z",
+      endDate: "2025-11-29T22:00:00Z",
+      outlookStartDate: "2025-11-29T12:00:00Z",
+      outlookEndDate: "2025-11-29T22:00:00Z",
+      timeZone: "WAT",
+    },
+
+    categories: ["Art", "Culture", "Festival", "Street Experience"],
+    price: 0,
+    percentCharge: 5,
+
+    tickets: [
+      {
+        id: 1,
+        name: "General Admission",
+        price: 0,
+        quantity: 1000,
+        maxQuantity: 1,
+        step: 1,
+        description: {
+          info: "Free entry to Art Attack — The Street Canvas Experience. Immerse yourself in live graffiti, body art, exhibitions, and creative street energy.",
+          perks: [
+            "Access to all exhibitions and activities",
+            "Live graffiti and art performances",
+            "Face painting and tattoo artistry",
+            "Sip & Paint sessions",
+            "Merch access and networking opportunities",
+          ],
+        },
+      },
+    ],
+
+    formLink:
+      "https://docs.google.com/forms/d/e/1FAIpQLSebMxhNbW4qIdpgvg2uMaQeexsHUVw4R146F5NKdnmAJ7QpGw/viewform?usp=dialog",
+
+    merch: {},
+
+    about: {
+      description:
+        "Art Attack: The Street Canvas Experience is a creative outdoor festival celebrating street culture and visual expression. Powered by the Impossible Bandit Crew in collaboration with The Lemonade Network, the event features live graffiti walls, body art, exhibitions, tattoo artistry, and merch showcases. It's all about unleashing positive chaos — an immersive blend of art, creativity, and Lagos street energy.",
+      rating: 13,
+      policy:
+        "Entry is free. Participation in some activities or merchandise purchases may require on-site payment. All event activities are subject to change based on availability or weather conditions.",
+    },
+
+    lineup: {
+      images: [],
+      names: [],
+    },
+
+    vendors: {
+      images: [],
+      brands: [],
+    },
+
+    organizers: {
+      name: "Impossible Bandit Crew",
+      username: "imb",
+      phone: "08101504456",
+      socials: {
+        website: "",
+        instagram: "https://instagram.com/impossiblebandits",
+        facebook: "",
+        x: "",
+        tiktok: "",
+        linkedin: "",
+      },
+    },
+  },
+  karaoke: {
+    id: "karaoke",
+    url: "karaoke",
+    image: "https://tlnevents.com/assets/events-banner/karaoke.webp",
+    name: "Karaoke/ Movie Night",
+
+    venue: {
+      name: "Lemonade Studios",
+      address: "65 Queen Street, Alagomeji-Yaba, Lagos 100001, Lagos",
+      city: "Alagomeji-Yaba",
+      state: "Lagos",
+      country: "Nigeria",
+      zip: "100001",
+      latitude: "6.5149",
+      longitude: "3.3785",
+      iframe:
+        "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.152150741183!2d3.378674140517502!3d6.502415094889078!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8c601fb92825%3A0x79aeab96370cd448!2s65%20Queen%20St%2C%20Alagomeji-Yaba%2C%20Lagos%20100001%2C%20Lagos!5e0!3m2!1sen!2sng!4v1755554574183!5m2!1sen!2sng",
+    },
+
+    date: {
+      iso: "2025-12-06T16:00:00Z/2025-12-06T22:00:00Z",
+      startDate: "2025-12-06T16:00:00Z",
+      endDate: "2025-12-06T22:00:00Z",
+      outlookStartDate: "2025-12-06T16:00:00Z",
+      outlookEndDate: "2025-12-06T22:00:00Z",
+      timeZone: "WAT",
+    },
+
+    categories: ["Entertainment", "Chill", "Fun Night"],
+    price: 0,
+    percentCharge: 5,
+
+    tickets: [
+      {
+        id: 1,
+        name: "General Admission",
+        price: 0,
+        quantity: 1000,
+        maxQuantity: 1,
+        step: 1,
+        description: {
+          info: "Enjoy a relaxed multi-experience evening with karaoke, movies, games and light refreshments.",
+          perks: [
+            "General Access",
+            "Game & Movie Participation",
+            "Suya",
+            "Popcorn",
+          ],
+        },
+      },
+    ],
+
+    merch: {},
+
+    about: {
+      description:
+        "An intimate entertainment night featuring karaoke, interactive movie sessions, games, and light refreshments. Perfect for hangouts and networking.",
+      rating: 18,
+      policy: "Free entry — seating based on availability.",
+    },
+
+    lineup: {
+      images: [],
+      names: [],
+    },
+
+    vendors: {
+      images: [],
+      brands: [],
+    },
+
+    organizers: {
+      name: "The Lemonade Network",
+      username: "lemonade.africa",
+      phone: "08101504456",
+      socials: {
+        website: "",
+        instagram: "https://instagram.com/lemonade.africa",
+        facebook: "",
+        x: "",
+        tiktok: "",
+        linkedin: "",
+      },
+    },
+  },
+  fuji: {
+    id: "fuji",
+    url: "fuji",
+    image: "https://tlnevents.com/assets/events-banner/fuji.webp",
+    name: "Detty Fuji Groove",
+
+    venue: {
+      name: "Delakes Mall",
+      address: "Block 26 Plot 8 Admiralty Way, Lekki Phase 1, Eti-Osa, Lagos",
+      city: "Lekki",
+      state: "Lagos",
+      country: "Nigeria",
+      zip: "100001",
+      latitude: "6.5149",
+      longitude: "3.3785",
+      iframe:
+        "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.576457254178!2d3.4766085749922984!3d6.448385693543009!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103bf56803189701%3A0xf579eecc957e0aa9!2sDELAKES%20MALL!5e0!3m2!1sen!2sng!4v1763657008352!5m2!1sen!2sng",
+    },
+
+    date: {
+      iso: "2025-12-20T16:00:00Z/2025-12-21T02:00:00Z",
+      startDate: "2025-12-20T16:00:00Z",
+      endDate: "2025-12-21T102:00:00Z",
+      outlookStartDate: "2025-12-20T16:00:00Z",
+      outlookEndDate: "2025-12-21T02:00:00Z",
+      timeZone: "WAT",
+    },
+
+    categories: ["Music", "Cultural Experience", "Party"],
+    price: 10000,
+    percentCharge: 0,
+
+    tickets: [
+      {
+        id: 1,
+        name: "Regular",
+        price: 10000,
+        quantity: 1000,
+        maxQuantity: 5,
+        step: 1,
+        description: {
+          info: "General access to Detty Fuji Groove with food and drinks included.",
+          perks: ["Food Included", "Drinks Included", "General Entry"],
+        },
+      },
+      {
+        id: 2,
+        name: "VIP",
+        price: 20000,
+        quantity: 100,
+        maxQuantity: 5,
+        step: 1,
+        description: {
+          info: "VIP access with finger foods, drinks, and cocktail service.",
+          perks: [
+            "VIP Access",
+            "Finger Foods",
+            "Drinks Included",
+            "Cocktail Service",
+          ],
+        },
+      },
+      {
+        id: 3,
+        name: "Ijoye (Table of 10)",
+        price: 300000,
+        quantity: 100,
+        maxQuantity: 1,
+        step: 10,
+        description: {
+          info: "Ijoye hospitality table for 10 guests with top service, food, drinks, and premium comfort.",
+          perks: [
+            "Table for 10 Guests",
+            "Top Service",
+            "Food Included",
+            "Drinks Included",
+            "Premium Comfort Seating",
+          ],
+        },
+      },
+      {
+        id: 4,
+        name: "Oba (Table of 10)",
+        price: 500000,
+        quantity: 100,
+        maxQuantity: 1,
+        step: 10,
+        description: {
+          info: "Oba royal experience table for 10 guests, including front row seating, hype session, and exclusive royal treatments.",
+          perks: [
+            "Table for 10 Guests",
+            "Front Row Seating",
+            "Hype Session Access",
+            "Royal Treatments",
+          ],
+        },
+      },
+    ],
+
+    merch: {},
+
+    about: {
+      description:
+        "Detty Fuji Groove is a unique cultural-party fusion inspired by Yoruba fuji music, African rhythms, and nightlife dance energy. Prepare for drums, chants, DJ remixes, and modern fuji vibes.",
+      rating: 18,
+      policy:
+        "Entry is free. Participation in some activities or merchandise purchases may require on-site payment. All event activities are subject to change based on availability or weather conditions.",
+    },
+
+    lineup: {
+      images: [],
+      names: [],
+    },
+
+    vendors: {
+      images: [],
+      brands: [],
+    },
+
+    organizers: {
+      name: "The Lemonade Network",
+      username: "tlnevents",
+      phone: "08101504456",
+      socials: {
+        website: "",
+        instagram: "https://instagram.com/lemonade.africa",
+        facebook: "",
+        x: "",
+        tiktok: "",
+        linkedin: "",
+      },
+    },
+  },
+  rcc: {
+    id: "rcc",
+    url: "rcc",
+    image: "https://tlnevents.com/assets/events-banner/placeholder.webp",
+    name: "Red Cup Christmas",
+
+    venue: {
+      name: "Lemonade Studios",
+      address: "65 Queen Street, Alagomeji-Yaba, Lagos 100001, Lagos",
+      city: "Alagomeji-Yaba",
+      state: "Lagos",
+      country: "Nigeria",
+      zip: "100001",
+      latitude: "6.5149",
+      longitude: "3.3785",
+      iframe:
+        "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.152150741183!2d3.378674140517502!3d6.502415094889078!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8c601fb92825%3A0x79aeab96370cd448!2s65%20Queen%20St%2C%20Alagomeji-Yaba%2C%20Lagos%20100001%2C%20Lagos!5e0!3m2!1sen!2sng!4v1755554574183!5m2!1sen!2sng",
+    },
+
+    date: {
+      iso: "2025-12-24T16:00:00Z/2025-12-24T22:00:00Z",
+      startDate: "2025-12-24T16:00:00Z",
+      endDate: "2025-12-24T122:00:00Z",
+      outlookStartDate: "2025-12-24T16:00:00Z",
+      outlookEndDate: "2025-12-24T22:00:00Z",
+      timeZone: "WAT",
+    },
+
+    categories: ["Art", "Culture", "Festival", "Street Experience"],
+    price: 10000,
+    percentCharge: 5,
+
+    tickets: [
+      {
+        id: 1,
+        name: "General Admission",
+        price: 5000,
+        quantity: 1000,
+        maxQuantity: 1,
+        step: 1,
+        description: {
+          info: "Free entry to Art Attack — The Street Canvas Experience. Immerse yourself in live graffiti, body art, exhibitions, and creative street energy.",
+          perks: [
+            "Access to all exhibitions and activities",
+            "Live graffiti and art performances",
+            "Face painting and tattoo artistry",
+            "Sip & Paint sessions",
+            "Merch access and networking opportunities",
+          ],
+        },
+      },
+    ],
+
+    merch: {},
+
+    about: {
+      description:
+        "Art Attack: The Street Canvas Experience is a creative outdoor festival celebrating street culture and visual expression. Powered by the Impossible Bandit Crew in collaboration with The Lemonade Network, the event features live graffiti walls, body art, exhibitions, tattoo artistry, and merch showcases. It's all about unleashing positive chaos — an immersive blend of art, creativity, and Lagos street energy.",
+      rating: 18,
+      policy:
+        "Entry is free. Participation in some activities or merchandise purchases may require on-site payment. All event activities are subject to change based on availability or weather conditions.",
+    },
+
+    lineup: {
+      images: [],
+      names: [],
+    },
+
+    vendors: {
+      images: [],
+      brands: [],
+    },
+
+    organizers: {
+      name: "The Lemonade Network",
+      username: "tlnevents",
+      phone: "08101504456",
+      socials: {
+        website: "",
+        instagram: "https://instagram.com/lemonade.africa",
+        facebook: "",
+        x: "",
+        tiktok: "",
+        linkedin: "",
+      },
+    },
+  },
+  "sounds-of-music": {
+    id: "sounds-of-music",
+    url: "sounds-of-music",
+    image: "https://tlnevents.com/assets/events-banner/sounds-of-music.webp",
+    name: "Sounds of Music",
+
+    venue: {
+      name: "Alliance Française de Lagos / Mike Adenuga Centre",
+      address: "9 Osborne Rd, Ikoyi, Lagos 106104, Lagos",
+      city: "Ikoyi",
+      state: "Lagos",
+      country: "Nigeria",
+      zip: "106104",
+      latitude: "6.46013",
+      longitude: "3.42985",
+      iframe:
+        "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.484506576953!2d3.4298478749923955!3d6.460132493531451!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8c62047310d9%3A0x57d99c5ac7b36931!2sAlliance%20Fran%C3%A7aise%20de%20Lagos%20%2F%20Mike%20Adenuga%20Centre!5e0!3m2!1sen!2sng!4v1763862774784!5m2!1sen!2sng",
+    },
+
+    date: {
+      iso: "2025-12-12T17:00:00Z/2025-12-12T20:30:00Z",
+      startDate: "2025-12-12T17:00:00Z",
+      endDate: "2025-12-12T20:30:00Z",
+      outlookStartDate: "2025-12-12T17:00:00Z",
+      outlookEndDate: "2025-12-12T20:30:00Z",
+      timeZone: "WAT",
+    },
+
+    categories: ["Music", "Art", "Culture", "Live Performance", "Orchestra"],
+    price: 40000,
+    percentCharge: 0,
+
+    tickets: [
+      {
+        id: 1,
+        name: "Adult",
+        price: 40000,
+        quantity: 50,
+        maxQuantity: 10,
+        step: 1,
+        description: {
+          info: "Access to Sounds of Music — an orchestral and fusion performance evening featuring live ensembles, special musical collaborations, and artistic showcases.",
+          perks: [
+            "Entry into the full orchestral and fusion performance",
+            "Access to all musical features and live showcases",
+            "Enjoy performances from top instrumentalists and dance groups",
+            "Networking with performers, creators, and attendees",
+          ],
+        },
+      },
+      {
+        id: 2,
+        name: "Children",
+        price: 35000,
+        quantity: 50,
+        maxQuantity: 10,
+        step: 1,
+        description: {
+          info: "Access to Sounds of Music — an orchestral and fusion performance evening featuring live ensembles, special musical collaborations, and artistic showcases.",
+          perks: [
+            "Entry into the full orchestral and fusion performance",
+            "Access to all musical features and live showcases",
+            "Enjoy performances from top instrumentalists and dance groups",
+            "Networking with performers, creators, and attendees",
+          ],
+        },
+      },
+    ],
+
+    merch: {},
+
+    about: {
+      description:
+        "Sounds of Music is a refined orchestral and fusion showcase designed to highlight classical excellence, instrumental brilliance, and artistic performance culture in Lagos. The evening features chamber ensembles, saxophone artistry, violin fusion, contemporary dance, and collaborative musical expressions. Hosted by Diana Egwuatu, the event promises a rich blend of soundscapes, creativity, and cultural depth.",
+      rating: 13,
+      policy:
+        "Tickets admit one attendee. All sales are final unless otherwise stated. Guests are expected to arrive on time to ensure a seamless classical performance experience. Activities and performers are subject to updates by the organizers.",
+    },
+    lineup: {
+      images: [],
+      names: [],
+    },
+
+    vendors: {
+      images: [],
+      brands: [],
+    },
+
+    organizers: {
+      name: "Sounds of Music Organizing Committee",
+      username: "soundsofmusic",
+      phone: "",
       socials: {
         website: "",
         instagram: "",

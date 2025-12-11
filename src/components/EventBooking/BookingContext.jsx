@@ -8,7 +8,7 @@ export const multiBookingContext = React.createContext();
 const BookingContext = ({ children }) => {
   const [currentStep, setStep] = useState(() => {
     const storedStep = localStorage.getItem("currentStep");
-    return storedStep ? parseInt(storedStep, 10) : 1;
+    return storedStep ? parseInt(1, 10) : 1;
   });
 
   useEffect(() => {
@@ -86,7 +86,7 @@ const BookingContext = ({ children }) => {
   };
 
   // Fee percentage based on the event creator's subscription plan
-  const [feePercentage, setFeePercentage] = useState(5); // Default fee percentage is 5%
+  const [feePercentage, setFeePercentage] = useState(event.percentCharge); // Default fee percentage is 5%
 
   const [countryCode, setCountryCode] = useState("+234"); // Default country code (Nigeria)
 
@@ -215,6 +215,7 @@ const BookingContext = ({ children }) => {
           setIsSubmitting,
           isDisable,
           setIsDisable,
+          
         }}
       >
         {children}
