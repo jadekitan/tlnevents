@@ -50,6 +50,10 @@ const EventDetails = () => {
   const { eventId } = useParams(); // Get the event ID from the URL
   const event = eventsData[eventId]; // Lookup event from local data
 
+  // --- SOLD OUT CHECK ---
+  // Returns true only if tickets exist AND every single ticket has 0 quantity
+  const isSoldOut = event?.tickets?.every((ticket) => ticket.quantity <= 0);
+
   useEffect(() => {
     // Check for referral code in URL parameters
     const urlCode = searchParams.get("affiliate");
@@ -69,7 +73,6 @@ const EventDetails = () => {
 
   // Generate buy ticket link with referral code
   const getBuyTicketLink = () => {
-    
     if (affiliateCode) {
       return `/${eventId}/checkout?affiliate=${affiliateCode}`;
     }
@@ -454,19 +457,31 @@ END:VCALENDAR
               <Box bg="primary.500" w="100%" h="0.5px"></Box>
 
               <Box display={["none", "none", "none", "block"]} w="100%">
-                <Link to={getBuyTicketLink()}>
+                {isSoldOut ? (
                   <Button
                     w="100%"
-                    bg="primary.400"
-                    _hover={{ bg: "primary.500" }}
+                    bg="gray.400"
+                    _hover={{ bg: "gray.400" }}
+                    isDisabled
+                    cursor="not-allowed"
                   >
-                    <Text>
-                      {event.tickets.some((ticket) => ticket.price === 0)
-                        ? "Register"
-                        : "Get Tickets"}
-                    </Text>
+                    <Text>Sold Out</Text>
                   </Button>
-                </Link>
+                ) : (
+                  <Link to={getBuyTicketLink()}>
+                    <Button
+                      w="100%"
+                      bg="primary.400"
+                      _hover={{ bg: "primary.500" }}
+                    >
+                      <Text>
+                        {event.tickets.some((ticket) => ticket.price === 0)
+                          ? "Register"
+                          : "Get Tickets"}
+                      </Text>
+                    </Button>
+                  </Link>
+                )}
               </Box>
             </VStack>
             <Box
@@ -520,97 +535,6 @@ END:VCALENDAR
                   {event.about.description}
                 </Text>
               </VStack>
-              {/* {event.merch && (
-                <Flex w="100%" justify="space-between" align="center" key={category}>
-                  <VStack
-                    w="100%"
-                    justify="flex-start"
-                    align="flex-start"
-                    spacing={["18px", "20px"]}
-                  >
-
-                    <Heading color="neutral.500" fontSize={["24px", "28px"]}>
-                      Merch
-                    </Heading>
-                    {Object.keys(event.merch.tees).map((category) => {
-                      // Validate the category exists
-                      if (!event.merch[category]) {
-                        console.warn(`Category "${category}" is invalid or undefined.`);
-                        return null;
-                      }
-
-                      // Get all items in the current category
-                      const items = Object.values(event.merch[category]);
-
-                      // Skip rendering if no items exist
-                      if (!items.length) {
-                        console.warn(`No items found in category "${category}".`);
-                        return null;
-                      }
-
-                      // Pick a random item
-                      const randomItem = items[Math.floor(Math.random() * items.length)];
-
-                      // Ensure randomItem exists
-                      if (!randomItem) {
-                        console.warn(`Random item is undefined for category "${category}".`);
-                        return null;
-                      }
-
-                      return (
-                        <Stack
-                          key={category}
-                          w="100%"
-                          flexDir={["column", "row"]}
-                          overflow="hidden"
-                          align={["flex-start", "center"]}
-                          gap="20px"
-                        >
-                          <Avatar
-                            size="md"
-                            border="none"
-                            src={randomItem.image || "fallback-image.jpg"}
-                            alt={randomItem.name || "Unnamed Item"}
-                          />
-                          <Heading
-                            color="white"
-                            fontFamily="outfit"
-                            fontSize="16px"
-                            whiteSpace="nowrap"
-                            overflow="hidden"
-                            textOverflow="ellipsis"
-                          >
-                            {randomItem.name || "Unnamed Item"}
-                          </Heading>
-                        </Stack>
-                      );
-                    })}
-
-
-
-
-
-                    <Link to={`/${event.id}/merch/${category}/${randomItem.id}`}>
-                      <Button
-                        bg="primary-color900"
-                        color="white"
-                        _hover={{ bg: "primary-color500" }}
-                        rounded="8px"
-                      >
-                        <Text
-                          fontFamily="outfit"
-                          fontSize="14px"
-                          fontWeight="600"
-                          lineHeight="20px"
-                        >
-                          View Details
-                        </Text>
-                      </Button>
-                    </Link>
-
-
-                  </VStack>
-                </Flex>)} */}
 
               <Box w="100%" h="1px" bg="primary.500"></Box>
               <VStack w="100%" align="flex-start" spacing="20px">
@@ -700,8 +624,8 @@ END:VCALENDAR
                   <Text color="neutral.500" fontSize={["14px", "16px"]}>
                     {event.venue.address}
                   </Text>
-                  <Box w="100%" h="100%" bg="gary.500">
-                    <AspectRatio bg="gary.500" ratio={16 / 9}>
+                  <Box w="100%" h="100%" bg="gray.500">
+                    <AspectRatio bg="gray.500" ratio={16 / 9}>
                       <iframe
                         src={event.venue.iframe}
                         allowFullScreen=""
@@ -710,15 +634,6 @@ END:VCALENDAR
                       ></iframe>
                     </AspectRatio>
                   </Box>
-
-                  {/* <Button
-                      size="md"
-                      bg="primary.500"
-                      _hover={{ bg: "primary.400", color: "dark" }}
-                      color="white"
-                    >
-                      View on Map
-                    </Button> */}
                 </VStack>
               </VStack>
               <Box
@@ -806,16 +721,29 @@ END:VCALENDAR
             w="100%"
             p={["10px", "20px", "40px"]}
           >
-            <Link to={getBuyTicketLink()}>
+            {isSoldOut ? (
               <Button
                 w="100%"
                 h={["45px", "50px"]}
-                bg="primary.500"
+                bg="gray.400"
                 rounded="8px"
+                isDisabled
+                cursor="not-allowed"
               >
-                <Text fontSize={["18px", "20px", "22px"]}>Get Ticket</Text>
+                <Text fontSize={["18px", "20px", "22px"]}>Sold Out</Text>
               </Button>
-            </Link>
+            ) : (
+              <Link to={getBuyTicketLink()}>
+                <Button
+                  w="100%"
+                  h={["45px", "50px"]}
+                  bg="primary.500"
+                  rounded="8px"
+                >
+                  <Text fontSize={["18px", "20px", "22px"]}>Get Ticket</Text>
+                </Button>
+              </Link>
+            )}
           </Box>
         </VStack>
       </VStack>

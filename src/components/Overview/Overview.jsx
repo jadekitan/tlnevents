@@ -36,13 +36,13 @@ const TicketDetailsPanel = React.memo(
   ({ ticketType, orders, event, calculateTicketSummary }) => {
     const filteredOrders = useMemo(() => {
       return orders.filter(
-        (order) => ticketType === "All" || order.ticketType === ticketType
+        (order) => ticketType === "All" || order.ticketType === ticketType,
       );
     }, [orders, ticketType]);
 
     const summary = useMemo(
       () => calculateTicketSummary(ticketType),
-      [ticketType, calculateTicketSummary]
+      [ticketType, calculateTicketSummary],
     );
 
     const summaryBoxes = useMemo(
@@ -70,7 +70,7 @@ const TicketDetailsPanel = React.memo(
           icon: <IoCheckmarkDoneSharp />,
         },
       ],
-      [summary]
+      [summary],
     );
 
     const formatCreatedAt = useCallback((createdAt) => {
@@ -348,7 +348,7 @@ const TicketDetailsPanel = React.memo(
         </VStack>
       </Box>
     );
-  }
+  },
 );
 
 const Overview = () => {
@@ -377,9 +377,24 @@ const Overview = () => {
       try {
         const result = await getAllOrders({});
         if (result.success) {
-          const eventSpecificOrders = result.data.filter(
-            (order) => order.eventName === event.name
+          // 1. Filter orders matching the specific event name
+          let eventSpecificOrders = result.data.filter(
+            (order) => order.eventName === event.name,
           );
+
+          // 2. NEW LOGIC: Filter out old editions if 'editionStartDate' is defined
+          if (event.editionStartDate) {
+            const editionStartTimestamp = new Date(
+              event.editionStartDate,
+            ).getTime();
+
+            eventSpecificOrders = eventSpecificOrders.filter((order) => {
+              const orderCreatedAt = new Date(order.createdAt).getTime();
+              return orderCreatedAt >= editionStartTimestamp;
+            });
+          }
+
+          // 3. Set state with the cleanly filtered array
           setOrders(eventSpecificOrders);
         } else {
           setError(result.message || "Failed to fetch orders");
@@ -391,7 +406,7 @@ const Overview = () => {
       }
     };
     fetchOrders();
-  }, [event.name]);
+  }, [event.name, event.editionStartDate]); // Make sure to add event.editionStartDate to the dependency array
 
   const calculateTicketsAvailable = useCallback(
     (ticketType) => {
@@ -409,13 +424,13 @@ const Overview = () => {
             .find((t) => t.name === ticketType);
       return ticket ? ticket.quantity : 0;
     },
-    [event.tickets]
+    [event.tickets],
   );
 
   const calculateTicketSummary = useCallback(
     (ticketType) => {
       const eventOrders = orders.filter(
-        (order) => order.eventName === event.name
+        (order) => order.eventName === event.name,
       );
       const filteredOrders =
         ticketType === "All"
@@ -424,18 +439,18 @@ const Overview = () => {
       return {
         totalTicketsSold: filteredOrders.reduce(
           (acc, order) => acc + order.quantity,
-          0
+          0,
         ),
         totalRevenue: filteredOrders.reduce(
-          (acc, order) => acc + order.total,
-          0
+          (acc, order) => acc + order.subTotal,
+          0,
         ),
         ticketsAvailable: calculateTicketsAvailable(ticketType),
         totalCheckedIn: filteredOrders.filter((order) => order.checkedIn)
           .length,
       };
     },
-    [orders, event.name, calculateTicketsAvailable]
+    [orders, event.name, calculateTicketsAvailable],
   );
 
   if (loading)

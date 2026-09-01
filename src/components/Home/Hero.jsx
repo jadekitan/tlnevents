@@ -37,71 +37,15 @@ const fadeIn = keyframes`
 
 const Hero = () => {
   const eventsData = [
-    // {
-    //   url: "art-attack",
-    //   image: "https://tlnevents.com/assets/art-attack.webp",
-    //   name: "Art Attack",
-    //   date: "29 November",
-    //   venue: "65 Queens Street, Alagomeji-Yaba, Lagos",
-    //   video: "https://tlnevents.com/assets/art-attack.mp4",
-    //   poster:
-    //     "https://tlnevents.com/assets/events-banner/art-attack-fallback.webp",
-    // },
-    // {
-    //   url: "karaoke",
-    //   image: "https://tlnevents.com/assets/karaoke.webp",
-    //   name: "Karaoke & Movie Night",
-    //   date: "06 December",
-    //   venue: "65 Queens Street, Alagomeji-Yaba, Lagos",
-    //   video: "",
-    //   poster: "https://tlnevents.com/assets/events-banner/karaoke.webp",
-    // },
-    {
-      url: "sounds-of-music",
-      image: "https://tlnevents.com/assets/sounds-of-music.webp",
-      name: "Sounds of Music",
-      date: "12 December",
-      venue: "Alliance Française de Lagos / Mike Adenuga Centre, Lagos",
-      video: "https://tlnevents.com/assets/sounds-of-music.mp4",
-      poster: "https://tlnevents.com/assets/events-banner/sounds-of-music-fallback.webp",
-    },
     {
       url: "ikoyi-block-party",
       image: "https://tlnevents.com/assets/ikoyi-block-party.webp",
       name: "Ikoyi Block Party",
-      date: "13 December",
-      venue: "Federal Civil Service Club, Lagos",
+      date: "24 October",
+      venue: "29 Macarthy Street, Lagos",
       video: "https://tlnevents.com/assets/ikoyi-block-party.mp4",
       poster: "https://tlnevents.com/assets/ikoyi-block-party-fallback.jpg",
     },
-    {
-      url: "fuji",
-      image: "https://tlnevents.com/assets/fuji.webp",
-      name: "Detty Fuji Groove",
-      date: "20 December",
-      venue: "Delakes Mall, Lekki, Lagos",
-      video: "https://tlnevents.com/assets/fuji.mp4",
-      poster: "https://tlnevents.com/assets/events-banner/fuji.webp",
-    },
-    // {
-    //   url: "rcc",
-    //   image: "https://tlnevents.com/assets/rcc.webp",
-    //   name: "Red Cup Christmas",
-    //   date: "24 December",
-    //   venue: "65 Queens Street, Alagomeji-Yaba, Lagos",
-    //   video: "https://tlnevents.com/assets/rcc.mp4",
-    //   poster: "https://tlnevents.com/assets/placeholder.webp",
-    // },
-    {
-      url: "silent-disco",
-      image: "https://tlnevents.com/assets/silent-disco-3.webp",
-      name: "Jay's Silent Disco",
-      date: "28 December",
-      venue: "65 Queens Street, Alagomeji-Yaba, Lagos",
-      video: "https://tlnevents.com/assets/silent-disco-3.mp4",
-      poster: "https://tlnevents.com/assets/silent-disco-fallback-3.webp",
-    },
-    // Add more events as needed
   ];
 
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
@@ -116,7 +60,7 @@ const Hero = () => {
 
     const interval = setInterval(() => {
       handleEventChange(
-        currentEventIndex === eventsData.length - 1 ? 0 : currentEventIndex + 1
+        currentEventIndex === eventsData.length - 1 ? 0 : currentEventIndex + 1,
       );
     }, 10000);
 
@@ -276,60 +220,68 @@ const Hero = () => {
         </VStack>
 
         {/* Navigation Controls */}
-        <HStack spacing={4} justify="center" align="center" mt={4}>
-          {/* Previous Event Button */}
-          <IconButton
-            aria-label="Previous event"
-            icon={<RiArrowLeftDoubleFill />}
-            onClick={prevEvent}
-            variant="ghost"
-            color="white"
-            _hover={{ bg: "rgba(255, 255, 255, 0.1)" }}
-            size="lg"
-          />
+        {eventsData > 1 && (
+          <HStack spacing={4} justify="center" align="center" mt={4}>
+            {/* Previous Event Button */}
+            <IconButton
+              aria-label="Previous event"
+              icon={<RiArrowLeftDoubleFill />}
+              onClick={prevEvent}
+              variant="ghost"
+              color="white"
+              _hover={{ bg: "rgba(255, 255, 255, 0.1)" }}
+              size="lg"
+            />
 
-          {/* Event Indicators */}
-          <HStack spacing={2} overflow="hidden">
-            {eventsData.map((event, index) => (
-              <Button
-                key={event.url}
-                size="sm"
-                variant="ghost"
-                color={index === currentEventIndex ? "primary.500" : "white"}
-                onClick={() => goToEvent(index)}
-                _hover={{ bg: "rgba(255, 255, 255, 0.1)" }}
-                minW="auto"
-                px={2}
-                fontSize="sm"
-              >
-                {event.name}
-              </Button>
-            ))}
+            {/* Event Indicators */}
+            {eventsData > 1 && (
+              <HStack spacing={2} overflow="hidden">
+                {eventsData.map((event, index) => (
+                  <Button
+                    key={event.url}
+                    size="sm"
+                    variant="ghost"
+                    color={
+                      index === currentEventIndex ? "primary.500" : "white"
+                    }
+                    onClick={() => goToEvent(index)}
+                    _hover={{ bg: "rgba(255, 255, 255, 0.1)" }}
+                    minW="auto"
+                    px={2}
+                    fontSize="sm"
+                  >
+                    {event.name}
+                  </Button>
+                ))}
+              </HStack>
+            )}
+
+            {/* Next Event Button */}
+            <IconButton
+              aria-label="Next event"
+              icon={<RiArrowRightDoubleFill />}
+              onClick={nextEvent}
+              variant="ghost"
+              color="white"
+              _hover={{ bg: "rgba(255, 255, 255, 0.1)" }}
+              size="lg"
+            />
           </HStack>
-
-          {/* Next Event Button */}
-          <IconButton
-            aria-label="Next event"
-            icon={<RiArrowRightDoubleFill />}
-            onClick={nextEvent}
-            variant="ghost"
-            color="white"
-            _hover={{ bg: "rgba(255, 255, 255, 0.1)" }}
-            size="lg"
-          />
-        </HStack>
+        )}
 
         {/* Progress Indicator */}
-        <Box position="absolute" bottom="0px" left="0" width="100%" px={4}>
-          <Box height="2px" bg="rgba(255, 255, 255, 0.3)" position="relative">
-            <Box
-              height="100%"
-              bg="primary.500"
-              width={`${((currentEventIndex + 1) / eventsData.length) * 100}%`}
-              transition="width 0.3s ease"
-            />
+        {eventsData > 1 && (
+          <Box position="absolute" bottom="0px" left="0" width="100%" px={4}>
+            <Box height="2px" bg="rgba(255, 255, 255, 0.3)" position="relative">
+              <Box
+                height="100%"
+                bg="primary.500"
+                width={`${((currentEventIndex + 1) / eventsData.length) * 100}%`}
+                transition="width 0.3s ease"
+              />
+            </Box>
           </Box>
-        </Box>
+        )}
       </VStack>
     </Box>
   );

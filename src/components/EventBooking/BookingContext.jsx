@@ -1,19 +1,25 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { eventsData } from "../../../server/eventsData";
-import { Icon } from "@chakra-ui/react";
+import { Icon, useToast } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import { debounce } from "lodash";
 
 export const multiBookingContext = React.createContext();
+
 const BookingContext = ({ children }) => {
+  const { eventId } = useParams();
+  const event = eventsData[eventId]; 
+  const toast = useToast();
+
   const [currentStep, setStep] = useState(() => {
     const storedStep = localStorage.getItem("currentStep");
-    return storedStep ? parseInt(1, 10) : 1;
+    return storedStep ? parseInt(storedStep, 10) : 1;
   });
 
   useEffect(() => {
     localStorage.setItem("currentStep", currentStep);
   }, [currentStep]);
+
   const LeftArrow = (props) => (
     <Icon
       {...props}
@@ -53,42 +59,70 @@ const BookingContext = ({ children }) => {
 
   const clearPurchaseType = () => {
     localStorage.removeItem("purchaseType");
-    setPurchaseType(null); // Reset the state to null
+    setPurchaseType(null);
   };
-
-  const { eventId } = useParams(); // Get the event ID from the URL
-  const event = eventsData[eventId]; // Lookup event from local data
 
   const [ticketType, setTicketType] = useState(event ? event.tickets : []);
 
+  // Initialize counts from local storage or default to 0
+  const [ticketCounts, setTicketCounts] = useState(() => {
+    const storedCounts = JSON.parse(localStorage.getItem("ticketCounts"));
+    return storedCounts || {};
+  });
+
+  // --- CRITICAL FIX: Validate Stock vs LocalStorage ---
+  // This ensures that if a user has 5 tickets in localStorage, but only 2 are left
+  // in the database (eventsData), it clamps the value down to 2.
   useEffect(() => {
     if (event) {
       setTicketType(event.tickets);
-    } else {
-      setTicketType([]); // Clear tickets if no event or purchaseType
-    }
-  }, [event]);
 
-  // Initialize ticket counts from localStorage if available
-  const [ticketCounts, setTicketCounts] = useState(() => {
-    const storedCounts = JSON.parse(localStorage.getItem("ticketCounts"));
-    return (
-      storedCounts ||
-      ticketType.reduce((acc, ticket) => ({ ...acc, [ticket.id]: 0 }), {})
-    );
-  });
+      setTicketCounts((prevCounts) => {
+        const newCounts = { ...prevCounts };
+        let hasChanged = false;
+
+        event.tickets.forEach((ticket) => {
+          const currentCount = newCounts[ticket.id] || 0;
+          
+          // Calculate max available based on stock steps
+          const stockAvailable = Math.floor((ticket.quantity || 0) / ticket.step) * ticket.step;
+          // The effective limit is the lower of specific maxQuantity OR available stock
+          const effectiveMax = Math.min(ticket.maxQuantity * ticket.step, stockAvailable);
+
+          // If current selection exceeds available stock, clamp it
+          if (currentCount > effectiveMax) {
+            newCounts[ticket.id] = effectiveMax;
+            hasChanged = true;
+          }
+          
+          // Ensure we don't have counts for tickets that don't exist
+          if (currentCount > 0 && effectiveMax <= 0) {
+             newCounts[ticket.id] = 0;
+             hasChanged = true;
+          }
+        });
+
+        if (hasChanged) {
+           // Optional: Notify user their cart changed due to stock
+           // toast({ title: "Cart Updated", description: "Some items were adjusted due to availability.", status: "info" });
+           localStorage.setItem("ticketCounts", JSON.stringify(newCounts));
+           return newCounts;
+        }
+        return prevCounts;
+      });
+    } else {
+      setTicketType([]);
+    }
+  }, [event]); // Removed 'toast' from deps to avoid loop
 
   const clearTicketCounts = () => {
-    setTicketCounts(
-      ticketType.reduce((acc, ticket) => ({ ...acc, [ticket.id]: 0 }), {})
-    );
+    setTicketCounts({});
     localStorage.removeItem("ticketCounts");
   };
 
-  // Fee percentage based on the event creator's subscription plan
-  const [feePercentage, setFeePercentage] = useState(event.percentCharge); // Default fee percentage is 5%
+  const [feePercentage, setFeePercentage] = useState(event?.percentCharge || 0);
 
-  const [countryCode, setCountryCode] = useState("+234"); // Default country code (Nigeria)
+  const [countryCode, setCountryCode] = useState("+234");
 
   const [assignMultiple, setAssignMultiple] = useState(
     () => JSON.parse(localStorage.getItem("assignMultiple")) || false
@@ -103,7 +137,6 @@ const BookingContext = ({ children }) => {
     localStorage.setItem("assignMultiple", JSON.stringify(assignMultiple));
   }, [assignMultiple]);
 
-  // Context state for contact data
   const [contactData, setContactData] = useState(() => {
     const storedContactData = localStorage.getItem("contactData");
     return storedContactData
@@ -114,19 +147,11 @@ const BookingContext = ({ children }) => {
           email: "",
           phone: "",
           countryCode: "+234",
-          attendeeAddresses: ticketType.reduce((acc, ticket) => {
-            const count = ticketCounts[ticket.id] || 0;
-            acc[ticket.id] = Array.from({ length: count }).map(() => ({
-              firstName: "",
-              lastName: "",
-              email: "",
-            }));
-            return acc;
-          }, {}),
+          attendeeAddresses: {}, // Initialize empty, populate dynamically
         };
   });
 
-  // Debounced localStorage save
+  // Debounced Save
   const saveToLocalStorage = useCallback(
     debounce((data) => {
       localStorage.setItem("contactData", JSON.stringify(data));
@@ -134,26 +159,21 @@ const BookingContext = ({ children }) => {
     []
   );
 
-  // General contact data change handler
   const handleContactDataChange = useCallback(
     (newData) => {
       setContactData((prevData) => {
         const updatedData = { ...prevData, ...newData };
-        requestAnimationFrame(() => {
-          saveToLocalStorage(updatedData);
-        });
+        saveToLocalStorage(updatedData);
         return updatedData;
       });
     },
     [saveToLocalStorage]
   );
 
-  // Call save on form blur
   const handleBlur = useCallback(() => {
     saveToLocalStorage(contactData);
   }, [contactData, saveToLocalStorage]);
 
-  // Cleanup effect
   useEffect(() => {
     return () => {
       saveToLocalStorage.cancel();
@@ -161,22 +181,15 @@ const BookingContext = ({ children }) => {
   }, [saveToLocalStorage]);
 
   const clearContactData = () => {
-    setContactData({
+    const resetData = {
       firstName: "",
       lastName: "",
       email: "",
       phone: "",
       countryCode: "+234",
-      attendeeAddresses: ticketType.reduce((acc, ticket) => {
-        const count = ticketCounts[ticket.id] || 0;
-        acc[ticket.id] = Array.from({ length: count }).map(() => ({
-          firstName: "",
-          lastName: "",
-          email: "",
-        }));
-        return acc;
-      }, {}),
-    });
+      attendeeAddresses: {},
+    };
+    setContactData(resetData);
     localStorage.removeItem("contactData");
   };
 
@@ -184,43 +197,40 @@ const BookingContext = ({ children }) => {
   const [isDisable, setIsDisable] = useState(false);
 
   return (
-    <>
-      <multiBookingContext.Provider
-        value={{
-          currentStep,
-          setStep,
-          purchaseType,
-          setPurchaseType,
-          ticketType,
-          setTicketType,
-          ticketCounts,
-          setTicketCounts,
-          clearTicketCounts,
-          feePercentage,
-          setFeePercentage,
-          LeftArrow,
-          countryCode,
-          setCountryCode,
-          contactData,
-          setContactData,
-          handleContactDataChange,
-          saveToLocalStorage,
-          handleBlur,
-          clearPurchaseType,
-          clearContactData,
-          assignMultiple,
-          setAssignMultiple,
-          clearAssignMultiple,
-          isSubmitting,
-          setIsSubmitting,
-          isDisable,
-          setIsDisable,
-          
-        }}
-      >
-        {children}
-      </multiBookingContext.Provider>
-    </>
+    <multiBookingContext.Provider
+      value={{
+        currentStep,
+        setStep,
+        purchaseType,
+        setPurchaseType,
+        ticketType,
+        setTicketType,
+        ticketCounts,
+        setTicketCounts,
+        clearTicketCounts,
+        feePercentage,
+        setFeePercentage,
+        LeftArrow,
+        countryCode,
+        setCountryCode,
+        contactData,
+        setContactData,
+        handleContactDataChange,
+        saveToLocalStorage,
+        handleBlur,
+        clearPurchaseType,
+        clearContactData,
+        assignMultiple,
+        setAssignMultiple,
+        clearAssignMultiple,
+        isSubmitting,
+        setIsSubmitting,
+        isDisable,
+        setIsDisable,
+      }}
+    >
+      {children}
+    </multiBookingContext.Provider>
   );
 };
 

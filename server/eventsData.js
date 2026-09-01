@@ -549,35 +549,33 @@ export const eventsData = {
   "ikoyi-block-party": {
     id: "ikoyi-block-party",
     url: "ikoyi-block-party",
-    image: "https://tlnevents.com/assets/events-banner/ikoyi-block-party.webp",
-    name: "Ikoyi Block Party",
-
+    editionStartDate: "2026-01-01T00:00:00Z",
+    image:
+      "https://tlnevents.com/assets/events-banner/ikoyi-block-party-2.webp",
+    name: "Ikoyi Block Party: All White Edition",
     venue: {
-      name: "Federal Civil Service Club",
-      address: "16, Awolowo Rd, Ikoyi, Lagos",
-      city: "Ikoyi",
+      name: "29 Macarthy Street",
+      address: "29 Macarthy Street, Lagos Island, Lagos",
+      city: "Lagos Island",
       state: "Lagos",
       country: "Nigeria",
       zip: "106104",
       latitude: "6.5149",
       longitude: "3.3785",
       iframe:
-        "https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d31716.90078624938!2d3.3703679108398434!3d6.4437628000000045!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8b26830760f3%3A0x7f0bed56ce95b1ec!2sFederal%20Civil%20Service%20Club%20Ikoyi!5e0!3m2!1sen!2sng!4v1759860637704!5m2!1sen!2sng",
+        "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.5894167228075!2d3.4038291746295464!3d6.446728393544614!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8b2457375d97%3A0x471a8b68c95f3b16!2s29%20Macarthy%20Street%2C%20Lagos%20Island%2C%20Lagos%20234001%2C%20Lagos!5e0!3m2!1sen!2sng!4v1770468337993!5m2!1sen!2sng",
     },
-
     date: {
-      iso: "2025-12-13T19:00:00Z/2025-12-14T04:00:00Z",
-      startDate: "2025-12-13T19:00:00Z",
-      endDate: "2025-12-14T04:00:00Z",
-      outlookStartDate: "2025-12-13T19:00:00Z",
-      outlookEndDate: "2025-12-14T04:00:00Z",
+      iso: "2026-10-24T20:00:00Z/2026-10-25T05:00:00Z",
+      startDate: "2026-10-24T20:00:00Z",
+      endDate: "2026-10-25T05:00:00Z",
+      outlookStartDate: "2026-10-24T20:00:00Z",
+      outlookEndDate: "2026-10-25T05:00:00Z",
       timeZone: "WAT",
     },
-
     categories: ["Festival", "Party", "Entertainment"],
     price: 3000,
     percentCharge: 5,
-
     tickets: [
       {
         id: 1,
@@ -587,178 +585,20 @@ export const eventsData = {
         maxQuantity: 5,
         step: 1,
         description: {
-          info: "Grants you regular entry access to the biggest Afrobeats rave — Ikoyi Block Party. Enjoy good music, vibes, and crowd energy all night long.",
+          info: "Entry pass for the All White Edition at Ikoyi Block Party. Gives full access to the party experience and performances.",
           perks: [
             "General Entry",
             "Access to Party Grounds",
-            "Live Performances",
-            "Games & Side Attractions",
-          ],
-        },
-      },
-      {
-        id: 2,
-        name: "Stage Access",
-        price: 15000,
-        quantity: 300,
-        maxQuantity: 2,
-        step: 1,
-        description: {
-          info: "Experience the event closer to the action with premium access to the stage area and exclusive crowd interaction zones.",
-          perks: [
-            "Stage Area Access",
-            "Exclusive Crowd Zone",
-            "Live Performances",
-            "Backstage Vibe",
-          ],
-        },
-      },
-      {
-        id: 3,
-        name: "Tables (VIP)",
-        price: 100000,
-        quantity: 20,
-        maxQuantity: 1,
-        step: 1,
-        description: {
-          info: "VIP Table experience for you and your squad. Includes bottle service, premium seating, and personalized assistance.",
-          perks: [
-            "VIP Entry & Seating",
-            "Bottle Service",
-            "Exclusive Lounge Access",
-            "Host & Waiter Support",
+            "Live DJ Sets",
+            "Games & Activities",
           ],
         },
       },
     ],
-
-    merch: {
-      tees: {
-        "lemonade-tee": {
-          id: "lemonade-tee",
-          name: "Lemonade Tee",
-          price: 35000,
-          description: {
-            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
-            color:
-              "Available in Black, White, and Pink, perfect for versatile styling.",
-            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
-            footer:
-              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
-          },
-          sizes: ["M", "L", "XL", "XXL"],
-          colors: ["Black", "White", "Pink"],
-          image:
-            "https://tlnevents.com/assets/merch/tees/lemonade-tee(black-back).jpg",
-          hasFrontView: true,
-          hasBackView: true,
-        },
-
-        "playground-vibes-tee": {
-          id: "playground-vibes-tee",
-          name: "Playground Vibes Tee",
-          price: 35000,
-          description: {
-            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
-            color:
-              "Available in Black, White, and Pink, perfect for versatile styling.",
-            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
-            footer:
-              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
-          },
-          sizes: ["M", "L", "XL", "XXL"],
-          colors: ["Black", "White", "Pink"],
-          image:
-            "https://tlnevents.com/assets/merch/tees/playground-vibes-tee(pink-back).jpg",
-          hasFrontView: true,
-          hasBackView: true,
-        },
-
-        "rewind-repeat-tee": {
-          id: "rewind-repeat-tee",
-          name: "Rewind Repeat Tee",
-          price: 35000,
-          description: {
-            head: "A must-have for fans of the Lemonade Playground Experience, these classic tees radiate simplicity and charm.",
-            color:
-              "Available in Black, White, and Pink, perfect for versatile styling.",
-            size: "M, L, XL, XXL, ensuring a comfortable fit for everyone.",
-            footer:
-              "These t-shirts are crafted from premium materials, designed to keep you cool and comfortable while making a bold statement.",
-          },
-          sizes: ["M", "L", "XL", "XXL"],
-          colors: ["Black", "White", "Pink"],
-          image:
-            "https://tlnevents.com/assets/merch/tees/rewind-repeat-tee(white-back).jpg",
-          hasFrontView: false,
-          hasBackView: true,
-        },
-      },
-
-      "crop-tops": {
-        "wrangler-crop-top": {
-          id: "wrangler-crop-top",
-          name: "Wrangler Crop Top",
-          price: 25000,
-          description: {
-            head: "Bold and striking, this crop top is ideal for making a statement at the event or beyond.",
-            color: "Iconic combinations of Black and White and Red and White.",
-            size: "S, M, L, XL, XXL.",
-            footer:
-              "With a Wrangler-inspired edge, this piece brings an effortlessly cool vibe.",
-          },
-          sizes: ["S", "M", "L", "XL", "XXL"],
-          colors: ["Black", "Red"],
-          image:
-            "https://tlnevents.com/assets/merch/crop-tops/wrangler-crop-top(black-front).jpg",
-          hasFrontView: true,
-          hasBackView: false,
-        },
-
-        "washed-crop-top": {
-          id: "washed-crop-top",
-          name: "Washed Crop Top",
-          price: 25000,
-          description: {
-            head: "Effortlessly chic with a touch of vintage, the washed crop top is the perfect balance of comfort and style.",
-            color: "Subtle tones like White, Black, and Pink.",
-            size: "S, M, L, XL, XXL.",
-            footer:
-              "Its washed aesthetic offers a laid-back, retro charm suitable for all-day wear.",
-          },
-          sizes: ["S", "M", "L", "XL", "XXL"],
-          colors: ["White", "Black"],
-          image:
-            "https://tlnevents.com/assets/merch/crop-tops/washed-crop-top(black-front).jpg",
-          hasFrontView: true,
-          hasBackView: false,
-        },
-
-        "ringer-baby-crop-top": {
-          id: "ringer-baby-crop-top",
-          name: "Ringer Baby Crop Top",
-          price: 25000,
-          description: {
-            head: "Cute and sporty, the ringer baby crop top is made to elevate your casual style.",
-            color:
-              "Fresh combos like Cream and Blue, Black and White, and Pink and Cream.",
-            size: "S, M, L, XL.",
-            footer:
-              "With ringer-style edges and soft fabric, it’s a playful choice for any Lemonade Playground enthusiast.",
-          },
-          sizes: ["S", "M", "L", "XL"],
-          colors: ["Cream & Blue", "Cream & Green"],
-          image:
-            "https://tlnevents.com/assets/merch/crop-tops/ringer-baby-crop-top(cream&green-front).jpg",
-          hasFrontView: true,
-          hasBackView: false,
-        },
-      },
-    },
-
+    merch: {},
     about: {
       description:
-        "The Ikoyi Block Party, hosted by DJ Princz Ent, is set to be the biggest Afrobeats rave in Lagos! Bringing together top DJs, performers, and vibrant Lagos energy, this outdoor experience at Federal Civil Services Club promises unforgettable vibes, great music, and the best crowd in the city.",
+        "Ikoyi Block Party – All White Edition is a high-energy nightlife experience hosted by DJ Princz Entertainment. Guests are expected to come dressed in their best all-white attire for a themed Afrobeats rave featuring DJs, crowd games, and vibrant Lagos nightlife culture.",
       rating: 18,
       policy:
         "Tickets are non-refundable except in cases of event cancellation or rescheduling.",
@@ -771,7 +611,6 @@ export const eventsData = {
       ],
       names: ["Speed Darlington", "Odumodu"],
     },
-
     vendors: {
       images: [
         "https://bit.ly/ryan-florence",
@@ -780,7 +619,6 @@ export const eventsData = {
       ],
       brands: ["Celeb Foods", "Tise Spag", "Korede"],
     },
-
     organizers: {
       name: "DJ Princz Ent",
       username: "dj-princz-ent",
@@ -1007,7 +845,7 @@ export const eventsData = {
         id: 1,
         name: "Regular",
         price: 10000,
-        quantity: 1000,
+        quantity: 100,
         maxQuantity: 5,
         step: 1,
         description: {
@@ -1227,7 +1065,7 @@ export const eventsData = {
         id: 1,
         name: "Adult",
         price: 40000,
-        quantity: 50,
+        quantity: 0,
         maxQuantity: 10,
         step: 1,
         description: {
@@ -1244,7 +1082,7 @@ export const eventsData = {
         id: 2,
         name: "Children",
         price: 35000,
-        quantity: 50,
+        quantity: 0,
         maxQuantity: 10,
         step: 1,
         description: {

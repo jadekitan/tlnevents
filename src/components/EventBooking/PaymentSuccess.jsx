@@ -15,12 +15,10 @@ import {
   Td,
   TableCaption,
   TableContainer,
-  Tfoot,
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
 import { useLocation, Link, useParams } from "react-router-dom";
-import axios from "axios";
 import { order } from "../../../server/order";
 
 const PaymentSuccess = () => {
@@ -39,28 +37,17 @@ const PaymentSuccess = () => {
   } = useContext(multiBookingContext);
 
   const location = useLocation();
-
-  // Extract the reference from the URL query params
   const query = new URLSearchParams(location.search);
   const referenceNumber = query.get("reference");
   const email = query.get("email");
   const guest = query.get("guest");
   const affiliateCode = query.get("affiliate");
 
-  const [orderData, setOrderData] = useState([]);
+  const [displayOrders, setDisplayOrders] = useState([]);
   const { eventId } = useParams();
   const event = eventsData[eventId];
 
-  // Debug affiliate code on component mount
-  useEffect(() => {
-    console.log("🔍 DEBUG - Current affiliateCode:", affiliateCode);
-    const isValidAffiliate =
-      affiliateCode &&
-      affiliateCode !== "null" &&
-      affiliateCode !== "undefined" &&
-      affiliateCode.trim() !== "";
-    console.log("🔍 DEBUG - Is valid affiliate code:", isValidAffiliate);
-  }, [affiliateCode, query]);
+  const hasProcessed = useRef(false);
 
   const clearData = () => {
     clearContactData();
@@ -69,69 +56,105 @@ const PaymentSuccess = () => {
     localStorage.removeItem("referral_code");
   };
 
-  const hasExtractedData = useRef(false);
+  const generateUniqueOrderId = (userEmail) => {
+    const uniqueKey = `orderId_${userEmail}`;
+    const storedOrderId = localStorage.getItem(uniqueKey);
+    // Reuse existing ID if available to prevent duplicates on re-render
+    if (storedOrderId) return storedOrderId;
 
-  // ---------------------------------------------------------
-  // UPDATED LOGIC STARTS HERE
-  // ---------------------------------------------------------
+    const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let orderId = "";
+    for (let i = 0; i < 5; i++) {
+      orderId += characters[Math.floor(Math.random() * characters.length)];
+    }
+    localStorage.setItem(uniqueKey, orderId);
+    return orderId;
+  };
+
   useEffect(() => {
-    const extractOrderData = () => {
-      const data = [];
-      const tbodyRows = document.querySelectorAll("tbody tr");
+    const processOrder = async () => {
+      if (hasProcessed.current) return;
+      hasProcessed.current = true;
 
-      tbodyRows.forEach((row) => {
-        const cells = row.querySelectorAll("td");
-        if (cells.length === 9) {
-          data.push({
-            orderId: cells[0].textContent,
-            attendeeName: cells[1].textContent,
-            email: cells[2].textContent,
-            ticketType: cells[3].textContent,
-            quantity: parseInt(cells[4].textContent, 10),
-            ticketPrice: parseFloat(cells[5].textContent),
-            subTotal: parseFloat(cells[6].textContent),
-            fees: parseFloat(cells[7].textContent),
-            total: parseFloat(cells[8].textContent),
-            eventName: event.name,
+      const allOrders = [];
+      const isGuestCheckout = guest === "true";
+
+      // 1. Build Payload from Context
+      Object.keys(ticketCounts).forEach((ticketId) => {
+        const count = ticketCounts[ticketId];
+        const ticket = ticketType.find((t) => t.id === parseInt(ticketId));
+
+        if (!count || !ticket) return;
+
+        // LOGIC BRANCH: Guest Checkout vs Single Purchaser
+        if (isGuestCheckout) {
+          // --- GUEST LOGIC: Separate entry per ticket (keeps individual names) ---
+          for (let i = 0; i < count; i++) {
+            let attendeeName = `${contactData.firstName} ${contactData.lastName}`;
+            let attendeeEmail = contactData.email;
+
+            // Retrieve specific guest info if available
+            if (contactData.attendeeAddresses?.[ticketId]?.[i]) {
+              const guestInfo = contactData.attendeeAddresses[ticketId][i];
+              attendeeName = `${guestInfo.firstName} ${guestInfo.lastName}`;
+              attendeeEmail = guestInfo.email;
+            }
+
+            // Calculation for SINGLE ticket
+            const quantity = 1;
+            const subTotal = ticket.price / ticket.step;
+            const singleFee = (ticket.price * (feePercentage / 100)) + (100 / ticket.step);
+            const fees = event.percentCharge === 0 || ticket.price === 0 ? 0 : singleFee;
+
+            allOrders.push({
+              orderId: generateUniqueOrderId(attendeeEmail),
+              attendeeName: attendeeName,
+              email: attendeeEmail,
+              ticketType: ticket.name,
+              quantity: quantity,
+              ticketPrice: ticket.price,
+              subTotal: subTotal,
+              fees: fees,
+              total: subTotal + fees,
+            });
+          }
+        } else {
+          // --- STANDARD LOGIC: Grouped entry (Quantity > 1) ---
+          // No loop here. We create ONE order line for this ticket type.
+          
+          let attendeeName = `${contactData.firstName} ${contactData.lastName}`;
+          let attendeeEmail = contactData.email;
+
+          // Calculation for TOTAL quantity of this ticket type
+          const quantity = count;
+          const subTotal = (ticket.price * count) / ticket.step;
+          
+          // Calculate total fees for this batch
+          const singleFee = (ticket.price * (feePercentage / 100)) + (100 / ticket.step);
+          const totalFees = event.percentCharge === 0 || ticket.price === 0 ? 0 : (singleFee * count);
+
+          allOrders.push({
+            orderId: generateUniqueOrderId(attendeeEmail),
+            attendeeName: attendeeName,
+            email: attendeeEmail,
+            ticketType: ticket.name,
+            quantity: quantity,
+            ticketPrice: ticket.price,
+            subTotal: subTotal,
+            fees: totalFees,
+            total: subTotal + totalFees,
           });
         }
       });
 
-      return data;
-    };
+      setDisplayOrders(allOrders);
 
-    const handleOrderData = async () => {
-      if (hasExtractedData.current) return;
-      hasExtractedData.current = true;
-
-      const extractedData = extractOrderData();
-      setOrderData(extractedData);
-
-      // 1. Prepare Affiliate Code
-      // Default to "" so it is always sent as a string, never undefined
-      let refCode = "";
-      if (
-        affiliateCode &&
-        affiliateCode !== "null" &&
-        affiliateCode !== "undefined" &&
-        affiliateCode.trim() !== ""
-      ) {
-        refCode = affiliateCode;
-      }
-
-      // 2. Prepare Reference Number
-      let refNumber = null;
-      if (referenceNumber) {
-        const parsedRef = Number.parseInt(referenceNumber);
-        refNumber = isNaN(parsedRef) ? null : parsedRef;
-      }
-
-      // 3. Construct the Final Payload using PascalCase
+      // 2. Prepare Final Payload
       const finalPayload = {
-        eventName: event.name, // Capitalized
-        referenceNumber: refNumber, // Capitalized
-        affiliateCode: refCode, // Capitalized & ensures "" is sent
-        orders: extractedData.map((item) => ({
+        eventName: event.name,
+        referenceNumber: referenceNumber ? Number(referenceNumber) : null,
+        affiliateCode: (affiliateCode && affiliateCode !== "null") ? affiliateCode : "",
+        orders: allOrders.map((item) => ({
           attendeeName: item.attendeeName,
           email: item.email,
           fees: Number(item.fees),
@@ -142,48 +165,22 @@ const PaymentSuccess = () => {
         })),
       };
 
-      console.log("🚀 Sending Payload:", finalPayload);
+      console.log("🚀 Sending Batch Payload:", finalPayload);
 
+      // 3. Send to Server
       try {
-        await order(finalPayload);
+        if (allOrders.length > 0) {
+          await order(finalPayload);
+        }
       } catch (error) {
-        console.error("❌ Error submitting order:", error.message);
-        console.error("📋 Error details:", error.response?.data || error);
+        console.error("❌ Error submitting order:", error);
+      } finally {
+        clearData();
       }
-
-      clearData();
     };
 
-    const timer = setTimeout(() => {
-      handleOrderData();
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [affiliateCode, referenceNumber, event.name]);
-  // ---------------------------------------------------------
-  // END UPDATED LOGIC
-  // ---------------------------------------------------------
-
-  // Helper function to generate a unique order ID per email
-  function generateUniqueOrderId(email) {
-    const uniqueKey = `orderId_${email}`;
-    const storedOrderId = localStorage.getItem(uniqueKey);
-
-    if (storedOrderId) {
-      return storedOrderId;
-    }
-
-    const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    let orderId = "";
-
-    for (let i = 0; i < 5; i++) {
-      const randomIndex = Math.floor(Math.random() * characters.length);
-      orderId += characters[randomIndex];
-    }
-
-    localStorage.setItem(uniqueKey, orderId);
-    return orderId;
-  }
+    processOrder();
+  }, []);
 
   return (
     <Box w="100%" h="100%">
@@ -201,29 +198,28 @@ const PaymentSuccess = () => {
                 w={["120px", "150px"]}
                 src="/logo.webp"
                 alt="The Lemonade Logo"
-              ></Image>
+              />
             </Link>
           </Flex>
           <Image
             w={["100px", "150px"]}
             src="https://tlnevents.com/assets/confirmed.svg"
-            alt="confirmed Image"
+            alt="Confirmed"
           />
           <VStack w="100%" spacing="20px">
             <Heading color="dark" fontSize="32px">
-              Payment Succesful !
+              Payment Successful!
             </Heading>
             <VStack w="100%" textAlign="center" spacing="10px">
               <Text color="dark" fontSize={["12px", "16px"]}>
-                Your order was successful. We've also sent a copy to your email
-                address{" "}
+                Your order was successful. We've sent a copy to{" "}
                 <Text as="span" color="primary.500">
                   {email}
                 </Text>
-                {guest === "true" ? " and all the attending guests." : "."}
+                .
               </Text>
               <Text color="dark" fontSize={["12px", "16px"]}>
-                If you do not receive your ticket from us, please email us at{" "}
+                If you do not receive your ticket, email us at{" "}
                 <Link to="mailto:info@lemonade.africa">
                   <Text as="span" color="primary.500">
                     info@lemonade.africa
@@ -232,175 +228,39 @@ const PaymentSuccess = () => {
                 .
               </Text>
             </VStack>
+
+            {/* Hidden Table for PDF/Printing if needed */}
             <Box display="none">
               <TableContainer>
                 <Table variant="simple">
-                  <TableCaption>
-                    Checkout Information to push to database and sending of
-                    email
-                  </TableCaption>
                   <Thead>
                     <Tr>
                       <Th>Order ID</Th>
                       <Th>Name</Th>
                       <Th>Email</Th>
-                      <Th>Ticket Type</Th>
-                      <Th isNumeric>Quantity</Th>
+                      <Th>Ticket</Th>
+                      <Th isNumeric>Qty</Th>
                       <Th isNumeric>Price</Th>
-                      <Th isNumeric>Subtotal</Th>
-                      <Th isNumeric>Fees</Th>
                       <Th isNumeric>Total</Th>
                     </Tr>
                   </Thead>
-
-                  {guest === "true" ? (
-                    <Tbody>
-                      {Object.keys(ticketCounts).map((ticketId) => {
-                        const ticketQuantity = ticketCounts[ticketId];
-                        const ticketPrice = ticketType[ticketId - 1]?.price;
-                        const ticketName = ticketType[ticketId - 1]?.name;
-                        const step = ticketType[ticketId - 1]?.step;
-
-                        if (!ticketQuantity || ticketQuantity <= 0) return null;
-
-                        const emailGroups = {};
-
-                        Array.from({ length: ticketQuantity }).forEach(
-                          (_, i) => {
-                            const email =
-                              contactData.attendeeAddresses?.[ticketId]?.[i]
-                                ?.email;
-                            const firstName =
-                              contactData.attendeeAddresses?.[ticketId]?.[i]
-                                ?.firstName;
-                            const lastName =
-                              contactData.attendeeAddresses?.[ticketId]?.[i]
-                                ?.lastName;
-
-                            if (!emailGroups[email]) {
-                              emailGroups[email] = {
-                                firstName,
-                                lastName,
-                                email,
-                                quantity: 0,
-                                subtotal: 0,
-                                fees: 0,
-                                total: 0,
-                                orderId: generateUniqueOrderId(email),
-                              };
-                            }
-
-                            const quantity = 1;
-                            const subtotal = (ticketPrice * quantity) / step;
-                            const fees =
-                              quantity *
-                              (ticketPrice * (feePercentage / 100) +
-                                100 / step);
-                            const total = subtotal + fees;
-
-                            emailGroups[email].quantity += quantity;
-                            emailGroups[email].subtotal += subtotal;
-                            emailGroups[email].fees += fees;
-                            emailGroups[email].total += total;
-                          }
-                        );
-
-                        return Object.values(emailGroups).map(
-                          (group, index) => (
-                            <Tr key={index}>
-                              <Td>{group.orderId}</Td>
-                              <Td>{`${group.firstName} ${group.lastName}`}</Td>
-                              <Td>{group.email}</Td>
-                              <Td>{ticketName}</Td>
-                              <Td isNumeric>{group.quantity}</Td>
-                              <Td isNumeric>{ticketPrice}</Td>
-                              <Td isNumeric>{group.subtotal}</Td>
-                              <Td isNumeric>{group.fees}</Td>
-                              <Td isNumeric>{group.total}</Td>
-                            </Tr>
-                          )
-                        );
-                      })}
-                    </Tbody>
-                  ) : (
-                    <Tbody>
-                      {Object.keys(ticketCounts).map((ticketId) => {
-                        const ticketQuantity = ticketCounts[ticketId];
-                        const ticketPrice = ticketType[ticketId - 1]?.price;
-                        const ticketName = ticketType[ticketId - 1]?.name;
-                        const step = ticketType[ticketId - 1]?.step;
-
-                        if (!ticketQuantity || ticketQuantity <= 0) return null;
-
-                        const emailGroups = {};
-
-                        Array.from({ length: ticketQuantity }).forEach(
-                          (_, i) => {
-                            const email = contactData.email;
-                            const firstName = contactData.firstName;
-
-                            if (!emailGroups[email]) {
-                              emailGroups[email] = {
-                                firstName,
-                                email,
-                                quantity: 0,
-                                subtotal: 0,
-                                fees: 0,
-                                total: 0,
-                                orderId: generateUniqueOrderId(email),
-                              };
-                            }
-
-                            const quantity = 1;
-                            const subtotal = (ticketPrice * quantity) / step;
-                            const fees =
-                              event.percentCharge === 0 ||
-                              subtotal === 0 ||
-                              ticketPrice === 0
-                                ? 0
-                                : quantity *
-                                  (ticketPrice * (feePercentage / 100) +
-                                    100 / step);
-
-                            const total = subtotal + fees;
-
-                            emailGroups[email].quantity += quantity;
-                            emailGroups[email].subtotal += subtotal;
-                            emailGroups[email].fees += fees;
-                            emailGroups[email].total += total;
-                          }
-                        );
-
-                        return Object.values(emailGroups).map(
-                          (group, index) => (
-                            <Tr key={index}>
-                              <Td>{group.orderId}</Td>
-                              <Td>{group.firstName}</Td>
-                              <Td>{group.email}</Td>
-                              <Td>{ticketName}</Td>
-                              <Td isNumeric>{group.quantity}</Td>
-                              <Td isNumeric>{ticketPrice}</Td>
-                              <Td isNumeric>{group.subtotal}</Td>
-                              <Td isNumeric>{group.fees}</Td>
-                              <Td isNumeric>{group.total}</Td>
-                            </Tr>
-                          )
-                        );
-                      })}
-                    </Tbody>
-                  )}
-
-                  <Tfoot>
-                    <Tr>
-                      <Th>Unique ID</Th>
-                      <Th>Attendee</Th>
-                      <Th>Send Order to this email</Th>
-                      <Th>Ticket Type for each attendees</Th>
-                    </Tr>
-                  </Tfoot>
+                  <Tbody>
+                    {displayOrders.map((item, idx) => (
+                      <Tr key={idx}>
+                        <Td>{item.orderId}</Td>
+                        <Td>{item.attendeeName}</Td>
+                        <Td>{item.email}</Td>
+                        <Td>{item.ticketType}</Td>
+                        <Td isNumeric>{item.quantity}</Td>
+                        <Td isNumeric>{item.ticketPrice}</Td>
+                        <Td isNumeric>{item.total}</Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
                 </Table>
               </TableContainer>
             </Box>
+
             <VStack>
               <Link to={`/${event.id}`}>
                 <Button bg="primary.500" _hover={{ bg: "primary.400" }}>

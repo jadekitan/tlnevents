@@ -23,7 +23,6 @@ import {
 } from "@chakra-ui/react";
 import { multiBookingContext } from "./BookingContext";
 import { eventsData } from "../../../server/eventsData";
-import PurchaseType from "./PurchaseType";
 import EventTickets from "./EventTickets";
 import EventContact from "./EventContact";
 import { IoClose } from "react-icons/io5";
@@ -38,6 +37,7 @@ const EventBooking = () => {
     purchaseType,
     ticketType,
     ticketCounts,
+    setTicketCounts, // Required to update cart if stock is low
     feePercentage,
     contactData,
     isSubmitting,
@@ -51,10 +51,6 @@ const EventBooking = () => {
     clearAssignMultiple,
   } = useContext(multiBookingContext);
 
-  useEffect(() => {
-    document.title = "Checkout | The Lemonade Network";
-  }, []);
-
   const { eventId } = useParams();
   const event = eventsData[eventId];
   const navigate = useNavigate();
@@ -63,37 +59,98 @@ const EventBooking = () => {
   const cancelRef = useRef();
   const formRef = useRef(null);
 
-  // Function to calculate the subtotal
+  useEffect(() => {
+    document.title = "Checkout | The Lemonade Network";
+  }, []);
+
+  // --- CORE VALIDATION LOGIC ---
+  const verifyStockAvailability = async () => {
+    // 1. (Optional) Fetch latest data from server
+    // In a real production app, you would fetch the fresh event data here
+    // to ensure you aren't checking against stale data.
+    // const freshEvent = await axios.get(`/api/events/${eventId}`);
+    // const sourceTickets = freshEvent.data.tickets;
+
+    // For now, we check against the local 'event' object
+    const sourceTickets = event.tickets;
+
+    // Simulate network delay for user feedback (optional)
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    let isStockValid = true;
+    const adjustedCounts = { ...ticketCounts };
+    let hasChanges = false;
+
+    // 2. Iterate through user's cart and compare with stock
+    sourceTickets.forEach((ticket) => {
+      const requestedQty = adjustedCounts[ticket.id] || 0;
+
+      // Calculate real available stock (Total Qty / Step)
+      // Example: If 10 tickets left and step is 2 (Couple), available units is 5.
+      const availableUnits =
+        Math.floor(ticket.quantity / ticket.step) * ticket.step;
+      const maxPurchasable = availableUnits;
+
+      if (requestedQty > 0) {
+        if (requestedQty > maxPurchasable) {
+          isStockValid = false;
+          hasChanges = true;
+          // Clamp the cart to the maximum available
+          adjustedCounts[ticket.id] = maxPurchasable;
+        }
+
+        // Edge case: If stock is completely 0
+        if (ticket.quantity <= 0) {
+          isStockValid = false;
+          hasChanges = true;
+          adjustedCounts[ticket.id] = 0;
+        }
+      }
+    });
+
+    // 3. If issues found, update state and notify user
+    if (!isStockValid && hasChanges) {
+      setTicketCounts(adjustedCounts);
+
+      toast({
+        title: "Stock Update",
+        description:
+          "Some tickets are no longer available in the requested quantity. We have updated your cart.",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+    }
+
+    return isStockValid;
+  };
+
   const calculateSubtotal = () => {
     return ticketType.reduce((acc, ticket) => {
-      return acc + ticketCounts[ticket.id] * (ticket.price / ticket.step);
+      return (
+        acc + (ticketCounts[ticket.id] || 0) * (ticket.price / ticket.step)
+      );
     }, 0);
   };
 
-  // Fixed fee calculation
-  // Fixed fee calculation - no fees for free tickets
   const calculateFees = () => {
     if (event.percentCharge === 0) return 0;
-
     return ticketType.reduce((acc, ticket) => {
-      if (ticketCounts[ticket.id] === 0 || ticket.price === 0) return acc;
-
+      const count = ticketCounts[ticket.id] || 0;
+      if (count === 0 || ticket.price === 0) return acc;
       const ticketFee =
-        ticketCounts[ticket.id] *
-        (ticket.price * (feePercentage / 100) + 100 / ticket.step);
-
+        count * (ticket.price * (feePercentage / 100) + 100 / ticket.step);
       return acc + ticketFee;
     }, 0);
   };
 
   const subtotal = calculateSubtotal();
   const fees = calculateFees();
- 
   const total = Math.ceil(subtotal + fees);
 
-  // Check if event has any paid tickets
   const hasPaidTickets = ticketType.some(
-    (ticket) => ticketCounts[ticket.id] > 0 && ticket.price > 0
+    (ticket) => (ticketCounts[ticket.id] || 0) > 0 && ticket.price > 0
   );
 
   function scrollToSection(id) {
@@ -112,7 +169,6 @@ const EventBooking = () => {
 
   const storedCode = localStorage.getItem("referral_code");
 
-  // Handle Paystack Payment
   const handlePaystackPayment = () => {
     const handler = window.PaystackPop.setup({
       key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
@@ -147,12 +203,7 @@ const EventBooking = () => {
     handler.openIframe();
   };
 
-  // Handle free ticket registration
   const handleFreeRegistration = () => {
-    setIsSubmitting(true);
-    setIsDisable(true);
-
-    // Simulate processing delay
     setTimeout(() => {
       navigate(
         `/${event.id}/checkout/register-success?&email=${contactData.email}&guest=${assignMultiple}`
@@ -162,11 +213,37 @@ const EventBooking = () => {
     }, 2000);
   };
 
-  const handleNextStep = () => {
-    if (total === 0 && !hasPaidTickets) {
-      handleFreeRegistration();
-    } else {
-      handlePaystackPayment();
+  // --- UPDATED PROCESS HANDLER ---
+  const handleProcessCheckout = async () => {
+    setIsSubmitting(true);
+    setIsDisable(true);
+
+    try {
+      // 1. Verify Stock First
+      const isStockAvailable = await verifyStockAvailability();
+
+      // 2. If valid, proceed to payment logic
+      if (isStockAvailable) {
+        if (total === 0 && !hasPaidTickets) {
+          handleFreeRegistration();
+        } else {
+          handlePaystackPayment();
+        }
+      } else {
+        // If invalid, stop spinner (Toast is handled in verify function)
+        setIsSubmitting(false);
+        setIsDisable(false);
+      }
+    } catch (error) {
+      console.error("Checkout Verification Error", error);
+      setIsSubmitting(false);
+      setIsDisable(false);
+      toast({
+        title: "Error",
+        description:
+          "Something went wrong verifying your order. Please try again.",
+        status: "error",
+      });
     }
   };
 
@@ -176,7 +253,11 @@ const EventBooking = () => {
         return <EventTickets />;
       case 2:
         return (
-          <EventContact handleNextStep={handleNextStep} formRef={formRef} />
+          // Pass the new process handler to the contact form
+          <EventContact
+            handleNextStep={handleProcessCheckout}
+            formRef={formRef}
+          />
         );
       default:
         return <EventTickets />;
@@ -185,7 +266,7 @@ const EventBooking = () => {
 
   const handleContinue = () => {
     const hasSelectedTickets = ticketType.some(
-      (ticket) => ticketCounts[ticket.id] > 0
+      (ticket) => (ticketCounts[ticket.id] || 0) > 0
     );
 
     if (hasSelectedTickets) {
@@ -215,7 +296,7 @@ const EventBooking = () => {
 
   const handleCancel = () => {
     const hasSelectedTickets = ticketType.some(
-      (ticket) => ticketCounts[ticket.id] > 0
+      (ticket) => (ticketCounts[ticket.id] || 0) > 0
     );
     if (hasSelectedTickets) {
       onOpen();
@@ -438,7 +519,7 @@ const EventBooking = () => {
                       spacing="20px"
                     >
                       {ticketType.map((ticket) =>
-                        ticketCounts[ticket.id] > 0 ? (
+                        (ticketCounts[ticket.id] || 0) > 0 ? (
                           <Flex
                             key={ticket.id}
                             w="100%"
@@ -524,7 +605,9 @@ const EventBooking = () => {
                       onClick={ContinueStep}
                       isDisabled={isDisable}
                       isLoading={isSubmitting}
-                      loadingText="Processing..."
+                      loadingText={
+                        currentStep === 2 ? "Verifying..." : "Processing..."
+                      } // Visual Feedback
                       spinnerPlacement="end"
                     >
                       <Text
@@ -580,7 +663,9 @@ const EventBooking = () => {
                   onClick={ContinueStep}
                   isDisabled={isDisable}
                   isLoading={isSubmitting}
-                  loadingText="Processing..."
+                  loadingText={
+                    currentStep === 2 ? "Verifying..." : "Processing..."
+                  }
                   spinnerPlacement="end"
                 >
                   <Text

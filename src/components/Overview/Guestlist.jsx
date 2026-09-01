@@ -73,9 +73,22 @@ const Guestlist = () => {
       try {
         const result = await getAllOrders({});
         if (result.success) {
-          const eventSpecificOrders = result.data.filter(
+          // 1. Filter orders matching the specific event name
+          let eventSpecificOrders = result.data.filter(
             (order) => order.eventName === event.name
           );
+
+          // 2. NEW LOGIC: Filter out old editions if 'editionStartDate' is defined
+          if (event.editionStartDate) {
+            const editionStartTimestamp = new Date(event.editionStartDate).getTime();
+            
+            eventSpecificOrders = eventSpecificOrders.filter((order) => {
+              const orderCreatedAt = new Date(order.createdAt).getTime();
+              return orderCreatedAt >= editionStartTimestamp;
+            });
+          }
+
+          // 3. Set state with the cleanly filtered array
           setOrders(eventSpecificOrders);
         } else {
           setError(result.message || "Failed to fetch orders");
@@ -87,7 +100,7 @@ const Guestlist = () => {
       }
     };
     fetchOrders();
-  }, [event.name]);
+  }, [event.name, event.editionStartDate]); // Make sure to add event.editionStartDate to the dependency array
 
   const filteredOrders = useMemo(() => {
     if (activeTab === 0) return orders;
